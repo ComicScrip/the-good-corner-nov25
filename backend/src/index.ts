@@ -6,7 +6,7 @@ app.use(express.json())
 
 const port = 3000
 
-const ads = [
+let ads = [
   {
     id: 1,
     title: "Bike to sell",
@@ -46,6 +46,24 @@ app.post('/ads', (req, res) => {
   ads.push(req.body)
   res.send("OK");
 })
+
+app.delete('/ads/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10)
+  const adToDelete = ads.find((ad) => ad.id === id)
+  if (!adToDelete) return res.sendStatus(404)
+  ads = ads.filter((ad) => ad.id !== id)
+  res.send('ad deleted')
+})
+
+app.patch('/ads/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10)
+  const adToUpdate = ads.find((ad) => ad.id === id)
+  if (!adToUpdate) return res.sendStatus(404)
+  //Object.assign(adToUpdate, req.body)
+  ads = ads.map(ad => ad.id === id ? ({ ...ad, ...req.body }) : ad)
+  res.send('ad updated')
+})
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
