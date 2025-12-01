@@ -1,14 +1,14 @@
+import { Length, Min } from "class-validator";
 import {
   BaseEntity,
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  ManyToOne,
+  Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
 } from "typeorm";
-import { Length, Min } from "class-validator";
 import Category from "./Category";
 import Tag from "./Tag";
 
@@ -39,10 +39,16 @@ export default class Ad extends BaseEntity {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => Category, (category) => category.ads)
+  @ManyToOne(
+    () => Category,
+    (category) => category.ads,
+  )
   category: Category;
 
   @JoinTable()
-  @ManyToMany(() => Tag, (tag) => tag.ads)
+  @ManyToMany(
+    () => Tag,
+    (tag) => tag.ads,
+  )
   tags: Tag[];
 }

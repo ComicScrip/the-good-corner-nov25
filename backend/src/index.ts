@@ -1,11 +1,11 @@
 import "reflect-metadata";
-import express, { Request, Response } from "express";
 import { validate } from "class-validator";
+import express, { type Request, type Response } from "express";
+import { In, Like } from "typeorm";
 import db from "./db";
 import Ad from "./entities/Ad";
 import Category from "./entities/Category";
 import Tag from "./entities/Tag";
-import { In, Like } from "typeorm";
 
 const app = express();
 const port = 4000;
@@ -85,13 +85,13 @@ app.post("/ads", async (req: Request, res: Response) => {
       ...
       const newAdWithId = await newAd.save();
     */
-    const newAd = Ad.create(req.body);
+    const newAd = Ad.create(req.body) as Ad
     const errors = await validate(newAd);
     if (errors.length > 0) return res.status(422).send({ errors });
     const newAdWithId = await newAd.save();
     res.send(newAdWithId);
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.sendStatus(500);
   }
 });
@@ -168,7 +168,7 @@ app.patch("/ads/:id", async (req: Request, res: Response) => {
   try {
     const adToUpdate = await Ad.findOneBy({ id: parseInt(req.params.id, 10) });
     if (!adToUpdate) return res.sendStatus(404);
-    await Ad.merge(adToUpdate, req.body);
+    Ad.merge(adToUpdate, req.body);
     const errors = await validate(adToUpdate);
     if (errors.length > 0) return res.status(422).send({ errors });
     res.send(await adToUpdate.save());

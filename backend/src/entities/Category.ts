@@ -1,12 +1,12 @@
+import { Length } from "class-validator";
 import {
   BaseEntity,
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
+  Entity,
   OneToMany,
+  PrimaryGeneratedColumn,
 } from "typeorm";
 import Ad from "./Ad";
-import { Length } from "class-validator";
 
 @Entity()
 export default class Category extends BaseEntity {
@@ -19,6 +19,9 @@ export default class Category extends BaseEntity {
   })
   name: string;
 
-  @OneToMany(() => Ad, (ad) => ad.category)
+  @OneToMany(
+    () => Ad,
+    (ad) => ad.category,
+  )
   ads: Ad[];
 }
