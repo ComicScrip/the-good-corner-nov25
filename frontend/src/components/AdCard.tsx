@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Ad } from "@/types";
 
 interface AdCardProps {
@@ -5,10 +6,13 @@ interface AdCardProps {
 }
 
 export default function AdCard({
-	ad: { title, price, pictureUrl },
+	ad: { title, price, pictureUrl, id },
 }: AdCardProps) {
 	return (
-		<div className="w-[400px]">
+		<Link
+			href={`http://localhost:3000/ads/${id}`}
+			className="w-[400px] cursor-pointer"
+		>
 			<div className="relative shadow-md border rounded-lg p-4 bg-white mr-3 mb-3">
 				{/** biome-ignore lint/performance/noImgElement: images come form unknown domains */}
 				<img
@@ -21,6 +25,6 @@ export default function AdCard({
 					<div className="ad-card-price">{price} €</div>
 				</div>
 			</div>
-		</div>
+		</Link>
 	);
 }
