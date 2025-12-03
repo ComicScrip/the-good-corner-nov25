@@ -1,3 +1,13 @@
+import Header from "@/components/Header";
+import RecentAds from "@/components/RecentAds";
+
 export default function Home() {
-	return <h1>The good corner</h1>;
+	return (
+		<>
+			<Header />
+			<main>
+				<RecentAds />
+			</main>
+		</>
+	);
 }
