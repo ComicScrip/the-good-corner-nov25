@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Ad } from "@/types";
+import FavoriteButton from "./FavoriteButton";
 
 interface AdCardProps {
 	ad: Ad;
@@ -23,6 +24,9 @@ export default function AdCard({
 				<div className="flex justify-between pt-6">
 					<div className="ad-card-title">{title}</div>
 					<div className="ad-card-price">{price} €</div>
+				</div>
+				<div className="absolute top-6 right-6">
+					<FavoriteButton />
 				</div>
 			</div>
 		</Link>
