@@ -6,7 +6,7 @@ export default function RecentAds() {
 	const [ads, setAds] = useState<Ad[]>([]);
 
 	useEffect(() => {
-		fetch("http://localhost:4000/ads")
+		fetch("http://localhost:4000/ads?limit=5&sortBy=createdAt&order=desc")
 			.then((res) => res.json())
 			.then((data) => {
 				setAds(data);

@@ -14,10 +14,40 @@ app.use(cors());
 
 const port = 4000;
 
-app.get("/ads", async (_req, res) => {
+app.get("/ads", async (req, res) => {
   try {
-    const ads = await Ad.find({ relations: { category: true, tags: true } });
+    const categoryId =
+      typeof req.query.categoryId === "string"
+        ? parseInt(req.query.categoryId, 10)
+        : undefined;
+    const limit =
+      typeof req.query.limit === "string"
+        ? parseInt(req.query.limit, 10)
+        : undefined;
+    const sortBy = req.query.sortBy || 'createdAt';
+    const order = req.query.order || 'desc';
+
+    const ads = await Ad.find({
+      where: { category: { id: categoryId } },
+      take: limit,
+      order: { [`${sortBy}`]: order },
+    });
     res.send(ads);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+});
+
+app.get("/ads/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const ad = await Ad.findOne({
+      where: { id },
+      relations: { tags: true, category: true },
+    });
+    if (!ad) return res.sendStatus(404);
+    res.send(ad);
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
