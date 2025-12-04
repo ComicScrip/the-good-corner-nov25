@@ -1,18 +1,36 @@
+import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
-export default function FavoriteButton() {
-	const [isFav, setIsFav] = useState(false);
+interface FavoriteButtonProps {
+	defaultActive?: boolean;
+	onChange?: (active: boolean) => void;
+}
+
+export default function FavoriteButton({
+	defaultActive = false,
+	onChange,
+}: FavoriteButtonProps) {
+	const [isFav, setIsFav] = useState(defaultActive);
+
+	const toggle = (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.preventDefault();
+		const newState = !isFav;
+		setIsFav(newState);
+		onChange?.(newState);
+	};
 
 	return (
 		<button
 			type="button"
-			onClick={(e) => {
-				e.preventDefault();
-				setIsFav(!isFav);
-			}}
-			className="bg-white p-2 rounded-2xl"
+			onClick={toggle}
+			className="p-2 rounded-full transition-colors duration-300 bg-gray-100 cursor-pointer"
 		>
-			{isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
+			{isFav ? (
+				<HeartSolid className="w-7 h-7 text-red-500 transition-transform duration-300 transform scale-110" />
+			) : (
+				<HeartOutline className="w-7 h-7 text-gray-500 transition-transform duration-300 hover:scale-110" />
+			)}
 		</button>
 	);
 }
