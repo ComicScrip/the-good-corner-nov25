@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* see https://github.com/biomejs/biome/issues/7835 */
+@plugin "daisyui" {
+  themes: bumblebee --default
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
