@@ -1,6 +1,21 @@
+import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
+import type { Category } from "@/types";
 
 export default function NewAd() {
+	const [categories, setCategories] = useState<Category[]>([]);
+
+	useEffect(() => {
+		fetch("http://localhost:4000/categories")
+			.then((res) => res.json())
+			.then((data) => {
+				setCategories(data);
+			})
+			.catch((err) => {
+				console.error(err);
+			});
+	}, []);
+
 	return (
 		<Layout pageTitle="Création d'une annonce">
 			<div className="p-4">
@@ -15,6 +30,16 @@ export default function NewAd() {
 							className="m-2 p-2 border"
 							required
 						/>
+					</div>
+
+					<div className="my-2">
+						<select name="category" id="category">
+							{categories.map((c) => (
+								<option key={c.id} value={c.id}>
+									{c.name}
+								</option>
+							))}
+						</select>
 					</div>
 
 					<button

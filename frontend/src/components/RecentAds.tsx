@@ -1,23 +1,20 @@
+import { useEffect, useState } from "react";
 import type { Ad } from "@/types";
 import AdCard from "./AdCard";
 
 export default function RecentAds() {
-	const ads: Ad[] = [
-		{
-			id: 1,
-			pictureUrl:
-				"https://www.wizicar.com/wp-content/uploads/2020/01/nouvelle-peugeot-208.jpg",
-			price: 5000,
-			title: "Peugeot 208",
-		},
-		{
-			id: 2,
-			pictureUrl:
-				"https://www.hom.com/media/catalog/product/cache/790421f214897a3493395295add0d504/h/a/harronew_tee-shirtcrewneck_405508_40m014_blackcombination.jpg",
-			price: 5,
-			title: "t-shirt noir",
-		},
-	];
+	const [ads, setAds] = useState<Ad[]>([]);
+
+	useEffect(() => {
+		fetch("http://localhost:4000/ads?limit=5&sortBy=createdAt&order=desc")
+			.then((res) => res.json())
+			.then((data) => {
+				setAds(data);
+			})
+			.catch((err) => {
+				console.error(err);
+			});
+	}, []);
 
 	return (
 		<div className="p-4">
