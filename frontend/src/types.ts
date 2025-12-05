@@ -9,6 +9,16 @@ export interface Ad {
   location: string
 }
 
+export interface AdInput {
+  title: string
+  price: number
+  pictureUrl: string
+  tags: { id: number }[]
+  category: { id: number }
+  description: string
+  location: string
+}
+
 export interface Category {
   id: number
   name: string

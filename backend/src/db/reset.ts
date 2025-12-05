@@ -10,7 +10,7 @@ export async function clearDB() {
 }
 
 async function main() {
-  await clearDB();
+  await clearDB().catch(console.error);
   await db.initialize();
 
   const macbook = Ad.create({

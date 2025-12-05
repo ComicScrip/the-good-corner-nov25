@@ -13,6 +13,7 @@ export default function Search() {
 		fetch(`http://localhost:4000/ads?${url.searchParams}`)
 			.then((res) => res.json())
 			.then((data) => {
+				console.table(data);
 				setAds(data);
 			})
 			.catch((err) => {
