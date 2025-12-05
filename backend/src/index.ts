@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { validate } from "class-validator";
 import cors from "cors";
 import express from "express";
+import { Like } from "typeorm";
 import db from "./db";
 import { Ad } from "./entities/Ad";
 import { Category } from "./entities/Category";
@@ -20,15 +21,21 @@ app.get("/ads", async (req, res) => {
       typeof req.query.categoryId === "string"
         ? parseInt(req.query.categoryId, 10)
         : undefined;
+
+    const titleContains = req.query.titleContains;
+
     const limit =
       typeof req.query.limit === "string"
         ? parseInt(req.query.limit, 10)
         : undefined;
-    const sortBy = req.query.sortBy || 'createdAt';
-    const order = req.query.order || 'desc';
+    const sortBy = req.query.sortBy || "createdAt";
+    const order = req.query.order || "desc";
 
     const ads = await Ad.find({
-      where: { category: { id: categoryId } },
+      where: {
+        category: { id: categoryId },
+        title: titleContains ? Like(`%${titleContains}%`) : undefined,
+      },
       take: limit,
       order: { [`${sortBy}`]: order },
     });
@@ -119,7 +126,7 @@ app.delete("/ads/:id", async (req, res) => {
     const adToDelete = await Ad.findOneBy({ id });
     if (!adToDelete) return res.sendStatus(404);
     await adToDelete.remove();
-    res.send("deleted !");
+    res.send({ message: "ad deleted" });
   } catch (err) {
     console.log(err);
     res.sendStatus(500);

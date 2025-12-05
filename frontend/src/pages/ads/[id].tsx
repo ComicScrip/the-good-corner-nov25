@@ -29,6 +29,20 @@ export default function AdDetails() {
 						"Chargement..."
 					) : (
 						<div className="">
+							<button
+								type="button"
+								onClick={() => {
+									fetch(`http://localhost:4000/ads/${id}`, {
+										method: "DELETE",
+									})
+										.then((res) => res.json())
+										.then((_data) => router.push("/"))
+										.catch((err) => console.error(err));
+								}}
+							>
+								Supprimer
+							</button>
+
 							<div className=" flex justify-between items-start md:items-center">
 								<div className="flex items-start md:items-center flex-col md:flex-row">
 									<h1 className="text-3xl">{ad.title}</h1>

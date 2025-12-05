@@ -51,6 +51,18 @@ export default function Header() {
 						);
 					})}
 				</nav>
+				<form
+					onSubmit={(e) => {
+						e.preventDefault();
+						const formData = new FormData(e.target as HTMLFormElement);
+						const search = (formData.get("titleContains") as string) || "";
+						const params = new URLSearchParams(window.location.search);
+						params.set("titleContains", search);
+						router.push(`/search?${params.toString()}`);
+					}}
+				>
+					<input type="text" name="titleContains" />
+				</form>
 			</div>
 
 			<Link href="/newAd" className="btn btn-primary">
