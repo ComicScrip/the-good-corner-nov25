@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import type { Category } from "@/types";
+import SearchInput from "./SearchInput";
 
 export default function Header() {
 	const router = useRouter();
@@ -34,44 +35,7 @@ export default function Header() {
 			</div>
 
 			{/* Small screen search: below title and publish */}
-			<form
-				className="md:hidden"
-				onSubmit={(e) => {
-					e.preventDefault();
-					const formData = new FormData(e.target as HTMLFormElement);
-					const search = (formData.get("titleContains") as string) || "";
-					const params = new URLSearchParams(window.location.search);
-					params.set("titleContains", search);
-					router.push(`/search?${params.toString()}`);
-				}}
-			>
-				<label className="input">
-					<svg
-						className="h-[1em] opacity-50"
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 24 24"
-					>
-						<title>search</title>
-						<g
-							strokeLinejoin="round"
-							strokeLinecap="round"
-							strokeWidth="2.5"
-							fill="none"
-							stroke="currentColor"
-						>
-							<circle cx="11" cy="11" r="8"></circle>
-							<path d="m21 21-4.3-4.3"></path>
-						</g>
-					</svg>
-					<input
-						className="w-full"
-						type="search"
-						required
-						placeholder="Rechercher une annonce"
-						name="titleContains"
-					/>
-				</label>
-			</form>
+			<SearchInput className="md:hidden" inputClassName="w-full" />
 
 			{/* Large screen layout: Title + Search + Publish button */}
 			<div className="hidden md:flex md:flex-row md:justify-between md:items-center">
@@ -82,43 +46,7 @@ export default function Header() {
 						</h1>
 					</Link>
 
-					<form
-						onSubmit={(e) => {
-							e.preventDefault();
-							const formData = new FormData(e.target as HTMLFormElement);
-							const search = (formData.get("titleContains") as string) || "";
-							const params = new URLSearchParams(window.location.search);
-							params.set("titleContains", search);
-							router.push(`/search?${params.toString()}`);
-						}}
-					>
-						<label className="input">
-							<svg
-								className="h-[1em] opacity-50"
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 24 24"
-							>
-								<title>search</title>
-								<g
-									strokeLinejoin="round"
-									strokeLinecap="round"
-									strokeWidth="2.5"
-									fill="none"
-									stroke="currentColor"
-								>
-									<circle cx="11" cy="11" r="8"></circle>
-									<path d="m21 21-4.3-4.3"></path>
-								</g>
-							</svg>
-							<input
-								className="w-sm"
-								type="search"
-								required
-								placeholder="Rechercher une annonce"
-								name="titleContains"
-							/>
-						</label>
-					</form>
+					<SearchInput inputClassName="w-sm" />
 				</div>
 
 				<Link href="/newAd" className="btn btn-primary">
@@ -135,7 +63,7 @@ export default function Header() {
 					return (
 						<button
 							type="button"
-							className={`p-2 rounded-lg mt-3 cursor-pointer ${
+							className={`p-2 rounded-lg cursor-pointer ${
 								isActive ? "bg-[#ffa41b] text-white" : ""
 							}`}
 							onClick={() => {
