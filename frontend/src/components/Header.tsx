@@ -1,23 +1,10 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import type { Category } from "@/types";
 import SearchInput from "./SearchInput";
+import CategoriesNav from "./CategoriesNav";
 
 export default function Header() {
 	const router = useRouter();
-	const [categories, setCategories] = useState<Category[]>([]);
-
-	useEffect(() => {
-		fetch("http://localhost:4000/categories")
-			.then((res) => res.json())
-			.then((data) => {
-				setCategories(data);
-			})
-			.catch((err) => {
-				console.error(err);
-			});
-	}, []);
 
 	return (
 		<header className="p-4 border-b border-gray-400 flex flex-col w-full gap-4">
@@ -54,30 +41,7 @@ export default function Header() {
 				</Link>
 			</div>
 
-			<nav className="flex carousel-horizontal max-w-[100vw]">
-				{categories.map((cat) => {
-					const [firstLetter, ...resetOfCatName] = cat.name.split("");
-					const catName = firstLetter.toUpperCase() + resetOfCatName.join("");
-					const isActive = router.query.categoryId === cat.id.toString();
-
-					return (
-						<button
-							type="button"
-							className={`p-2 rounded-lg cursor-pointer ${
-								isActive ? "bg-[#ffa41b] text-white" : ""
-							}`}
-							onClick={() => {
-								const params = new URLSearchParams(window.location.search);
-								if (!isActive) params.set("categoryId", cat.id.toString());
-								router.push(`/search?${params.toString()}`);
-							}}
-							key={cat.id}
-						>
-							{catName}
-						</button>
-					);
-				})}
-			</nav>
+			<CategoriesNav />
 		</header>
 	);
 }
