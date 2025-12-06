@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 interface SearchInputProps {
 	className?: string;
@@ -7,6 +8,13 @@ interface SearchInputProps {
 
 export default function SearchInput({ className = "", inputClassName = "w-full" }: SearchInputProps) {
 	const router = useRouter();
+	const [searchValue, setSearchValue] = useState("");
+
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search);
+		const titleContains = params.get("titleContains") || "";
+		setSearchValue(titleContains);
+	}, [router.asPath]);
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -40,9 +48,10 @@ export default function SearchInput({ className = "", inputClassName = "w-full" 
 				<input
 					className={inputClassName}
 					type="search"
-					required
 					placeholder="Rechercher une annonce"
 					name="titleContains"
+					value={searchValue}
+					onChange={(e) => setSearchValue(e.target.value)}
 				/>
 			</label>
 		</form>
