@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Ad } from "@/types";
 import AdCard from "./AdCard";
