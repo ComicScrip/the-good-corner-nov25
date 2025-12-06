@@ -19,15 +19,55 @@ export default function Header() {
 	}, []);
 
 	return (
-		<header className="p-4 border-b border-gray-400 flex justify-between">
+		<header className="p-4 border-b border-gray-400 flex justify-between w-[1vw]">
 			<div>
-				<Link href="/">
-					<h1 className="text-orange-600 text-2xl font-bold">
-						The good corner
-					</h1>
-				</Link>
+				<div className="flex flew-wrap">
+					<Link href="/" className="w-max">
+						<h1 className="text-orange-600 text-2xl font-bold">
+							The good corner
+						</h1>
+					</Link>
 
-				<nav className="flex h-[54px]">
+					<form
+						onSubmit={(e) => {
+							e.preventDefault();
+							const formData = new FormData(e.target as HTMLFormElement);
+							const search = (formData.get("titleContains") as string) || "";
+							const params = new URLSearchParams(window.location.search);
+							params.set("titleContains", search);
+							router.push(`/search?${params.toString()}`);
+						}}
+					>
+						<label className="input ml-6">
+							<svg
+								className="h-[1em] opacity-50"
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 24 24"
+							>
+								<title>search</title>
+								<g
+									strokeLinejoin="round"
+									strokeLinecap="round"
+									strokeWidth="2.5"
+									fill="none"
+									stroke="currentColor"
+								>
+									<circle cx="11" cy="11" r="8"></circle>
+									<path d="m21 21-4.3-4.3"></path>
+								</g>
+							</svg>
+							<input
+								className="w-sm"
+								type="search"
+								required
+								placeholder="Rechercher une annonce"
+								name="titleContains"
+							/>
+						</label>
+					</form>
+				</div>
+
+				<nav className="flex carousel-horizontal max-w-[100vw]">
 					{categories.map((cat) => {
 						const [firstLetter, ...resetOfCatName] = cat.name.split("");
 						const catName = firstLetter.toUpperCase() + resetOfCatName.join("");
@@ -51,18 +91,6 @@ export default function Header() {
 						);
 					})}
 				</nav>
-				<form
-					onSubmit={(e) => {
-						e.preventDefault();
-						const formData = new FormData(e.target as HTMLFormElement);
-						const search = (formData.get("titleContains") as string) || "";
-						const params = new URLSearchParams(window.location.search);
-						params.set("titleContains", search);
-						router.push(`/search?${params.toString()}`);
-					}}
-				>
-					<input type="text" name="titleContains" />
-				</form>
 			</div>
 
 			<Link href="/newAd" className="btn btn-primary">
