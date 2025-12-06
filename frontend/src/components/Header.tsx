@@ -19,7 +19,7 @@ export default function Header() {
 	}, []);
 
 	return (
-		<header className="p-4 border-b border-gray-400 flex justify-between w-[1vw]">
+		<header className="p-4 border-b border-gray-400 flex justify-between w-full">
 			<div>
 				<div className="flex flew-wrap">
 					<Link href="/" className="w-max">
