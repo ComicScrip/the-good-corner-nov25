@@ -66,7 +66,11 @@ export default function Header() {
 				</form>
 			</div>
 
-			<nav className="flex carousel-horizontal max-w-[100vw]">
+			<Link href="/newAd" className="btn btn-primary">
+				Publier
+			</Link>
+
+			<nav className="flex carousel-horizontal max-w-[100vw] col-span-full">
 				{categories.map((cat) => {
 					const [firstLetter, ...resetOfCatName] = cat.name.split("");
 					const catName = firstLetter.toUpperCase() + resetOfCatName.join("");
@@ -90,10 +94,6 @@ export default function Header() {
 					);
 				})}
 			</nav>
-
-			<Link href="/newAd" className="btn btn-primary">
-				Publier
-			</Link>
 		</header>
 	);
 }
