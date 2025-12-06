@@ -21,7 +21,7 @@ export default function Header() {
 	return (
 		<header className="p-4 border-b border-gray-400 flex flex-col w-full gap-4">
 			{/* Small screen layout: Title + Publish button on same line */}
-			<div className="flex flex-row justify-between items-center sm:hidden">
+			<div className="flex flex-row justify-between items-center md:hidden">
 				<Link href="/" className="w-max">
 					<h1 className="text-orange-600 text-2xl font-bold">
 						The good corner
@@ -35,7 +35,7 @@ export default function Header() {
 
 			{/* Small screen search: below title and publish */}
 			<form
-				className="sm:hidden"
+				className="md:hidden"
 				onSubmit={(e) => {
 					e.preventDefault();
 					const formData = new FormData(e.target as HTMLFormElement);
@@ -74,7 +74,7 @@ export default function Header() {
 			</form>
 
 			{/* Large screen layout: Title + Search + Publish button */}
-			<div className="hidden sm:flex sm:flex-row sm:justify-between sm:items-center">
+			<div className="hidden md:flex md:flex-row md:justify-between md:items-center">
 				<div className="flex flex-row items-center gap-4">
 					<Link href="/" className="w-max">
 						<h1 className="text-orange-600 text-2xl font-bold">
