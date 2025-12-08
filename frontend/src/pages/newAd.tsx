@@ -22,6 +22,7 @@ export default function NewAd() {
 
 	const [tags, setTags] = useState<Tag[]>([]);
 	const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	useEffect(() => {
 		fetch("http://localhost:4000/tags")
@@ -36,27 +37,31 @@ export default function NewAd() {
 
 	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		setIsSubmitting(true);
+
 		const formData = new FormData(e.target as HTMLFormElement);
 		const toSend = Object.fromEntries(formData.entries()) as unknown as AdInput;
 		toSend.price = parseFloat(toSend.price as unknown as string);
 		toSend.category = { id: toSend.category as unknown as number };
 		toSend.tags = selectedTags.map((t) => ({ id: t.id }));
 
-		fetch("http://localhost:4000/ads", {
-			method: "POST",
-			body: JSON.stringify(toSend),
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-			.then((res) => res.json())
-			.then((data) => {
-				console.log("response from API : ", data);
-				router.push(`/ads/${data.id}`);
-			})
-			.catch((err) => {
-				console.error(err);
+		try {
+			const response = await fetch("http://localhost:4000/ads", {
+				method: "POST",
+				body: JSON.stringify(toSend),
+				headers: {
+					"Content-Type": "application/json",
+				},
 			});
+
+			const data = await response.json();
+			console.log("response from API : ", data);
+			router.push(`/ads/${data.id}`);
+		} catch (err) {
+			console.error(err);
+		} finally {
+			setIsSubmitting(false);
+		}
 	};
 
 	return (
@@ -172,8 +177,12 @@ export default function NewAd() {
 						></textarea>
 					</div>
 
-					<button type="submit" className="btn btn-primary mt-12 w-full">
-						Envoyer
+					<button
+						type="submit"
+						className="btn btn-primary mt-12 w-full"
+						disabled={isSubmitting}
+					>
+						{isSubmitting ? "Sauvegarde en cours" : "Envoyer"}
 					</button>
 				</form>
 			</div>
