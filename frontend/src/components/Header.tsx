@@ -1,11 +1,8 @@
 import Link from "next/link";
-import { useRouter } from "next/router";
-import SearchInput from "./SearchInput";
 import CategoriesNav from "./CategoriesNav";
+import SearchInput from "./SearchInput";
 
 export default function Header() {
-	const router = useRouter();
-
 	return (
 		<header className="p-4 border-b border-gray-400 flex flex-col w-full gap-4">
 			{/* Small screen layout: Title + Publish button on same line */}
