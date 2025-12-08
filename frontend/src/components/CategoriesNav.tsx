@@ -29,7 +29,7 @@ export default function CategoriesNav() {
 	};
 
 	return (
-		<nav className="flex carousel-horizontal max-w-[100vw]">
+		<nav className="flex carousel-horizontal max-w-[100vw] h-[40px]">
 			{categories.map((cat) => {
 				const [firstLetter, ...restOfCatName] = cat.name.split("");
 				const catName = firstLetter.toUpperCase() + restOfCatName.join("");
@@ -39,7 +39,7 @@ export default function CategoriesNav() {
 					<button
 						type="button"
 						className={`p-2 rounded-lg cursor-pointer ${
-							isActive ? "bg-[#ffa41b] text-white" : ""
+							isActive ? "bg-orange-600 text-white" : ""
 						}`}
 						onClick={() => handleCategoryClick(cat.id)}
 						key={cat.id}
