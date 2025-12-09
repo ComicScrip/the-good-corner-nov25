@@ -1,12 +1,27 @@
 import "reflect-metadata";
+
+import { ApolloServer } from "@apollo/server";
+import { startStandaloneServer } from "@apollo/server/standalone";
 import { validate } from "class-validator";
 import cors from "cors";
 import express from "express";
+import { buildSchema } from "type-graphql";
 import { Like } from "typeorm";
 import db from "./db";
 import { Ad } from "./entities/Ad";
 import { Category } from "./entities/Category";
 import { Tag } from "./entities/Tag";
+import env from "./env";
+import AdResolver from "./resolvers/AdResolver";
+
+buildSchema({ resolvers: [AdResolver] }).then((schema) => {
+  const server = new ApolloServer({ schema });
+  startStandaloneServer(server, {
+    listen: { port: env.GRAPHQL_SERVER_PORT },
+  }).then(({ url }) => {
+    console.log(`graphql server ready on ${url}`);
+  });
+});
 
 const app = express();
 
@@ -150,5 +165,5 @@ app.patch("/ads/:id", async (req, res) => {
 
 app.listen(port, async () => {
   await db.initialize();
-  console.log(`Example app listening on port ${port}`);
+  console.log(`REST API listening on port ${port}`);
 });

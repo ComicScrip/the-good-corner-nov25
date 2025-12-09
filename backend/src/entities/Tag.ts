@@ -1,21 +1,30 @@
 import { Length } from "class-validator";
+import { Field, ID, ObjectType } from "type-graphql";
 import {
   BaseEntity,
-  Column, Entity,
+  Column,
+  Entity,
   ManyToMany,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
 } from "typeorm";
 import { Ad } from "./Ad";
 
+@ObjectType()
 @Entity()
 export class Tag extends BaseEntity {
+  @Field(() => ID)
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Field()
   @Column({ length: 100 })
   @Length(2, 100)
   name: string;
 
-  @ManyToMany(() => Ad, ad => ad.tags)
-  ads: Ad[]
+  @Field(() => [Ad])
+  @ManyToMany(
+    () => Ad,
+    (ad) => ad.tags,
+  )
+  ads: Ad[];
 }
