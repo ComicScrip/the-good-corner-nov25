@@ -18,7 +18,6 @@ export class Category extends BaseEntity {
 
   @Field()
   @Column({ length: 100 })
-  @Length(2, 100)
   name: string;
 
   @OneToMany(
@@ -34,7 +33,6 @@ export class NewCategoryInput {
   @Length(2, 20, { message: "Le nom doit contenir entre 2 et 20 caractères" })
   name: string;
 }
-
 
 @InputType()
 export class UpdateCategoryInput {
