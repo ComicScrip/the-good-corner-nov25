@@ -1,8 +1,6 @@
 @import "tailwindcss";
-
-/* see https://github.com/biomejs/biome/issues/7835 */
 @plugin "daisyui" {
-  themes: bumblebee --default
+  themes: bumblebee --default;
 }
 
 :root {
@@ -17,11 +15,13 @@ body {
 }
 
 html,
-body, #__next {
+body,
+#__next {
   height: 100%;
 }
 
-body, #__next {
+body,
+#__next {
   margin: 0;
   display: flex;
   flex-direction: column;

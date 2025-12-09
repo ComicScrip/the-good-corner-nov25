@@ -1,9 +1,10 @@
 import { Length } from "class-validator";
 import {
   BaseEntity,
-  Column, Entity,
+  Column,
+  Entity,
   ManyToMany,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
 } from "typeorm";
 import { Ad } from "./Ad";
 
@@ -16,6 +17,9 @@ export class Tag extends BaseEntity {
   @Length(2, 100)
   name: string;
 
-  @ManyToMany(() => Ad, ad => ad.tags)
-  ads: Ad[]
+  @ManyToMany(
+    () => Ad,
+    (ad) => ad.tags,
+  )
+  ads: Ad[];
 }
