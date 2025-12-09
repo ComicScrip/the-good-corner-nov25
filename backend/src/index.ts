@@ -13,8 +13,9 @@ import { Category } from "./entities/Category";
 import { Tag } from "./entities/Tag";
 import env from "./env";
 import AdResolver from "./resolvers/AdResolver";
+import CategoryResolver from "./resolvers/CategoryResolver";
 
-buildSchema({ resolvers: [AdResolver] }).then((schema) => {
+buildSchema({ resolvers: [AdResolver, CategoryResolver] }).then((schema) => {
   const server = new ApolloServer({ schema });
   startStandaloneServer(server, {
     listen: { port: env.GRAPHQL_SERVER_PORT },
