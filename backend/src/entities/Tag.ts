@@ -1,4 +1,3 @@
-import { Length } from "class-validator";
 import { Field, Int, ObjectType } from "type-graphql";
 import {
   BaseEntity,
@@ -18,10 +17,8 @@ export class Tag extends BaseEntity {
 
   @Field()
   @Column({ length: 100 })
-  @Length(2, 100)
   name: string;
 
-  @Field(() => [Ad])
   @ManyToMany(
     () => Ad,
     (ad) => ad.tags,

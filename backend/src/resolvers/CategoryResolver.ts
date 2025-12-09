@@ -1,18 +1,12 @@
 import { GraphQLError } from "graphql";
 import {
   Arg,
-  Args,
-  ArgsType,
-  Field,
   Int,
   Mutation,
   Query,
   Resolver,
 } from "type-graphql";
-import { Like } from "typeorm";
-import { Ad, NewAdInput, UpdateAdInput } from "../entities/Ad";
 import { Category, NewCategoryInput, UpdateCategoryInput } from "../entities/Category";
-
 
 @Resolver()
 export default class CategoryResolver {

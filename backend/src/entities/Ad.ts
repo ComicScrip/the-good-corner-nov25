@@ -52,8 +52,6 @@ export class Ad extends BaseEntity {
 
   @Field()
   @Column()
-  @Length(10, 255)
-  @IsUrl()
   pictureUrl: string;
 }
 
