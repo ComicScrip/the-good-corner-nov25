@@ -100,8 +100,8 @@ app.get("/tags", async (_req, res) => {
 app.post("/ads", async (req, res) => {
   try {
     const newAd = Ad.create(req.body);
-    const errors = await validate(newAd);
-    if (errors.length > 0) return res.status(422).send({ errors });
+    //const errors = await validate(newAd);
+    //if (errors.length > 0) return res.status(422).send({ errors });
     const adWithId = await newAd.save();
     res.send(adWithId);
   } catch (err) {
