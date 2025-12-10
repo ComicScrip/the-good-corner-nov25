@@ -17,7 +17,7 @@ export default function RecentAds() {
           </div>
         )}
         {ads.map((a) => (
-          AdCard ad={a} key={a.id} </>
+          <AdCard ad={a} key={a.id} />
         ))}
       </div>
     </div>
