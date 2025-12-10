@@ -13,10 +13,9 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
   [SubKey in K]: Maybe<T[SubKey]>;
 };
-export type MakeEmpty<
-  T extends { [key: string]: unknown },
-  K extends keyof T,
-> = { [_ in K]?: never };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = {
+  [_ in K]?: never;
+};
 export type Incremental<T> =
   | T
   | {
@@ -227,10 +226,7 @@ export const CategoriesDocument = gql`
  * });
  */
 export function useCategoriesQuery(
-  baseOptions?: ApolloReactHooks.QueryHookOptions<
-    CategoriesQuery,
-    CategoriesQueryVariables
-  >,
+  baseOptions?: ApolloReactHooks.QueryHookOptions<CategoriesQuery, CategoriesQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return ApolloReactHooks.useQuery<CategoriesQuery, CategoriesQueryVariables>(
@@ -239,41 +235,31 @@ export function useCategoriesQuery(
   );
 }
 export function useCategoriesLazyQuery(
-  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
-    CategoriesQuery,
-    CategoriesQueryVariables
-  >,
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CategoriesQuery, CategoriesQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useLazyQuery<
-    CategoriesQuery,
-    CategoriesQueryVariables
-  >(CategoriesDocument, options);
+  return ApolloReactHooks.useLazyQuery<CategoriesQuery, CategoriesQueryVariables>(
+    CategoriesDocument,
+    options,
+  );
 }
 export function useCategoriesSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
-    | ApolloReactHooks.SuspenseQueryHookOptions<
-        CategoriesQuery,
-        CategoriesQueryVariables
-      >,
+    | ApolloReactHooks.SuspenseQueryHookOptions<CategoriesQuery, CategoriesQueryVariables>,
 ) {
   const options =
     baseOptions === ApolloReactHooks.skipToken
       ? baseOptions
       : { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useSuspenseQuery<
-    CategoriesQuery,
-    CategoriesQueryVariables
-  >(CategoriesDocument, options);
+  return ApolloReactHooks.useSuspenseQuery<CategoriesQuery, CategoriesQueryVariables>(
+    CategoriesDocument,
+    options,
+  );
 }
 export type CategoriesQueryHookResult = ReturnType<typeof useCategoriesQuery>;
-export type CategoriesLazyQueryHookResult = ReturnType<
-  typeof useCategoriesLazyQuery
->;
-export type CategoriesSuspenseQueryHookResult = ReturnType<
-  typeof useCategoriesSuspenseQuery
->;
+export type CategoriesLazyQueryHookResult = ReturnType<typeof useCategoriesLazyQuery>;
+export type CategoriesSuspenseQueryHookResult = ReturnType<typeof useCategoriesSuspenseQuery>;
 export type CategoriesQueryResult = ApolloReactCommon.QueryResult<
   CategoriesQuery,
   CategoriesQueryVariables
@@ -308,20 +294,16 @@ export type CreateAdMutationFn = ApolloReactCommon.MutationFunction<
  * });
  */
 export function useCreateAdMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
-    CreateAdMutation,
-    CreateAdMutationVariables
-  >,
+  baseOptions?: ApolloReactHooks.MutationHookOptions<CreateAdMutation, CreateAdMutationVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useMutation<
-    CreateAdMutation,
-    CreateAdMutationVariables
-  >(CreateAdDocument, options);
+  return ApolloReactHooks.useMutation<CreateAdMutation, CreateAdMutationVariables>(
+    CreateAdDocument,
+    options,
+  );
 }
 export type CreateAdMutationHookResult = ReturnType<typeof useCreateAdMutation>;
-export type CreateAdMutationResult =
-  ApolloReactCommon.MutationResult<CreateAdMutation>;
+export type CreateAdMutationResult = ApolloReactCommon.MutationResult<CreateAdMutation>;
 export type CreateAdMutationOptions = ApolloReactCommon.BaseMutationOptions<
   CreateAdMutation,
   CreateAdMutationVariables
@@ -369,22 +351,13 @@ export function useAdQuery(
     ({ variables: AdQueryVariables; skip?: boolean } | { skip: boolean }),
 ) {
   const options = { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useQuery<AdQuery, AdQueryVariables>(
-    AdDocument,
-    options,
-  );
+  return ApolloReactHooks.useQuery<AdQuery, AdQueryVariables>(AdDocument, options);
 }
 export function useAdLazyQuery(
-  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
-    AdQuery,
-    AdQueryVariables
-  >,
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdQuery, AdQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useLazyQuery<AdQuery, AdQueryVariables>(
-    AdDocument,
-    options,
-  );
+  return ApolloReactHooks.useLazyQuery<AdQuery, AdQueryVariables>(AdDocument, options);
 }
 export function useAdSuspenseQuery(
   baseOptions?:
@@ -395,18 +368,12 @@ export function useAdSuspenseQuery(
     baseOptions === ApolloReactHooks.skipToken
       ? baseOptions
       : { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useSuspenseQuery<AdQuery, AdQueryVariables>(
-    AdDocument,
-    options,
-  );
+  return ApolloReactHooks.useSuspenseQuery<AdQuery, AdQueryVariables>(AdDocument, options);
 }
 export type AdQueryHookResult = ReturnType<typeof useAdQuery>;
 export type AdLazyQueryHookResult = ReturnType<typeof useAdLazyQuery>;
 export type AdSuspenseQueryHookResult = ReturnType<typeof useAdSuspenseQuery>;
-export type AdQueryResult = ApolloReactCommon.QueryResult<
-  AdQuery,
-  AdQueryVariables
->;
+export type AdQueryResult = ApolloReactCommon.QueryResult<AdQuery, AdQueryVariables>;
 export const RecentAdsDocument = gql`
     query recentAds {
   ads {
@@ -434,10 +401,7 @@ export const RecentAdsDocument = gql`
  * });
  */
 export function useRecentAdsQuery(
-  baseOptions?: ApolloReactHooks.QueryHookOptions<
-    RecentAdsQuery,
-    RecentAdsQueryVariables
-  >,
+  baseOptions?: ApolloReactHooks.QueryHookOptions<RecentAdsQuery, RecentAdsQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return ApolloReactHooks.useQuery<RecentAdsQuery, RecentAdsQueryVariables>(
@@ -446,10 +410,7 @@ export function useRecentAdsQuery(
   );
 }
 export function useRecentAdsLazyQuery(
-  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
-    RecentAdsQuery,
-    RecentAdsQueryVariables
-  >,
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<RecentAdsQuery, RecentAdsQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return ApolloReactHooks.useLazyQuery<RecentAdsQuery, RecentAdsQueryVariables>(
@@ -460,27 +421,20 @@ export function useRecentAdsLazyQuery(
 export function useRecentAdsSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
-    | ApolloReactHooks.SuspenseQueryHookOptions<
-        RecentAdsQuery,
-        RecentAdsQueryVariables
-      >,
+    | ApolloReactHooks.SuspenseQueryHookOptions<RecentAdsQuery, RecentAdsQueryVariables>,
 ) {
   const options =
     baseOptions === ApolloReactHooks.skipToken
       ? baseOptions
       : { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useSuspenseQuery<
-    RecentAdsQuery,
-    RecentAdsQueryVariables
-  >(RecentAdsDocument, options);
+  return ApolloReactHooks.useSuspenseQuery<RecentAdsQuery, RecentAdsQueryVariables>(
+    RecentAdsDocument,
+    options,
+  );
 }
 export type RecentAdsQueryHookResult = ReturnType<typeof useRecentAdsQuery>;
-export type RecentAdsLazyQueryHookResult = ReturnType<
-  typeof useRecentAdsLazyQuery
->;
-export type RecentAdsSuspenseQueryHookResult = ReturnType<
-  typeof useRecentAdsSuspenseQuery
->;
+export type RecentAdsLazyQueryHookResult = ReturnType<typeof useRecentAdsLazyQuery>;
+export type RecentAdsSuspenseQueryHookResult = ReturnType<typeof useRecentAdsSuspenseQuery>;
 export type RecentAdsQueryResult = ApolloReactCommon.QueryResult<
   RecentAdsQuery,
   RecentAdsQueryVariables
@@ -510,28 +464,16 @@ export const TagsDocument = gql`
  * });
  */
 export function useTagsQuery(
-  baseOptions?: ApolloReactHooks.QueryHookOptions<
-    TagsQuery,
-    TagsQueryVariables
-  >,
+  baseOptions?: ApolloReactHooks.QueryHookOptions<TagsQuery, TagsQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useQuery<TagsQuery, TagsQueryVariables>(
-    TagsDocument,
-    options,
-  );
+  return ApolloReactHooks.useQuery<TagsQuery, TagsQueryVariables>(TagsDocument, options);
 }
 export function useTagsLazyQuery(
-  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
-    TagsQuery,
-    TagsQueryVariables
-  >,
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<TagsQuery, TagsQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useLazyQuery<TagsQuery, TagsQueryVariables>(
-    TagsDocument,
-    options,
-  );
+  return ApolloReactHooks.useLazyQuery<TagsQuery, TagsQueryVariables>(TagsDocument, options);
 }
 export function useTagsSuspenseQuery(
   baseOptions?:
@@ -542,17 +484,9 @@ export function useTagsSuspenseQuery(
     baseOptions === ApolloReactHooks.skipToken
       ? baseOptions
       : { ...defaultOptions, ...baseOptions };
-  return ApolloReactHooks.useSuspenseQuery<TagsQuery, TagsQueryVariables>(
-    TagsDocument,
-    options,
-  );
+  return ApolloReactHooks.useSuspenseQuery<TagsQuery, TagsQueryVariables>(TagsDocument, options);
 }
 export type TagsQueryHookResult = ReturnType<typeof useTagsQuery>;
 export type TagsLazyQueryHookResult = ReturnType<typeof useTagsLazyQuery>;
-export type TagsSuspenseQueryHookResult = ReturnType<
-  typeof useTagsSuspenseQuery
->;
-export type TagsQueryResult = ApolloReactCommon.QueryResult<
-  TagsQuery,
-  TagsQueryVariables
->;
+export type TagsSuspenseQueryHookResult = ReturnType<typeof useTagsSuspenseQuery>;
+export type TagsQueryResult = ApolloReactCommon.QueryResult<TagsQuery, TagsQueryVariables>;

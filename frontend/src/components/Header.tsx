@@ -8,9 +8,7 @@ export default function Header() {
       {/* Small screen layout: Title + Publish button on same line */}
       <div className="flex flex-row justify-between items-center md:hidden">
         <Link href="/" className="w-max">
-          <h1 className="text-orange-600 text-2xl font-bold">
-            The good corner
-          </h1>
+          <h1 className="text-orange-600 text-2xl font-bold">The good corner</h1>
         </Link>
 
         <Link href="/newAd" className="btn btn-primary">
@@ -25,9 +23,7 @@ export default function Header() {
       <div className="hidden md:flex md:flex-row md:justify-between md:items-center">
         <div className="flex flex-row items-center gap-4">
           <Link href="/" className="w-max">
-            <h1 className="text-orange-600 text-2xl font-bold">
-              The good corner
-            </h1>
+            <h1 className="text-orange-600 text-2xl font-bold">The good corner</h1>
           </Link>
 
           <SearchInput inputClassName="w-sm" />

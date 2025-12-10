@@ -7,10 +7,7 @@ interface FavoriteButtonProps {
   onChange?: (active: boolean) => void;
 }
 
-export default function FavoriteButton({
-  defaultActive = false,
-  onChange,
-}: FavoriteButtonProps) {
+export default function FavoriteButton({ defaultActive = false, onChange }: FavoriteButtonProps) {
   const [isFav, setIsFav] = useState(defaultActive);
 
   const toggle = (e: React.MouseEvent<HTMLButtonElement>) => {
