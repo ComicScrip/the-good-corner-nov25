@@ -42,7 +42,8 @@ export default function NewAd() {
     const formData = new FormData(e.target as HTMLFormElement);
     const toSend = Object.fromEntries(formData.entries()) as unknown as AdInput;
     toSend.price = parseFloat(toSend.price as unknown as string);
-    toSend.category = { id: toSend.category as unknown as number };
+    const catId = parseInt(toSend.category as unknown as string, 10);
+    toSend.category = { id: catId };
     toSend.tags = selectedTags.map((t) => ({ id: t.id }));
 
     try {
