@@ -25,11 +25,11 @@ export type AdDetails = Ad & {
 };
 
 export interface AdInput {
-  title: string
-  price: number
-  pictureUrl: string
-  tags: { id: number }[]
-  category: { id: number }
-  description: string
-  location: string
+  title: string;
+  price: number;
+  pictureUrl: string;
+  tags: { id: number }[];
+  category: { id: number };
+  description: string;
+  location: string;
 }

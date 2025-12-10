@@ -8,15 +8,19 @@ const config: CodegenConfig = {
   generates: {
     "./src/graphql/generated/schema.ts": {
       // see https://github.com/dotansimha/graphql-code-generator/issues/5073
-      plugins: ["typescript", "typescript-operations", "typescript-react-apollo", { "add": { content: '// @ts-nocheck' } }],
-
+      plugins: [
+        "typescript",
+        "typescript-operations",
+        "typescript-react-apollo",
+        { add: { content: "// @ts-nocheck" } },
+      ],
     },
   },
   // see https://github.com/dotansimha/graphql-code-generator-community/issues/1216
   config: {
     apolloReactCommonImportFrom: "@apollo/client/react",
     apolloReactHooksImportFrom: "@apollo/client/react",
-  }
+  },
 };
 
 export default config;

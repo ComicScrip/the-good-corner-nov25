@@ -2,10 +2,7 @@ import { useRouter } from "next/router";
 import { type FormEvent, useEffect, useState } from "react";
 import Select from "react-select";
 import Layout from "@/components/Layout";
-import {
-  useCategoriesQuery,
-  useCreateAdMutation,
-} from "@/graphql/generated/schema";
+import { useCategoriesQuery, useCreateAdMutation } from "@/graphql/generated/schema";
 import type { AdInput, Tag } from "@/types";
 
 export default function NewAd() {
@@ -165,11 +162,7 @@ export default function NewAd() {
             ></textarea>
           </div>
 
-          <button
-            type="submit"
-            className="btn btn-primary mt-12 w-full"
-            disabled={isSubmitting}
-          >
+          <button type="submit" className="btn btn-primary mt-12 w-full" disabled={isSubmitting}>
             {isSubmitting ? "Sauvegarde en cours" : "Envoyer"}
           </button>
         </form>

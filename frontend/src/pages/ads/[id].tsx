@@ -46,8 +46,7 @@ export default function AdDetails() {
               <p className="mt-6 mb-6">{ad.description}</p>
               <div className="flex justify-between mb-6">
                 <div className="flex items-center mt-2 ">
-                  <MapPinIcon width={24} height={24} className="mr-2" />{" "}
-                  {ad.location}
+                  <MapPinIcon width={24} height={24} className="mr-2" /> {ad.location}
                 </div>
               </div>
 
@@ -57,11 +56,7 @@ export default function AdDetails() {
                   width={24}
                   height={24}
                   onClick={() => {
-                    if (
-                      confirm(
-                        "etes vous bien certain.e de vouloir supprimer cette annonce ?",
-                      )
-                    )
+                    if (confirm("etes vous bien certain.e de vouloir supprimer cette annonce ?"))
                       fetch(`http://localhost:4000/ads/${id}`, {
                         method: "DELETE",
                       })
