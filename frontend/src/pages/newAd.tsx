@@ -2,23 +2,17 @@ import { useRouter } from "next/router";
 import { type FormEvent, useEffect, useState } from "react";
 import Select from "react-select";
 import Layout from "@/components/Layout";
-import type { AdInput, Category, Tag } from "@/types";
+import {
+  useCategoriesQuery,
+  useCreateAdMutation,
+} from "@/graphql/generated/schema";
+import type { AdInput, Tag } from "@/types";
 
 export default function NewAd() {
   const router = useRouter();
 
-  const [categories, setCategories] = useState<Category[]>([]);
-
-  useEffect(() => {
-    fetch("http://localhost:4000/categories")
-      .then((res) => res.json())
-      .then((data) => {
-        setCategories(data);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  }, []);
+  const { data } = useCategoriesQuery();
+  const categories = data?.categories || [];
 
   const [tags, setTags] = useState<Tag[]>([]);
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
@@ -35,6 +29,8 @@ export default function NewAd() {
       });
   }, []);
 
+  const [createAd] = useCreateAdMutation();
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -47,17 +43,8 @@ export default function NewAd() {
     toSend.tags = selectedTags.map((t) => ({ id: t.id }));
 
     try {
-      const response = await fetch("http://localhost:4000/ads", {
-        method: "POST",
-        body: JSON.stringify(toSend),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = await response.json();
-      console.log("response from API : ", data);
-      router.push(`/ads/${data.id}`);
+      const response = await createAd({ variables: { data: toSend } });
+      router.push(`/ads/${response.data?.createAd.id}`);
     } catch (err) {
       console.error(err);
     } finally {

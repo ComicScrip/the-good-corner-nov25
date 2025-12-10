@@ -1,25 +1,21 @@
-import { useEffect, useState } from "react";
-import type { Ad } from "@/types";
+import { useRecentAdsQuery } from "@/graphql/generated/schema";
 import AdCard from "./AdCard";
+import Loader from "./Loader";
 
 export default function RecentAds() {
-  const [ads, setAds] = useState<Ad[]>([]);
-
-  useEffect(() => {
-    fetch("http://localhost:4000/ads")
-      .then((res) => res.json())
-      .then((data) => {
-        setAds(data);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  }, []);
+  const { data, loading, error } = useRecentAdsQuery();
+  const ads = data?.ads || [];
 
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-6">Annonces récentes</h2>
       <div className="flex flex-wrap">
+        {loading && <Loader />}
+        {error && (
+          <div className="text-red-600">
+            Une erreur est survenue lors de la récupération des données
+          </div>
+        )}
         {ads.map((a) => (
           <AdCard ad={a} key={a.id} />
         ))}

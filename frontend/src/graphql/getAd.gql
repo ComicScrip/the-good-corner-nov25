@@ -1,0 +1,19 @@
+query Ad($adId: Int!) {
+  ad(id: $adId) {
+    id
+    title
+    price
+    description
+    createdAt
+    location
+    category {
+      id
+      name
+    }
+    tags {
+      id
+      name
+    }
+    pictureUrl
+  }
+}
