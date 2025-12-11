@@ -44,7 +44,7 @@ export default class AdResolver {
       order: {
         [`${sortBy}`]: order,
       },
-      take: limit,
+      take: limit
     });
   }
 
