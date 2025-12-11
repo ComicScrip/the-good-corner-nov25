@@ -4,23 +4,15 @@ import * as ApolloReactCommon from "@apollo/client/react";
 import * as ApolloReactHooks from "@apollo/client/react";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
-export type Exact<T extends { [key: string]: unknown }> = {
-  [K in keyof T]: T[K];
-};
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
-  [SubKey in K]?: Maybe<T[SubKey]>;
-};
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
-  [SubKey in K]: Maybe<T[SubKey]>;
-};
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = {
   [_ in K]?: never;
 };
 export type Incremental<T> =
   | T
-  | {
-      [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never;
-    };
+  | { [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never };
 const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -55,6 +47,7 @@ export type Mutation = {
   __typename?: "Mutation";
   createAd: Ad;
   createCategory: Category;
+  createTag: Tag;
   deleteAd: Scalars["String"]["output"];
   deleteCategory: Scalars["String"]["output"];
   updateAd: Ad;
@@ -67,6 +60,10 @@ export type MutationCreateAdArgs = {
 
 export type MutationCreateCategoryArgs = {
   data: NewCategoryInput;
+};
+
+export type MutationCreateTagArgs = {
+  data: NewTagInput;
 };
 
 export type MutationDeleteAdArgs = {
@@ -98,6 +95,10 @@ export type NewAdInput = {
 };
 
 export type NewCategoryInput = {
+  name: Scalars["String"]["input"];
+};
+
+export type NewTagInput = {
   name: Scalars["String"]["input"];
 };
 
@@ -161,6 +162,15 @@ export type CreateAdMutation = {
   createAd: { __typename?: "Ad"; id: number };
 };
 
+export type CreateTagMutationVariables = Exact<{
+  data: NewTagInput;
+}>;
+
+export type CreateTagMutation = {
+  __typename?: "Mutation";
+  createTag: { __typename?: "Tag"; id: number; name: string };
+};
+
 export type AdQueryVariables = Exact<{
   adId: Scalars["Int"]["input"];
 }>;
@@ -185,13 +195,7 @@ export type RecentAdsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type RecentAdsQuery = {
   __typename?: "Query";
-  ads: Array<{
-    __typename?: "Ad";
-    id: number;
-    title: string;
-    price: number;
-    pictureUrl: string;
-  }>;
+  ads: Array<{ __typename?: "Ad"; id: number; title: string; price: number; pictureUrl: string }>;
 };
 
 export type TagsQueryVariables = Exact<{ [key: string]: never }>;
@@ -307,6 +311,51 @@ export type CreateAdMutationResult = ApolloReactCommon.MutationResult<CreateAdMu
 export type CreateAdMutationOptions = ApolloReactCommon.BaseMutationOptions<
   CreateAdMutation,
   CreateAdMutationVariables
+>;
+export const CreateTagDocument = gql`
+    mutation CreateTag($data: NewTagInput!) {
+  createTag(data: $data) {
+    id
+    name
+  }
+}
+    `;
+export type CreateTagMutationFn = ApolloReactCommon.MutationFunction<
+  CreateTagMutation,
+  CreateTagMutationVariables
+>;
+
+/**
+ * __useCreateTagMutation__
+ *
+ * To run a mutation, you first call `useCreateTagMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateTagMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createTagMutation, { data, loading, error }] = useCreateTagMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useCreateTagMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<CreateTagMutation, CreateTagMutationVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useMutation<CreateTagMutation, CreateTagMutationVariables>(
+    CreateTagDocument,
+    options,
+  );
+}
+export type CreateTagMutationHookResult = ReturnType<typeof useCreateTagMutation>;
+export type CreateTagMutationResult = ApolloReactCommon.MutationResult<CreateTagMutation>;
+export type CreateTagMutationOptions = ApolloReactCommon.BaseMutationOptions<
+  CreateTagMutation,
+  CreateTagMutationVariables
 >;
 export const AdDocument = gql`
     query Ad($adId: Int!) {
