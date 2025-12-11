@@ -16,14 +16,16 @@ import AdResolver from "./resolvers/AdResolver";
 import CategoryResolver from "./resolvers/CategoryResolver";
 import TagResolver from "./resolvers/TagResolver";
 
-buildSchema({ resolvers: [AdResolver, CategoryResolver,TagResolver] }).then((schema) => {
-  const server = new ApolloServer({ schema });
-  startStandaloneServer(server, {
-    listen: { port: env.GRAPHQL_SERVER_PORT },
-  }).then(({ url }) => {
-    console.log(`graphql server ready on ${url}`);
-  });
-});
+buildSchema({ resolvers: [AdResolver, CategoryResolver, TagResolver] }).then(
+  (schema) => {
+    const server = new ApolloServer({ schema });
+    startStandaloneServer(server, {
+      listen: { port: env.GRAPHQL_SERVER_PORT },
+    }).then(({ url }) => {
+      console.log(`graphql server ready on ${url}`);
+    });
+  },
+);
 
 const app = express();
 
