@@ -23,6 +23,7 @@ export class Tag extends BaseEntity {
   @ManyToMany(
     () => Ad,
     (ad) => ad.tags,
+    { onDelete: "CASCADE", cascade: true }
   )
   ads: Ad[];
 }
