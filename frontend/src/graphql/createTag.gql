@@ -1,0 +1,6 @@
+mutation CreateTag($data: NewTagInput!) {
+  createTag(data: $data) {
+    id
+    name
+  }
+}

@@ -1,5 +1,6 @@
-import { Tag } from "../entities/Tag";
-import { Query, Resolver } from "type-graphql";
+import { Tag, NewTagInput } from "../entities/Tag";
+import { Query, Arg, Mutation, Resolver } from "type-graphql";
+
 
 @Resolver()
 export default class TagResolver {
@@ -7,4 +8,15 @@ export default class TagResolver {
   async tags() {
     return Tag.find();
   }
+
+  @Mutation(() => Tag) async createTag(
+    @Arg("data", () => NewTagInput, { validate: true })
+    data: NewTagInput
+  ) {
+    const newTag = new Tag();
+    Object.assign(newTag, data);
+    return newTag.save();
+  }
+
 }
+
