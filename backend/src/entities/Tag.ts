@@ -3,6 +3,7 @@ import {
   BaseEntity,
   Column,
   Entity,
+  JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
@@ -20,6 +21,7 @@ export class Tag extends BaseEntity {
   @Column({ length: 100 })
   name: string;
 
+  @JoinTable()
   @ManyToMany(
     () => Ad,
     (ad) => ad.tags,
