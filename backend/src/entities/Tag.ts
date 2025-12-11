@@ -1,7 +1,6 @@
 import { Field, Int, ObjectType, InputType } from "type-graphql";
 import {
   BaseEntity,
-  BeforeRemove,
   Column,
   Entity,
   JoinTable,
@@ -25,7 +24,7 @@ export class Tag extends BaseEntity {
   @JoinTable()
   @ManyToMany(
     () => Ad,
-    (ad) => ad.tags
+    (ad) => ad.tags,
   )
   ads: Ad[];
 }

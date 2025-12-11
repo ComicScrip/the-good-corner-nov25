@@ -21,7 +21,7 @@ export default class TagResolver {
   @Mutation(() => Boolean)
   async deleteTag(@Arg("id", () => Int) id: number) {
     const tagToDelete = await Tag.findOne({
-      where: { id }
+      where: { id },
     });
 
     if (!tagToDelete)
