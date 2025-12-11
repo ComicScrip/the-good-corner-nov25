@@ -1,12 +1,12 @@
-import { unlink } from 'node:fs/promises'
-import { resolve } from 'node:path'
+import { unlink } from "node:fs/promises";
+import { resolve } from "node:path";
 import { Ad } from "../entities/Ad";
 import { Category } from "../entities/Category";
 import { Tag } from "../entities/Tag";
 import db from "./index";
 
 export async function clearDB() {
-  await unlink(resolve('src/db/the_good_corner.sqlite'))
+  await unlink(resolve("src/db/the_good_corner.sqlite"));
 }
 
 async function main() {

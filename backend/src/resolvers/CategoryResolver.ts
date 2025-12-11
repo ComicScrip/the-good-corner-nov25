@@ -1,12 +1,10 @@
 import { GraphQLError } from "graphql";
+import { Arg, Int, Mutation, Query, Resolver } from "type-graphql";
 import {
-  Arg,
-  Int,
-  Mutation,
-  Query,
-  Resolver,
-} from "type-graphql";
-import { Category, NewCategoryInput, UpdateCategoryInput } from "../entities/Category";
+  Category,
+  NewCategoryInput,
+  UpdateCategoryInput,
+} from "../entities/Category";
 
 @Resolver()
 export default class CategoryResolver {
@@ -15,10 +13,10 @@ export default class CategoryResolver {
     return Category.find();
   }
 
-
   @Mutation(() => Category)
   async createCategory(
-    @Arg("data", () => NewCategoryInput, { validate: true }) data: NewCategoryInput,
+    @Arg("data", () => NewCategoryInput, { validate: true })
+    data: NewCategoryInput,
   ) {
     const newCategory = new Category();
     Object.assign(newCategory, data);
@@ -30,7 +28,11 @@ export default class CategoryResolver {
   }
 
   @Mutation(() => Category)
-  async updateCategory(@Arg("id", () => Int) id: number, @Arg("data", () => UpdateCategoryInput, { validate: true }) data: UpdateCategoryInput,) {
+  async updateCategory(
+    @Arg("id", () => Int) id: number,
+    @Arg("data", () => UpdateCategoryInput, { validate: true })
+    data: UpdateCategoryInput,
+  ) {
     const categoryToUpdate = await Category.findOne({
       where: { id },
       relations: { ads: true },
@@ -40,9 +42,9 @@ export default class CategoryResolver {
         extensions: { code: "NOT_FOUND", http: { status: 404 } },
       });
 
-    Object.assign(categoryToUpdate, data)
-    await categoryToUpdate.save()
-    return categoryToUpdate
+    Object.assign(categoryToUpdate, data);
+    await categoryToUpdate.save();
+    return categoryToUpdate;
   }
 
   @Mutation(() => String)
@@ -55,7 +57,7 @@ export default class CategoryResolver {
       throw new GraphQLError("category not found", {
         extensions: { code: "NOT_FOUND", http: { status: 404 } },
       });
-    await category.remove()
-    return 'category deleted !'
+    await category.remove();
+    return "category deleted !";
   }
 }

@@ -38,7 +38,7 @@ export class Ad extends BaseEntity {
   createdAt: Date;
 
   @Field(() => Category)
-  @ManyToOne(() => Category, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Category, { onDelete: "CASCADE" })
   category: Category;
 
   @Field(() => [Tag])

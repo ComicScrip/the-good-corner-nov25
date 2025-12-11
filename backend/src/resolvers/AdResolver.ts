@@ -75,7 +75,10 @@ export default class AdResolver {
   }
 
   @Mutation(() => Ad)
-  async updateAd(@Arg("id", () => Int) id: number, @Arg("data", () => UpdateAdInput, { validate: true }) data: UpdateAdInput,) {
+  async updateAd(
+    @Arg("id", () => Int) id: number,
+    @Arg("data", () => UpdateAdInput, { validate: true }) data: UpdateAdInput,
+  ) {
     const adToUpdate = await Ad.findOne({
       where: { id },
       relations: { tags: true, category: true },
@@ -85,9 +88,9 @@ export default class AdResolver {
         extensions: { code: "NOT_FOUND", http: { status: 404 } },
       });
 
-    Object.assign(adToUpdate, data)
-    await adToUpdate.save()
-    return adToUpdate
+    Object.assign(adToUpdate, data);
+    await adToUpdate.save();
+    return adToUpdate;
   }
 
   @Mutation(() => String)
@@ -100,7 +103,7 @@ export default class AdResolver {
       throw new GraphQLError("ad not found", {
         extensions: { code: "NOT_FOUND", http: { status: 404 } },
       });
-    await ad.remove()
-    return 'ad deleted !'
+    await ad.remove();
+    return "ad deleted !";
   }
 }
