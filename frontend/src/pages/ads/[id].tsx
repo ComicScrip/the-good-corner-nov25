@@ -2,15 +2,18 @@ import { MapPinIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import Loader from "@/components/Loader";
-import { useAdQuery } from "@/graphql/generated/schema";
+import { useAdQuery, useDeleteAdMutation, useRecentAdsQuery } from "@/graphql/generated/schema";
 
 export default function AdDetails() {
+  const { refetch } = useRecentAdsQuery();
   const router = useRouter();
   const { id } = router.query;
 
   const { data } = useAdQuery({
     variables: { adId: parseInt(id as string, 10) },
   });
+
+  const [deleteAd] = useDeleteAdMutation();
 
   const ad = data?.ad;
 
@@ -55,14 +58,18 @@ export default function AdDetails() {
                   className="cursor-pointer"
                   width={24}
                   height={24}
-                  onClick={() => {
-                    if (confirm("etes vous bien certain.e de vouloir supprimer cette annonce ?"))
-                      fetch(`http://localhost:4000/ads/${id}`, {
-                        method: "DELETE",
-                      })
-                        .then((res) => res.json())
-                        .then((_data) => router.push("/"))
-                        .catch((err) => console.error(err));
+                  onClick={async () => {
+                    if (confirm("etes vous bien certain.e de vouloir supprimer cette annonce ?")) {
+                      try {
+                        await deleteAd({
+                          variables: { deleteAdId: parseInt(id as string, 10) },
+                        });
+                        await refetch();
+                        router.push("/");
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }
                   }}
                 />
               </div>

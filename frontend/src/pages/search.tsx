@@ -1,34 +1,43 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import AdCard from "@/components/AdCard";
 import Layout from "@/components/Layout";
-import type { Ad } from "@/types";
+import Loader from "@/components/Loader";
+import { useSearchAdsQuery } from "@/graphql/generated/schema";
 
 export default function Search() {
-  const [ads, setAds] = useState<Ad[]>([]);
   const router = useRouter();
 
-  useEffect(() => {
-    const url = new URL(`http://localhost:3000${router.asPath}`);
-    fetch(`http://localhost:4000/ads?${url.searchParams}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.table(data);
-        setAds(data);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+  const searchParams = useMemo(() => {
+    const params = new URLSearchParams(router.asPath.split("?")[1] || "");
+    return {
+      titleContains: params.get("titleContains") || undefined,
+      categoryId: params.get("categoryId")
+        ? parseInt(params.get("categoryId") ?? "0", 10)
+        : undefined,
+      limit: params.get("limit") ? parseInt(params.get("limit") ?? "O", 10) : 20,
+      sortBy: params.get("sortBy") || "createdAt",
+      order: params.get("order") || "desc",
+    };
   }, [router.asPath]);
 
+  const { data, loading, error } = useSearchAdsQuery({
+    variables: searchParams,
+  });
+
+  const ads = data?.ads || [];
+
   return (
-    <Layout pageTitle="recherche - TGC">
-      {ads.length === 0 && (
+    <Layout pageTitle="Recherche">
+      {loading && <Loader />}
+      {error && (
+        <div className="p-4 text-red-600">Une erreur est survenue lors de la recherche</div>
+      )}
+      {ads.length === 0 && !loading && (
         <div className="p-4">
           <p className="pb-4 pt-12 text-center">
-            {" "}
-            Aucune annonce ne corresspond à ces critères de recherche
+            Aucune annonce ne correspond à ces critères de recherche
           </p>
 
           <div className="text-center">
