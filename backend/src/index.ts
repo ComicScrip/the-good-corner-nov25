@@ -9,14 +9,14 @@ import AdResolver from "./resolvers/AdResolver";
 import CategoryResolver from "./resolvers/CategoryResolver";
 import TagResolver from "./resolvers/TagResolver";
 
-buildSchema({ resolvers: [AdResolver, CategoryResolver, TagResolver] }).then(
-  (schema) => {
-    const server = new ApolloServer({ schema });
-    startStandaloneServer(server, {
-      listen: { port: env.GRAPHQL_SERVER_PORT },
-    }).then(async ({ url }) => {
-      await db.initialize();
-      console.log(`GraphQL server ready on ${url}`);
-    });
-  },
-);
+async function start() {
+  await db.initialize();
+  const schema = await buildSchema({ resolvers: [AdResolver, CategoryResolver, TagResolver] });
+  const server = new ApolloServer({ schema });
+  const { url } = await startStandaloneServer(server, {
+    listen: { port: env.GRAPHQL_SERVER_PORT },
+  });
+  console.log(`graphql server ready on ${url}`);
+}
+
+start();
