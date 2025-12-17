@@ -1,0 +1,21 @@
+query SearchAds(
+  $titleContains: String
+  $categoryId: Int
+  $limit: Int
+  $sortBy: String
+  $order: String
+) {
+  ads(
+    titleContains: $titleContains
+    categoryId: $categoryId
+    limit: $limit
+    sortBy: $sortBy
+    order: $order
+  ) {
+    id
+    title
+    price
+    pictureUrl
+    location
+  }
+}
