@@ -11,7 +11,9 @@ import TagResolver from "./resolvers/TagResolver";
 
 async function start() {
   await db.initialize();
-  const schema = await buildSchema({ resolvers: [AdResolver, CategoryResolver, TagResolver] });
+  const schema = await buildSchema({
+    resolvers: [AdResolver, CategoryResolver, TagResolver],
+  });
   const server = new ApolloServer({ schema });
   const { url } = await startStandaloneServer(server, {
     listen: { port: env.GRAPHQL_SERVER_PORT },
