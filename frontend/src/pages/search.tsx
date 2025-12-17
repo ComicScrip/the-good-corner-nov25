@@ -29,7 +29,7 @@ export default function Search() {
   const ads = data?.ads || [];
 
   return (
-    <Layout pageTitle="recherche - TGC">
+    <Layout pageTitle="Recherche">
       {loading && <Loader />}
       {error && (
         <div className="p-4 text-red-600">Une erreur est survenue lors de la recherche</div>
