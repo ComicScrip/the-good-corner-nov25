@@ -1,36 +1,25 @@
 import { useRouter } from "next/router";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useState } from "react";
 import Select from "react-select";
 import Layout from "@/components/Layout";
-import { useCategoriesQuery, useCreateAdMutation } from "@/graphql/generated/schema";
+import { useCategoriesQuery, useCreateAdMutation, useTagsQuery } from "@/graphql/generated/schema";
 import type { AdInput, Tag } from "@/types";
 
 export default function NewAd() {
   const router = useRouter();
 
   const { data } = useCategoriesQuery();
+  const { data: tagsData } = useTagsQuery();
+
   const categories = data?.categories || [];
+  const tags = tagsData?.tags || [];
 
-  const [tags, setTags] = useState<Tag[]>([]);
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetch("http://localhost:4000/tags")
-      .then((res) => res.json())
-      .then((data) => {
-        setTags(data);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  }, []);
-
-  const [createAd] = useCreateAdMutation();
+  const [createAd, { loading: isSubmitting }] = useCreateAdMutation();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
     const formData = new FormData(e.target as HTMLFormElement);
     const toSend = Object.fromEntries(formData.entries()) as unknown as AdInput;
@@ -44,8 +33,6 @@ export default function NewAd() {
       router.push(`/ads/${response.data?.createAd.id}`);
     } catch (err) {
       console.error(err);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
