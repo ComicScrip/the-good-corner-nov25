@@ -29,9 +29,17 @@ export default function Header() {
           <SearchInput inputClassName="w-sm" />
         </div>
 
-        <Link href="/newAd" className="btn btn-primary">
-          Publier
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/admin/tags" className="btn btn-outline btn-sm">
+            Admin Tags
+          </Link>
+          <Link href="/admin/categories" className="btn btn-outline btn-sm">
+            Admin Catégories
+          </Link>
+          <Link href="/newAd" className="btn btn-primary">
+            Publier
+          </Link>
+        </div>
       </div>
 
       <CategoriesNav />
