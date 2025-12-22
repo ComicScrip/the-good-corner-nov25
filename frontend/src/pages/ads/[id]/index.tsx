@@ -1,4 +1,4 @@
-import { MapPinIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import Loader from "@/components/Loader";
@@ -53,9 +53,16 @@ export default function AdDetails() {
                 </div>
               </div>
 
-              <div>
+              <div className="flex gap-4">
+                <PencilIcon
+                  className="cursor-pointer text-blue-600 hover:text-blue-800"
+                  width={24}
+                  height={24}
+                  onClick={() => router.push(`/ads/${id}/edit`)}
+                  title="Modifier l'annonce"
+                />
                 <TrashIcon
-                  className="cursor-pointer"
+                  className="cursor-pointer text-red-600 hover:text-red-800"
                   width={24}
                   height={24}
                   onClick={async () => {
@@ -71,6 +78,7 @@ export default function AdDetails() {
                       }
                     }
                   }}
+                  title="Supprimer l'annonce"
                 />
               </div>
             </div>

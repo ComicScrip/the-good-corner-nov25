@@ -94,6 +94,7 @@ export type MutationUpdateCategoryArgs = {
   id: Scalars['Int']['input'];
 };
 
+
 export type MutationUpdateTagArgs = {
   data: UpdateTagInput;
   id: Scalars['Int']['input'];
@@ -179,31 +180,19 @@ export type CreateAdMutationVariables = Exact<{
 
 export type CreateAdMutation = { __typename?: 'Mutation', createAd: { __typename?: 'Ad', id: number } };
 
+export type CreateCategoryMutationVariables = Exact<{
+  data: NewCategoryInput;
+}>;
+
+
+export type CreateCategoryMutation = { __typename?: 'Mutation', createCategory: { __typename?: 'Category', id: number, name: string } };
+
 export type CreateTagMutationVariables = Exact<{
   data: NewTagInput;
 }>;
 
 
 export type CreateTagMutation = { __typename?: 'Mutation', createTag: { __typename?: 'Tag', id: number, name: string } };
-
-export type CreateCategoryMutationVariables = Exact<{
-  data: NewCategoryInput;
-}>;
-
-export type CreateCategoryMutation = { __typename?: 'Mutation', createCategory: { __typename?: 'Category', id: number, name: string } };
-
-export type DeleteCategoryMutationVariables = Exact<{
-  deleteCategoryId: Scalars['Int']['input'];
-}>;
-
-export type DeleteCategoryMutation = { __typename?: 'Mutation', deleteCategory: string };
-
-export type UpdateCategoryMutationVariables = Exact<{
-  updateCategoryId: Scalars['Int']['input'];
-  data: UpdateCategoryInput;
-}>;
-
-export type UpdateCategoryMutation = { __typename?: 'Mutation', updateCategory: { __typename?: 'Category', id: number, name: string } };
 
 export type DeleteAdMutationVariables = Exact<{
   deleteAdId: Scalars['Int']['input'];
@@ -212,18 +201,19 @@ export type DeleteAdMutationVariables = Exact<{
 
 export type DeleteAdMutation = { __typename?: 'Mutation', deleteAd: string };
 
+export type DeleteCategoryMutationVariables = Exact<{
+  deleteCategoryId: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteCategoryMutation = { __typename?: 'Mutation', deleteCategory: string };
+
 export type DeleteTagMutationVariables = Exact<{
   deleteTagId: Scalars['Int']['input'];
 }>;
 
-export type UpdateTagMutationVariables = Exact<{
-  updateTagId: Scalars['Int']['input'];
-  data: UpdateTagInput;
-}>;
 
 export type DeleteTagMutation = { __typename?: 'Mutation', deleteTag: boolean };
-
-export type UpdateTagMutation = { __typename?: 'Mutation', updateTag: { __typename?: 'Tag', id: number, name: string } };
 
 export type AdQueryVariables = Exact<{
   adId: Scalars['Int']['input'];
@@ -252,6 +242,30 @@ export type TagsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type TagsQuery = { __typename?: 'Query', tags: Array<{ __typename?: 'Tag', id: number, name: string }> };
+
+export type UpdateAdMutationVariables = Exact<{
+  updateAdId: Scalars['Int']['input'];
+  data: UpdateAdInput;
+}>;
+
+
+export type UpdateAdMutation = { __typename?: 'Mutation', updateAd: { __typename?: 'Ad', id: number, title: string, price: number, description: string, createdAt: any, location: string, pictureUrl: string, category: { __typename?: 'Category', id: number, name: string }, tags: Array<{ __typename?: 'Tag', id: number, name: string }> } };
+
+export type UpdateCategoryMutationVariables = Exact<{
+  updateCategoryId: Scalars['Int']['input'];
+  data: UpdateCategoryInput;
+}>;
+
+
+export type UpdateCategoryMutation = { __typename?: 'Mutation', updateCategory: { __typename?: 'Category', id: number, name: string } };
+
+export type UpdateTagMutationVariables = Exact<{
+  updateTagId: Scalars['Int']['input'];
+  data: UpdateTagInput;
+}>;
+
+
+export type UpdateTagMutation = { __typename?: 'Mutation', updateTag: { __typename?: 'Tag', id: number, name: string } };
 
 
 export const CategoriesDocument = gql`
@@ -327,6 +341,40 @@ export function useCreateAdMutation(baseOptions?: ApolloReactHooks.MutationHookO
 export type CreateAdMutationHookResult = ReturnType<typeof useCreateAdMutation>;
 export type CreateAdMutationResult = ApolloReactCommon.MutationResult<CreateAdMutation>;
 export type CreateAdMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateAdMutation, CreateAdMutationVariables>;
+export const CreateCategoryDocument = gql`
+    mutation CreateCategory($data: NewCategoryInput!) {
+  createCategory(data: $data) {
+    id
+    name
+  }
+}
+    `;
+export type CreateCategoryMutationFn = ApolloReactCommon.MutationFunction<CreateCategoryMutation, CreateCategoryMutationVariables>;
+
+/**
+ * __useCreateCategoryMutation__
+ *
+ * To run a mutation, you first call `useCreateCategoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCategoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCategoryMutation, { data, loading, error }] = useCreateCategoryMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useCreateCategoryMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateCategoryMutation, CreateCategoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateCategoryMutation, CreateCategoryMutationVariables>(CreateCategoryDocument, options);
+      }
+export type CreateCategoryMutationHookResult = ReturnType<typeof useCreateCategoryMutation>;
+export type CreateCategoryMutationResult = ApolloReactCommon.MutationResult<CreateCategoryMutation>;
+export type CreateCategoryMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateCategoryMutation, CreateCategoryMutationVariables>;
 export const CreateTagDocument = gql`
     mutation CreateTag($data: NewTagInput!) {
   createTag(data: $data) {
@@ -392,106 +440,6 @@ export function useDeleteAdMutation(baseOptions?: ApolloReactHooks.MutationHookO
 export type DeleteAdMutationHookResult = ReturnType<typeof useDeleteAdMutation>;
 export type DeleteAdMutationResult = ApolloReactCommon.MutationResult<DeleteAdMutation>;
 export type DeleteAdMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteAdMutation, DeleteAdMutationVariables>;
-export const DeleteTagDocument = gql`
-    mutation deleteTag($deleteTagId: Int!) {
-  deleteTag(id: $deleteTagId)
-}
-    `;
-export type DeleteTagMutationFn = ApolloReactCommon.MutationFunction<DeleteTagMutation, DeleteTagMutationVariables>;
-
-/**
- * __useDeleteTagMutation__
- *
- * To run a mutation, you first call `useDeleteTagMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteTagMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteTagMutation, { data, loading, error }] = useDeleteTagMutation({
- *   variables: {
- *      deleteTagId: // value for 'deleteTagId'
- *   },
- * });
- */
-export function useDeleteTagMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteTagMutation, DeleteTagMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useMutation<DeleteTagMutation, DeleteTagMutationVariables>(DeleteTagDocument, options);
-      }
-export type DeleteTagMutationHookResult = ReturnType<typeof useDeleteTagMutation>;
-export type DeleteTagMutationResult = ApolloReactCommon.MutationResult<DeleteTagMutation>;
-export type DeleteTagMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteTagMutation, DeleteTagMutationVariables>;
-export const UpdateTagDocument = gql`
-    mutation updateTag($updateTagId: Int!, $data: UpdateTagInput!) {
-  updateTag(id: $updateTagId, data: $data) {
-    id
-    name
-  }
-}
-    `;
-export type UpdateTagMutationFn = ApolloReactCommon.MutationFunction<UpdateTagMutation, UpdateTagMutationVariables>;
-
-/**
- * __useUpdateTagMutation__
- *
- * To run a mutation, you first call `useUpdateTagMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateTagMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [updateTagMutation, { data, loading, error }] = useUpdateTagMutation({
- *   variables: {
- *      updateTagId: // value for 'updateTagId'
- *      data: // value for 'data'
- *   },
- * });
- */
-export function useUpdateTagMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateTagMutation, UpdateTagMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useMutation<UpdateTagMutation, UpdateTagMutationVariables>(UpdateTagDocument, options);
-      }
-export type UpdateTagMutationHookResult = ReturnType<typeof useUpdateTagMutation>;
-export type UpdateTagMutationResult = ApolloReactCommon.MutationResult<UpdateTagMutation>;
-export type UpdateTagMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTagMutation, UpdateTagMutationVariables>;
-export const CreateCategoryDocument = gql`
-    mutation CreateCategory($data: NewCategoryInput!) {
-  createCategory(data: $data) {
-    id
-    name
-  }
-}
-    `;
-export type CreateCategoryMutationFn = ApolloReactCommon.MutationFunction<CreateCategoryMutation, CreateCategoryMutationVariables>;
-
-/**
- * __useCreateCategoryMutation__
- *
- * To run a mutation, you first call `useCreateCategoryMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateCategoryMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createCategoryMutation, { data, loading, error }] = useCreateCategoryMutation({
- *   variables: {
- *      data: // value for 'data'
- *   },
- * });
- */
-export function useCreateCategoryMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateCategoryMutation, CreateCategoryMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useMutation<CreateCategoryMutation, CreateCategoryMutationVariables>(CreateCategoryDocument, options);
-      }
-export type CreateCategoryMutationHookResult = ReturnType<typeof useCreateCategoryMutation>;
-export type CreateCategoryMutationResult = ApolloReactCommon.MutationResult<CreateCategoryMutation>;
-export type CreateCategoryMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateCategoryMutation, CreateCategoryMutationVariables>;
 export const DeleteCategoryDocument = gql`
     mutation deleteCategory($deleteCategoryId: Int!) {
   deleteCategory(id: $deleteCategoryId)
@@ -523,41 +471,37 @@ export function useDeleteCategoryMutation(baseOptions?: ApolloReactHooks.Mutatio
 export type DeleteCategoryMutationHookResult = ReturnType<typeof useDeleteCategoryMutation>;
 export type DeleteCategoryMutationResult = ApolloReactCommon.MutationResult<DeleteCategoryMutation>;
 export type DeleteCategoryMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteCategoryMutation, DeleteCategoryMutationVariables>;
-export const UpdateCategoryDocument = gql`
-    mutation updateCategory($updateCategoryId: Int!, $data: UpdateCategoryInput!) {
-  updateCategory(id: $updateCategoryId, data: $data) {
-    id
-    name
-  }
+export const DeleteTagDocument = gql`
+    mutation deleteTag($deleteTagId: Int!) {
+  deleteTag(id: $deleteTagId)
 }
     `;
-export type UpdateCategoryMutationFn = ApolloReactCommon.MutationFunction<UpdateCategoryMutation, UpdateCategoryMutationVariables>;
+export type DeleteTagMutationFn = ApolloReactCommon.MutationFunction<DeleteTagMutation, DeleteTagMutationVariables>;
 
 /**
- * __useUpdateCategoryMutation__
+ * __useDeleteTagMutation__
  *
- * To run a mutation, you first call `useUpdateCategoryMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateCategoryMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useDeleteTagMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteTagMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [updateCategoryMutation, { data, loading, error }] = useUpdateCategoryMutation({
+ * const [deleteTagMutation, { data, loading, error }] = useDeleteTagMutation({
  *   variables: {
- *      updateCategoryId: // value for 'updateCategoryId'
- *      data: // value for 'data'
+ *      deleteTagId: // value for 'deleteTagId'
  *   },
  * });
  */
-export function useUpdateCategoryMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateCategoryMutation, UpdateCategoryMutationVariables>) {
+export function useDeleteTagMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteTagMutation, DeleteTagMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useMutation<UpdateCategoryMutation, UpdateCategoryMutationVariables>(UpdateCategoryDocument, options);
+        return ApolloReactHooks.useMutation<DeleteTagMutation, DeleteTagMutationVariables>(DeleteTagDocument, options);
       }
-export type UpdateCategoryMutationHookResult = ReturnType<typeof useUpdateCategoryMutation>;
-export type UpdateCategoryMutationResult = ApolloReactCommon.MutationResult<UpdateCategoryMutation>;
-export type UpdateCategoryMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateCategoryMutation, UpdateCategoryMutationVariables>;
+export type DeleteTagMutationHookResult = ReturnType<typeof useDeleteTagMutation>;
+export type DeleteTagMutationResult = ApolloReactCommon.MutationResult<DeleteTagMutation>;
+export type DeleteTagMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteTagMutation, DeleteTagMutationVariables>;
 export const AdDocument = gql`
     query Ad($adId: Int!) {
   ad(id: $adId) {
@@ -748,3 +692,121 @@ export type TagsQueryHookResult = ReturnType<typeof useTagsQuery>;
 export type TagsLazyQueryHookResult = ReturnType<typeof useTagsLazyQuery>;
 export type TagsSuspenseQueryHookResult = ReturnType<typeof useTagsSuspenseQuery>;
 export type TagsQueryResult = ApolloReactCommon.QueryResult<TagsQuery, TagsQueryVariables>;
+export const UpdateAdDocument = gql`
+    mutation UpdateAd($updateAdId: Int!, $data: UpdateAdInput!) {
+  updateAd(id: $updateAdId, data: $data) {
+    id
+    title
+    price
+    description
+    createdAt
+    location
+    category {
+      id
+      name
+    }
+    tags {
+      id
+      name
+    }
+    pictureUrl
+  }
+}
+    `;
+export type UpdateAdMutationFn = ApolloReactCommon.MutationFunction<UpdateAdMutation, UpdateAdMutationVariables>;
+
+/**
+ * __useUpdateAdMutation__
+ *
+ * To run a mutation, you first call `useUpdateAdMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateAdMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateAdMutation, { data, loading, error }] = useUpdateAdMutation({
+ *   variables: {
+ *      updateAdId: // value for 'updateAdId'
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useUpdateAdMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateAdMutation, UpdateAdMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateAdMutation, UpdateAdMutationVariables>(UpdateAdDocument, options);
+      }
+export type UpdateAdMutationHookResult = ReturnType<typeof useUpdateAdMutation>;
+export type UpdateAdMutationResult = ApolloReactCommon.MutationResult<UpdateAdMutation>;
+export type UpdateAdMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateAdMutation, UpdateAdMutationVariables>;
+export const UpdateCategoryDocument = gql`
+    mutation updateCategory($updateCategoryId: Int!, $data: UpdateCategoryInput!) {
+  updateCategory(id: $updateCategoryId, data: $data) {
+    id
+    name
+  }
+}
+    `;
+export type UpdateCategoryMutationFn = ApolloReactCommon.MutationFunction<UpdateCategoryMutation, UpdateCategoryMutationVariables>;
+
+/**
+ * __useUpdateCategoryMutation__
+ *
+ * To run a mutation, you first call `useUpdateCategoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCategoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCategoryMutation, { data, loading, error }] = useUpdateCategoryMutation({
+ *   variables: {
+ *      updateCategoryId: // value for 'updateCategoryId'
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useUpdateCategoryMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateCategoryMutation, UpdateCategoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateCategoryMutation, UpdateCategoryMutationVariables>(UpdateCategoryDocument, options);
+      }
+export type UpdateCategoryMutationHookResult = ReturnType<typeof useUpdateCategoryMutation>;
+export type UpdateCategoryMutationResult = ApolloReactCommon.MutationResult<UpdateCategoryMutation>;
+export type UpdateCategoryMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateCategoryMutation, UpdateCategoryMutationVariables>;
+export const UpdateTagDocument = gql`
+    mutation updateTag($updateTagId: Int!, $data: UpdateTagInput!) {
+  updateTag(id: $updateTagId, data: $data) {
+    id
+    name
+  }
+}
+    `;
+export type UpdateTagMutationFn = ApolloReactCommon.MutationFunction<UpdateTagMutation, UpdateTagMutationVariables>;
+
+/**
+ * __useUpdateTagMutation__
+ *
+ * To run a mutation, you first call `useUpdateTagMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateTagMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateTagMutation, { data, loading, error }] = useUpdateTagMutation({
+ *   variables: {
+ *      updateTagId: // value for 'updateTagId'
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useUpdateTagMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateTagMutation, UpdateTagMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateTagMutation, UpdateTagMutationVariables>(UpdateTagDocument, options);
+      }
+export type UpdateTagMutationHookResult = ReturnType<typeof useUpdateTagMutation>;
+export type UpdateTagMutationResult = ApolloReactCommon.MutationResult<UpdateTagMutation>;
+export type UpdateTagMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTagMutation, UpdateTagMutationVariables>;
