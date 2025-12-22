@@ -1,0 +1,19 @@
+mutation UpdateAd($updateAdId: Int!, $data: UpdateAdInput!) {
+  updateAd(id: $updateAdId, data: $data) {
+    id
+    title
+    price
+    description
+    createdAt
+    location
+    category {
+      id
+      name
+    }
+    tags {
+      id
+      name
+    }
+    pictureUrl
+  }
+}

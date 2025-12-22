@@ -45,6 +45,7 @@ export default class AdResolver {
         [`${sortBy}`]: order,
       },
       take: limit,
+      relations: ["category", "tags"],
     });
   }
 
@@ -90,7 +91,10 @@ export default class AdResolver {
 
     Object.assign(adToUpdate, data);
     await adToUpdate.save();
-    return adToUpdate;
+    return await Ad.findOne({
+      where: { id },
+      relations: { tags: true, category: true },
+    });
   }
 
   @Mutation(() => String)
