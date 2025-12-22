@@ -35,3 +35,10 @@ export class NewTagInput {
   @Length(2, 20, { message: "Le nom doit contenir entre 2 et 20 caractères" })
   name: string;
 }
+
+@InputType()
+export class UpdateTagInput {
+  @Field({ nullable: true })
+  @Length(2, 20, { message: "Le nom doit contenir entre 2 et 20 caractères" })
+  name?: string;
+}

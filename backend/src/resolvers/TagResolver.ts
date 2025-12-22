@@ -1,5 +1,5 @@
 import { GraphQLError } from "graphql";
-import { Tag, NewTagInput } from "../entities/Tag";
+import { Tag, NewTagInput, UpdateTagInput } from "../entities/Tag";
 import { Query, Arg, Mutation, Resolver, Int } from "type-graphql";
 
 @Resolver()
@@ -16,6 +16,24 @@ export default class TagResolver {
     const newTag = new Tag();
     Object.assign(newTag, data);
     return newTag.save();
+  }
+
+  @Mutation(() => Tag) async updateTag(
+    @Arg("id", () => Int) id: number,
+    @Arg("data", () => UpdateTagInput, { validate: true })
+    data: UpdateTagInput,
+  ) {
+    const tagToUpdate = await Tag.findOne({
+      where: { id },
+    });
+
+    if (!tagToUpdate)
+      throw new GraphQLError("tag not found", {
+        extensions: { code: "NOT_FOUND", http: { status: 404 } },
+      });
+
+    Object.assign(tagToUpdate, data);
+    return tagToUpdate.save();
   }
 
   @Mutation(() => Boolean)
