@@ -47,6 +47,7 @@ export type Mutation = {
   deleteAd: Scalars['String']['output'];
   deleteCategory: Scalars['String']['output'];
   deleteTag: Scalars['Boolean']['output'];
+  signup: User;
   updateAd: Ad;
   updateCategory: Category;
   updateTag: Tag;
@@ -80,6 +81,11 @@ export type MutationDeleteCategoryArgs = {
 
 export type MutationDeleteTagArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type MutationSignupArgs = {
+  data: SignupInput;
 };
 
 
@@ -128,6 +134,7 @@ export type Query = {
   ads: Array<Ad>;
   categories: Array<Category>;
   tags: Array<Tag>;
+  users: Array<User>;
 };
 
 
@@ -142,6 +149,11 @@ export type QueryAdsArgs = {
   order?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
   titleContains?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type SignupInput = {
+  email: Scalars['String']['input'];
+  password: Scalars['String']['input'];
 };
 
 export type Tag = {
@@ -166,6 +178,13 @@ export type UpdateCategoryInput = {
 
 export type UpdateTagInput = {
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type User = {
+  __typename?: 'User';
+  createdAt: Scalars['DateTimeISO']['output'];
+  email: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
 };
 
 export type CategoriesQueryVariables = Exact<{ [key: string]: never; }>;
@@ -238,6 +257,13 @@ export type SearchAdsQueryVariables = Exact<{
 
 export type SearchAdsQuery = { __typename?: 'Query', ads: Array<{ __typename?: 'Ad', id: number, title: string, price: number, pictureUrl: string, location: string }> };
 
+export type SignupMutationVariables = Exact<{
+  data: SignupInput;
+}>;
+
+
+export type SignupMutation = { __typename?: 'Mutation', signup: { __typename?: 'User', id: number, email: string, createdAt: any } };
+
 export type TagsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -266,6 +292,11 @@ export type UpdateTagMutationVariables = Exact<{
 
 
 export type UpdateTagMutation = { __typename?: 'Mutation', updateTag: { __typename?: 'Tag', id: number, name: string } };
+
+export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UsersQuery = { __typename?: 'Query', users: Array<{ __typename?: 'User', id: number, email: string, createdAt: any }> };
 
 
 export const CategoriesDocument = gql`
@@ -652,6 +683,41 @@ export type SearchAdsQueryHookResult = ReturnType<typeof useSearchAdsQuery>;
 export type SearchAdsLazyQueryHookResult = ReturnType<typeof useSearchAdsLazyQuery>;
 export type SearchAdsSuspenseQueryHookResult = ReturnType<typeof useSearchAdsSuspenseQuery>;
 export type SearchAdsQueryResult = ApolloReactCommon.QueryResult<SearchAdsQuery, SearchAdsQueryVariables>;
+export const SignupDocument = gql`
+    mutation Signup($data: SignupInput!) {
+  signup(data: $data) {
+    id
+    email
+    createdAt
+  }
+}
+    `;
+export type SignupMutationFn = ApolloReactCommon.MutationFunction<SignupMutation, SignupMutationVariables>;
+
+/**
+ * __useSignupMutation__
+ *
+ * To run a mutation, you first call `useSignupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signupMutation, { data, loading, error }] = useSignupMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useSignupMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<SignupMutation, SignupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<SignupMutation, SignupMutationVariables>(SignupDocument, options);
+      }
+export type SignupMutationHookResult = ReturnType<typeof useSignupMutation>;
+export type SignupMutationResult = ApolloReactCommon.MutationResult<SignupMutation>;
+export type SignupMutationOptions = ApolloReactCommon.BaseMutationOptions<SignupMutation, SignupMutationVariables>;
 export const TagsDocument = gql`
     query Tags {
   tags {
@@ -810,3 +876,44 @@ export function useUpdateTagMutation(baseOptions?: ApolloReactHooks.MutationHook
 export type UpdateTagMutationHookResult = ReturnType<typeof useUpdateTagMutation>;
 export type UpdateTagMutationResult = ApolloReactCommon.MutationResult<UpdateTagMutation>;
 export type UpdateTagMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTagMutation, UpdateTagMutationVariables>;
+export const UsersDocument = gql`
+    query Users {
+  users {
+    id
+    email
+    createdAt
+  }
+}
+    `;
+
+/**
+ * __useUsersQuery__
+ *
+ * To run a query within a React component, call `useUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUsersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useUsersQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<UsersQuery, UsersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
+      }
+export function useUsersLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<UsersQuery, UsersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
+        }
+export function useUsersSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<UsersQuery, UsersQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
+        }
+export type UsersQueryHookResult = ReturnType<typeof useUsersQuery>;
+export type UsersLazyQueryHookResult = ReturnType<typeof useUsersLazyQuery>;
+export type UsersSuspenseQueryHookResult = ReturnType<typeof useUsersSuspenseQuery>;
+export type UsersQueryResult = ApolloReactCommon.QueryResult<UsersQuery, UsersQueryVariables>;

@@ -8,10 +8,11 @@ import env from "./env";
 import AdResolver from "./resolvers/AdResolver";
 import CategoryResolver from "./resolvers/CategoryResolver";
 import TagResolver from "./resolvers/TagResolver";
+import UserResolver from "./resolvers/UserResolver";
 
 async function start() {
   await db.initialize();
-  const schema = await buildSchema({ resolvers: [AdResolver, CategoryResolver, TagResolver] });
+  const schema = await buildSchema({ resolvers: [AdResolver, CategoryResolver, TagResolver, UserResolver] });
   const server = new ApolloServer({ schema });
   const { url } = await startStandaloneServer(server, {
     listen: { port: env.GRAPHQL_SERVER_PORT },
