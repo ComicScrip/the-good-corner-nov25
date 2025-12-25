@@ -3,11 +3,14 @@ import { ApolloProvider } from "@apollo/client/react";
 import type { AppProps } from "next/app";
 import dynamic from "next/dynamic";
 import client from "@/graphql/client";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 function App({ Component, pageProps }: AppProps) {
   return (
     <ApolloProvider client={client}>
-      <Component {...pageProps} />
+      <AuthProvider>
+        <Component {...pageProps} />
+      </AuthProvider>
     </ApolloProvider>
   );
 }

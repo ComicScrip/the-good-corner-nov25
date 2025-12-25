@@ -1,8 +1,23 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import CategoriesNav from "./CategoriesNav";
 import SearchInput from "./SearchInput";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLogoutMutation } from "@/graphql/generated/schema";
 
 export default function Header() {
+  const { user, loading } = useAuth();
+  const [logout] = useLogoutMutation();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
   return (
     <header className="p-4 border-b border-gray-400 flex flex-col w-full gap-4">
       {/* Small screen layout: Title + Publish button on same line */}
@@ -30,18 +45,47 @@ export default function Header() {
         </div>
 
         <div className="flex gap-2">
-          <Link href="/signup" className="btn btn-outline btn-sm">
-            S'inscrire
-          </Link>
-          <Link href="/admin/tags" className="btn btn-outline btn-sm">
-            Admin Tags
-          </Link>
-          <Link href="/admin/categories" className="btn btn-outline btn-sm">
-            Admin Catégories
-          </Link>
-          <Link href="/newAd" className="btn btn-primary">
-            Publier
-          </Link>
+          {!loading && (
+            <>
+              {user ? (
+                <>
+                  <span className="text-sm self-center mr-2">
+                    Bonjour, {user.email}
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="btn btn-outline btn-sm"
+                  >
+                    Déconnexion
+                  </button>
+                  <Link href="/admin/tags" className="btn btn-outline btn-sm">
+                    Admin Tags
+                  </Link>
+                  <Link href="/admin/categories" className="btn btn-outline btn-sm">
+                    Admin Catégories
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/signup" className="btn btn-outline btn-sm">
+                    S'inscrire
+                  </Link>
+                  <Link href="/login" className="btn btn-outline btn-sm">
+                    Se connecter
+                  </Link>
+                  <Link href="/admin/tags" className="btn btn-outline btn-sm">
+                    Admin Tags
+                  </Link>
+                  <Link href="/admin/categories" className="btn btn-outline btn-sm">
+                    Admin Catégories
+                  </Link>
+                </>
+              )}
+              <Link href="/newAd" className="btn btn-primary">
+                Publier
+              </Link>
+            </>
+          )}
         </div>
       </div>
 

@@ -2,7 +2,7 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: "http://localhost:4001",
+  schema: "http://localhost:4001/",
   documents: ["**/*.{gql,graphql}"],
   ignoreNoDocuments: true, // for better experience with the watcher
   generates: {
