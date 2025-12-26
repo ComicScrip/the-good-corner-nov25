@@ -149,7 +149,7 @@ export default function Header() {
           <SearchInput inputClassName="w-sm" />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           {!loading && (
             <>
               {user ? (
