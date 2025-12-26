@@ -16,7 +16,6 @@ export default function Login() {
   const onSubmit = async (data: LoginInput) => {
     try {
       await login({ variables: { data } });
-      alert("Connexion réussie !");
       router.push("/");
     } catch (err) {
       console.error(err);
