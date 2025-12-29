@@ -1,35 +1,40 @@
-import { sign, verify } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { User } from "./entities/User";
 import env from "./env";
 import type { GraphQLContext } from "./types";
+
 
 export interface JWTPayload {
   userId: number;
 }
 
-export const createJWT = (user: User): string => {
+export async function createJWT(user: User): Promise<string> {
   const payload: JWTPayload = {
     userId: user.id,
   };
 
-  return sign(payload, env.JWT_SECRET, { expiresIn: "7d" });
-};
+  return jwt.sign(payload, env.JWT_SECRET, { expiresIn: "7d" });
+}
 
 export const verifyJWT = (token: string): JWTPayload | null => {
   try {
-    const payload = verify(token, env.JWT_SECRET) as JWTPayload;
+    const payload = jwt.verify(token, env.JWT_SECRET) as JWTPayload;
     return payload;
-  } catch (_error: any) {
+  } catch (_error) {
+    console.log({ _error });
+
     return null;
   }
 };
 
-export const startSession = async (context: GraphQLContext, user: User) => {
-  const token = createJWT(user);
+const cookieName = "authToken"
 
-  context.res.cookie("authToken", token, {
+export async function startSession(context: GraphQLContext, user: User) {
+  const token = await createJWT(user);
+
+  context.res.cookie(cookieName, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     sameSite: "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
@@ -37,10 +42,22 @@ export const startSession = async (context: GraphQLContext, user: User) => {
   return token;
 };
 
-export const getUserFromToken = async (token: string): Promise<User | null> => {
-  const payload = verifyJWT(token);
-  if (!payload) return null;
+export async function endSession(context: GraphQLContext) {
+  context.res.clearCookie(cookieName);
+}
 
-  const user = await User.findOne({ where: { id: payload.userId } });
-  return user || null;
+export async function getJWT(context: GraphQLContext): Promise<JWTPayload | null> {
+  const token = context.req.cookies?.authToken
+
+  if (!token) return null;
+  const payload = verifyJWT(token);
+
+  if (!payload) return null;
+  return payload
+}
+
+export async function getCurrentUser(context: GraphQLContext): Promise<User | null> {
+  const jwt = await getJWT(context)
+  if (jwt === null) return null
+  return User.findOne({ where: { id: jwt.userId } });
 };

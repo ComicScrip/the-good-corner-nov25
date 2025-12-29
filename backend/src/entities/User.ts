@@ -43,3 +43,20 @@ export class SignupInput {
   )
   password: string;
 }
+
+@InputType()
+export class LoginInput {
+  @Field()
+  @IsEmail({}, { message: "L'email doit être valide" })
+  email: string;
+
+  @Field()
+  @IsStrongPassword(
+    {},
+    {
+      message:
+        "Le mot de passe doit contenir au moins 8 caractères, dont une minuscule, une majuscule, un chiffre et un caractère spécial",
+    },
+  )
+  password: string;
+}
