@@ -10,15 +10,15 @@ export default function Header() {
     fetchPolicy: "cache-and-network",
   });
   const user = data?.me || null;
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const [logout] = useLogoutMutation();
   const router = useRouter();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
       await logout();
       await refetch();
-      setIsMobileMenuOpen(false);
       router.push("/");
     } catch (err) {
       console.error("Logout error:", err);

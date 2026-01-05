@@ -55,6 +55,7 @@ export default class UserResolver {
     return startSession(context, user);
   }
 
+
   @Mutation(() => Boolean)
   async logout(@Ctx() context: GraphQLContext) {
     endSession(context);

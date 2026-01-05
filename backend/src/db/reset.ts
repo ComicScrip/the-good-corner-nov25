@@ -1,5 +1,6 @@
 import { unlink } from "node:fs/promises";
 import { resolve } from "node:path";
+import { hash } from "argon2";
 import { Ad } from "../entities/Ad";
 import { Category } from "../entities/Category";
 import { Tag } from "../entities/Tag";
@@ -74,6 +75,11 @@ async function main() {
       "https://contents.mediadecathlon.com/p2332580/k$7fd9d6e45cc872a8637c81772dbb6e56/sq/ski-alpin-homme-avec-fixation-rossignol-react-6.jpg?format=auto&f=969x969",
     location: "Lyon",
   });
+
+  await User.create({
+    email: "dave.lopper@app.com",
+    hashedPassword: await hash("SuperP@ssW0rd!"),
+  }).save();
 
   const computerCat = await Category.create({ name: "informatique" }).save();
   const voitureCat = await Category.create({ name: "automobile" }).save();

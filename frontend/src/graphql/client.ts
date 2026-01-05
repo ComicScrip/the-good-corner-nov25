@@ -9,7 +9,7 @@ const client = new ApolloClient({
   link: new HttpLink({
     uri: uri || "/",
     credentials: "include", // Important: Include cookies with requests
-  }),
+  })
 });
 
 export default client;
