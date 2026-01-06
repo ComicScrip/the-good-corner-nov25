@@ -30,6 +30,9 @@ export default function Header() {
         </div>
 
         <div className="flex gap-2">
+          <Link href="/signup" className="btn btn-outline btn-sm">
+            S'inscrire
+          </Link>
           <Link href="/admin/tags" className="btn btn-outline btn-sm">
             Admin Tags
           </Link>

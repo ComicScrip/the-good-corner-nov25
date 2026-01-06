@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { Ad } from "../entities/Ad";
 import { Category } from "../entities/Category";
 import { Tag } from "../entities/Tag";
+import { User } from "../entities/User";
 import db from "./index";
 
 export async function clearDB() {

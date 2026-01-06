@@ -8,7 +8,7 @@ interface FieldProps {
     name?: string;
     onChange?: ChangeEventHandler<HTMLInputElement>;
     placeholder?: string;
-    type?: "number" | "text";
+    type?: "number" | "text" | "password" | "email";
     required?: boolean;
   };
   error?: string;
