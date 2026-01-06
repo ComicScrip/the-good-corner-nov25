@@ -13,6 +13,7 @@ import {
 import { ObjectId } from "../types";
 import { Category } from "./Category";
 import { Tag } from "./Tag";
+import { User } from "./User";
 
 @ObjectType()
 @Entity()
@@ -53,6 +54,10 @@ export class Ad extends BaseEntity {
   @Field()
   @Column()
   pictureUrl: string;
+
+  @Field(() => User)
+  @ManyToOne(() => User)
+  author: User
 }
 
 @InputType()

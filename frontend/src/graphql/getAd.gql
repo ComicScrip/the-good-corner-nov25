@@ -15,5 +15,8 @@ query Ad($adId: Int!) {
       name
     }
     pictureUrl
+    author {
+      id
+    }
   }
 }

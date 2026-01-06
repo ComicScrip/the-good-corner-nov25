@@ -77,20 +77,25 @@ export default function Header() {
                 <button type="button" className="btn btn-outline w-full" onClick={handleLogout}>
                   Déconnexion
                 </button>
-                <Link
-                  href="/admin/tags"
-                  className="btn btn-outline w-full"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Admin Tags
-                </Link>
-                <Link
-                  href="/admin/categories"
-                  className="btn btn-outline w-full"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Admin Catégories
-                </Link>
+
+                {user.role === "admin" && (
+                  <>
+                    <Link
+                      href="/admin/tags"
+                      className="btn btn-outline w-full"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Admin Tags
+                    </Link>
+                    <Link
+                      href="/admin/categories"
+                      className="btn btn-outline w-full"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Admin Catégories
+                    </Link>
+                  </>
+                )}
               </div>
             ) : (
               <div className="space-y-2">
@@ -114,20 +119,6 @@ export default function Header() {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Se connecter
-                </Link>
-                <Link
-                  href="/admin/tags"
-                  className="btn btn-outline w-full"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Admin Tags
-                </Link>
-                <Link
-                  href="/admin/categories"
-                  className="btn btn-outline w-full"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Admin Catégories
                 </Link>
               </div>
             ))}
@@ -162,12 +153,17 @@ export default function Header() {
                   <button type="button" onClick={handleLogout} className="btn btn-outline btn-sm">
                     Déconnexion
                   </button>
-                  <Link href="/admin/tags" className="btn btn-outline btn-sm">
-                    Admin Tags
-                  </Link>
-                  <Link href="/admin/categories" className="btn btn-outline btn-sm">
-                    Admin Catégories
-                  </Link>
+
+                  {user.role === "admin" && (
+                    <>
+                      <Link href="/admin/tags" className="btn btn-outline btn-sm">
+                        Admin Tags
+                      </Link>
+                      <Link href="/admin/categories" className="btn btn-outline btn-sm">
+                        Admin Catégories
+                      </Link>
+                    </>
+                  )}
                 </>
               ) : (
                 <>
@@ -176,12 +172,6 @@ export default function Header() {
                   </Link>
                   <Link href="/login" className="btn btn-outline btn-sm">
                     Se connecter
-                  </Link>
-                  <Link href="/admin/tags" className="btn btn-outline btn-sm">
-                    Admin Tags
-                  </Link>
-                  <Link href="/admin/categories" className="btn btn-outline btn-sm">
-                    Admin Catégories
                   </Link>
                 </>
               )}

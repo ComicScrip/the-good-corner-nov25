@@ -1,6 +1,7 @@
 import { GraphQLError } from "graphql";
-import { Tag, NewTagInput, UpdateTagInput } from "../entities/Tag";
-import { Query, Arg, Mutation, Resolver, Int } from "type-graphql";
+import { Arg, Authorized, Int, Mutation, Query, Resolver } from "type-graphql";
+import { NewTagInput, Tag, UpdateTagInput } from "../entities/Tag";
+import { UserRole } from "../entities/User";
 
 @Resolver()
 export default class TagResolver {
@@ -9,7 +10,9 @@ export default class TagResolver {
     return Tag.find();
   }
 
-  @Mutation(() => Tag) async createTag(
+  @Authorized([UserRole.Admin])
+  @Mutation(() => Tag)
+  async createTag(
     @Arg("data", () => NewTagInput, { validate: true })
     data: NewTagInput,
   ) {
@@ -18,6 +21,7 @@ export default class TagResolver {
     return newTag.save();
   }
 
+  @Authorized([UserRole.Admin])
   @Mutation(() => Tag) async updateTag(
     @Arg("id", () => Int) id: number,
     @Arg("data", () => UpdateTagInput, { validate: true })
@@ -36,6 +40,7 @@ export default class TagResolver {
     return tagToUpdate.save();
   }
 
+  @Authorized([UserRole.Admin])
   @Mutation(() => Boolean)
   async deleteTag(@Arg("id", () => Int) id: number) {
     const tagToDelete = await Tag.findOne({

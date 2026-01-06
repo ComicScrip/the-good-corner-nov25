@@ -8,6 +8,11 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 
+export enum UserRole {
+  Admin = "admin",
+  Visitor = "visitor",
+}
+
 @ObjectType()
 @Entity()
 export class User extends BaseEntity {
@@ -25,6 +30,10 @@ export class User extends BaseEntity {
   @Field()
   @CreateDateColumn()
   createdAt: Date;
+
+  @Field()
+  @Column({ enum: UserRole, default: UserRole.Visitor })
+  role: UserRole;
 }
 
 @InputType()

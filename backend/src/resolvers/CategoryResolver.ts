@@ -1,10 +1,11 @@
 import { GraphQLError } from "graphql";
-import { Arg, Int, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Authorized, Int, Mutation, Query, Resolver } from "type-graphql";
 import {
   Category,
   NewCategoryInput,
   UpdateCategoryInput,
 } from "../entities/Category";
+import { UserRole } from "../entities/User";
 
 @Resolver()
 export default class CategoryResolver {
@@ -13,6 +14,7 @@ export default class CategoryResolver {
     return Category.find();
   }
 
+  @Authorized([UserRole.Admin])
   @Mutation(() => Category)
   async createCategory(
     @Arg("data", () => NewCategoryInput, { validate: true })
@@ -27,6 +29,7 @@ export default class CategoryResolver {
     });
   }
 
+  @Authorized([UserRole.Admin])
   @Mutation(() => Category)
   async updateCategory(
     @Arg("id", () => Int) id: number,
@@ -47,6 +50,7 @@ export default class CategoryResolver {
     return categoryToUpdate;
   }
 
+  @Authorized([UserRole.Admin])
   @Mutation(() => String)
   async deleteCategory(@Arg("id", () => Int) id: number) {
     const category = await Category.findOne({

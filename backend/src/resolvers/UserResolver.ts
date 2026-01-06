@@ -64,6 +64,11 @@ export default class UserResolver {
 
   @Query(() => User, { nullable: true })
   async me(@Ctx() context: GraphQLContext) {
-    return getCurrentUser(context);
+    try {
+      return await getCurrentUser(context)
+    } catch (e) {
+      console.error(e)
+    }
+    return null
   }
 }
