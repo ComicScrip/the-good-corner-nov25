@@ -17,6 +17,14 @@ export async function createJWT(user: User): Promise<string> {
   return jwt.sign(payload, env.JWT_SECRET, { expiresIn: "7d" });
 }
 
+export const verifyJWT = (token: string): JWTPayload | null => {
+  try {
+    return jwt.verify(token, env.JWT_SECRET) as JWTPayload;
+  } catch (_error) {
+    return null;
+  }
+};
+
 const cookieName = "authToken";
 
 export async function startSession(context: GraphQLContext, user: User) {
@@ -35,14 +43,6 @@ export async function startSession(context: GraphQLContext, user: User) {
 export async function endSession(context: GraphQLContext) {
   context.res.clearCookie(cookieName);
 }
-
-export const verifyJWT = (token: string): JWTPayload | null => {
-  try {
-    return jwt.verify(token, env.JWT_SECRET) as JWTPayload;
-  } catch (_error) {
-    return null;
-  }
-};
 
 export async function getJWT(
   context: GraphQLContext,
