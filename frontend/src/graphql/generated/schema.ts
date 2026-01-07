@@ -22,6 +22,7 @@ export type Scalars = {
 
 export type Ad = {
   __typename?: 'Ad';
+  author: User;
   category: Category;
   createdAt: Scalars['DateTimeISO']['output'];
   description: Scalars['String']['output'];
@@ -198,6 +199,7 @@ export type User = {
   createdAt: Scalars['DateTimeISO']['output'];
   email: Scalars['String']['output'];
   id: Scalars['Int']['output'];
+  role: Scalars['String']['output'];
 };
 
 export type CategoriesQueryVariables = Exact<{ [key: string]: never; }>;
@@ -252,7 +254,7 @@ export type AdQueryVariables = Exact<{
 }>;
 
 
-export type AdQuery = { __typename?: 'Query', ad: { __typename?: 'Ad', id: number, title: string, price: number, description: string, createdAt: any, location: string, pictureUrl: string, category: { __typename?: 'Category', id: number, name: string }, tags: Array<{ __typename?: 'Tag', id: number, name: string }> } };
+export type AdQuery = { __typename?: 'Query', ad: { __typename?: 'Ad', id: number, title: string, price: number, description: string, createdAt: any, location: string, pictureUrl: string, category: { __typename?: 'Category', id: number, name: string }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, author: { __typename?: 'User', id: number } } };
 
 export type LoginMutationVariables = Exact<{
   data: LoginInput;
@@ -269,7 +271,7 @@ export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 export type ProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ProfileQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, email: string, createdAt: any } | null };
+export type ProfileQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, email: string, createdAt: any, role: string } | null };
 
 export type RecentAdsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -576,6 +578,9 @@ export const AdDocument = gql`
       name
     }
     pictureUrl
+    author {
+      id
+    }
   }
 }
     `;
@@ -679,6 +684,7 @@ export const ProfileDocument = gql`
     id
     email
     createdAt
+    role
   }
 }
     `;

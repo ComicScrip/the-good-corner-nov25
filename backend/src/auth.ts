@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
+import type { AuthChecker } from "type-graphql";
 import { User } from "./entities/User";
 import env from "./env";
-import { UnauthenticatedError } from "./errors";
+import { ForbiddenError, UnauthenticatedError } from "./errors";
 import type { GraphQLContext } from "./types";
 
 export interface JWTPayload {
@@ -60,3 +61,13 @@ export async function getCurrentUser(context: GraphQLContext): Promise<User> {
   if (currentUser === null) throw new UnauthenticatedError();
   return currentUser;
 }
+
+export const authChecker: AuthChecker<GraphQLContext> = async (
+  { context },
+  roles,
+) => {
+  const currentUser = await getCurrentUser(context);
+  if (roles.length !== 0 && !roles.includes(currentUser.role.toString()))
+    throw new ForbiddenError();
+  return true;
+};

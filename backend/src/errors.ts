@@ -7,3 +7,13 @@ export class UnauthenticatedError extends GraphQLError {
     })
   }
 }
+
+export class ForbiddenError extends GraphQLError {
+  constructor(params?: { message?: string }) {
+    super(params?.message || "You are not allowed to perform this operation", {
+      extensions: { code: "FORBIDDEN", http: { status: 403 } },
+    })
+  }
+}
+
+

@@ -2,20 +2,34 @@ import { MapPinIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import Loader from "@/components/Loader";
-import { useAdQuery, useDeleteAdMutation, useRecentAdsQuery } from "@/graphql/generated/schema";
+import {
+  useAdQuery,
+  useDeleteAdMutation,
+  useProfileQuery,
+  useRecentAdsQuery,
+} from "@/graphql/generated/schema";
 
 export default function AdDetails() {
+  const { data: profileData } = useProfileQuery({
+    fetchPolicy: "cache-and-network",
+  });
+  const currentUser = profileData?.me || null;
+
   const { refetch } = useRecentAdsQuery();
   const router = useRouter();
   const { id } = router.query;
 
   const { data } = useAdQuery({
     variables: { adId: parseInt(id as string, 10) },
+    skip: !router.isReady,
   });
 
   const [deleteAd] = useDeleteAdMutation();
 
   const ad = data?.ad;
+
+  const currentUserHasWriteAccess =
+    currentUser?.role === "admin" || ad?.author.id === currentUser?.id;
 
   return (
     <Layout pageTitle={ad?.title ? `${ad.title} - TGC` : "The Good Corner"}>
@@ -54,32 +68,39 @@ export default function AdDetails() {
               </div>
 
               <div className="flex gap-4">
-                <PencilIcon
-                  className="cursor-pointer text-blue-600 hover:text-blue-800"
-                  width={24}
-                  height={24}
-                  onClick={() => router.push(`/ads/${id}/edit`)}
-                  title="Modifier l'annonce"
-                />
-                <TrashIcon
-                  className="cursor-pointer text-red-600 hover:text-red-800"
-                  width={24}
-                  height={24}
-                  onClick={async () => {
-                    if (confirm("etes vous bien certain.e de vouloir supprimer cette annonce ?")) {
-                      try {
-                        await deleteAd({
-                          variables: { deleteAdId: parseInt(id as string, 10) },
-                        });
-                        await refetch();
-                        router.push("/");
-                      } catch (err) {
-                        console.error(err);
+                {currentUserHasWriteAccess && (
+                  <PencilIcon
+                    className="cursor-pointer text-blue-600 hover:text-blue-800"
+                    width={24}
+                    height={24}
+                    onClick={() => router.push(`/ads/${id}/edit`)}
+                    title="Modifier l'annonce"
+                  />
+                )}
+
+                {currentUserHasWriteAccess && (
+                  <TrashIcon
+                    className="cursor-pointer text-red-600 hover:text-red-800"
+                    width={24}
+                    height={24}
+                    onClick={async () => {
+                      if (
+                        confirm("etes vous bien certain.e de vouloir supprimer cette annonce ?")
+                      ) {
+                        try {
+                          await deleteAd({
+                            variables: { deleteAdId: parseInt(id as string, 10) },
+                          });
+                          await refetch();
+                          router.push("/");
+                        } catch (err) {
+                          console.error(err);
+                        }
                       }
-                    }
-                  }}
-                  title="Supprimer l'annonce"
-                />
+                    }}
+                    title="Supprimer l'annonce"
+                  />
+                )}
               </div>
             </div>
           )}

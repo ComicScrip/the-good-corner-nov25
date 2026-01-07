@@ -3,5 +3,6 @@ query profile {
     id
     email
     createdAt
+    role
   }
 }
