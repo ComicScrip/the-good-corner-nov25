@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import type { AuthChecker } from "type-graphql";
-import { ForbiddenError, UnauthenticatedError } from "./entities/errors";
 import { User } from "./entities/User";
 import env from "./env";
+import { ForbiddenError, UnauthenticatedError } from "./errors";
 import type { GraphQLContext } from "./types";
 
 export interface JWTPayload {
@@ -44,7 +44,9 @@ export const verifyJWT = (token: string): JWTPayload | null => {
   }
 };
 
-export async function getJWT(context: GraphQLContext): Promise<JWTPayload | null> {
+export async function getJWT(
+  context: GraphQLContext,
+): Promise<JWTPayload | null> {
   const token = context.req.cookies?.[cookieName];
 
   if (!token) return null;
@@ -58,7 +60,7 @@ export async function getCurrentUser(context: GraphQLContext): Promise<User> {
   const jwt = await getJWT(context);
   if (jwt === null) throw new UnauthenticatedError();
   const currentUser = await User.findOne({ where: { id: jwt.userId } });
-  if (currentUser === null) throw new UnauthenticatedError()
+  if (currentUser === null) throw new UnauthenticatedError();
   return currentUser;
 }
 
@@ -68,8 +70,6 @@ export const authChecker: AuthChecker<GraphQLContext> = async (
 ) => {
   const currentUser = await getCurrentUser(context);
   if (roles.length !== 0 && !roles.includes(currentUser.role.toString()))
-    throw new ForbiddenError()
-  return true
+    throw new ForbiddenError();
+  return true;
 };
-
-

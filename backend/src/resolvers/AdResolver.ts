@@ -14,8 +14,8 @@ import {
 import { Like } from "typeorm";
 import { getCurrentUser } from "../auth";
 import { Ad, NewAdInput, UpdateAdInput } from "../entities/Ad";
-import { ForbiddenError } from "../entities/errors";
 import { UserRole } from "../entities/User";
+import { ForbiddenError } from "../errors";
 import type { GraphQLContext } from "../types";
 
 @ArgsType()
@@ -103,7 +103,10 @@ export default class AdResolver {
         extensions: { code: "NOT_FOUND", http: { status: 404 } },
       });
 
-    if (currentUser.role !== UserRole.Admin && currentUser.id !== adToUpdate.author.id)
+    if (
+      currentUser.role !== UserRole.Admin &&
+      currentUser.id !== adToUpdate.author.id
+    )
       throw new ForbiddenError();
 
     Object.assign(adToUpdate, data);
@@ -116,7 +119,10 @@ export default class AdResolver {
 
   @Authorized()
   @Mutation(() => String)
-  async deleteAd(@Arg("id", () => Int) id: number, @Ctx() context: GraphQLContext) {
+  async deleteAd(
+    @Arg("id", () => Int) id: number,
+    @Ctx() context: GraphQLContext,
+  ) {
     const ad = await Ad.findOne({
       where: { id },
       relations: { tags: true, category: true, author: true },
@@ -134,5 +140,3 @@ export default class AdResolver {
     return "ad deleted !";
   }
 }
-
-
