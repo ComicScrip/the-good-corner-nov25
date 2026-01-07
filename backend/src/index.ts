@@ -1,23 +1,22 @@
 import "reflect-metadata";
-
-import { ApolloServer } from "@apollo/server";
-import { startStandaloneServer } from "@apollo/server/standalone";
-import { buildSchema } from "type-graphql";
+import { fastifyApolloHandler } from "@as-integrations/fastify";
+import { initApollo } from "./apollo";
 import db from "./db";
 import env from "./env";
-import AdResolver from "./resolvers/AdResolver";
-import CategoryResolver from "./resolvers/CategoryResolver";
-import TagResolver from "./resolvers/TagResolver";
-import UserResolver from "./resolvers/UserResolver";
+import { initFastify } from "./fastify";
 
 async function start() {
   await db.initialize();
-  const schema = await buildSchema({ resolvers: [AdResolver, CategoryResolver, TagResolver, UserResolver] });
-  const server = new ApolloServer({ schema });
-  const { url } = await startStandaloneServer(server, {
-    listen: { port: env.GRAPHQL_SERVER_PORT },
-  });
-  console.log(`graphql server ready on ${url}`);
+  const fastify = await initFastify();
+  const apollo = await initApollo(fastify);
+  await apollo.start();
+
+  fastify.all("/", fastifyApolloHandler(apollo, {
+    context: async (req, res) => ({ res, req }),
+  }));
+
+  await fastify.listen({ port: env.GRAPHQL_SERVER_PORT });
+  console.log(`✨ server ready ! http://localhost:${env.GRAPHQL_SERVER_PORT}`);
 }
 
 start();

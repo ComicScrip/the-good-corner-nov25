@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 interface SearchInputProps {
   className?: string;
   inputClassName?: string;
+  noInputClass?: boolean;
 }
 
 export default function SearchInput({
   className = "",
   inputClassName = "w-full",
+  noInputClass = false,
 }: SearchInputProps) {
   const router = useRouter();
   const [searchValue, setSearchValue] = useState("");
@@ -30,8 +32,8 @@ export default function SearchInput({
 
   return (
     <form className={className} onSubmit={handleSubmit}>
-      <label className="input">
-        <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <label className={noInputClass ? "flex items-center gap-2 w-full bg-white border border-gray-300 rounded-lg px-3 py-2" : "input w-full"}>
+        <svg className="h-[1em] opacity-50 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <title>search</title>
           <g
             strokeLinejoin="round"
@@ -45,7 +47,7 @@ export default function SearchInput({
           </g>
         </svg>
         <input
-          className={inputClassName}
+          className={noInputClass ? "flex-1 outline-none bg-transparent" : inputClassName}
           type="search"
           placeholder="Rechercher une annonce"
           name="titleContains"

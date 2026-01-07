@@ -8,6 +8,8 @@
     "skipLibCheck": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    // https://github.com/fastify/fastify-cookie/issues/38#issuecomment-1710139153
+    "preserveSymlinks": true
   }
 }

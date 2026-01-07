@@ -6,7 +6,10 @@ console.log({ uri });
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
-  link: new HttpLink({ uri: uri || "/graphql" }),
+  link: new HttpLink({
+    uri: uri || "/",
+    credentials: "include", // Important: Include cookies with requests
+  })
 });
 
 export default client;
