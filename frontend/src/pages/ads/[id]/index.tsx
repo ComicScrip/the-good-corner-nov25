@@ -15,8 +15,6 @@ export default function AdDetails() {
   });
   const currentUser = profileData?.me || null;
 
-  console.log({ currentUser });
-
   const { refetch } = useRecentAdsQuery();
   const router = useRouter();
   const { id } = router.query;
