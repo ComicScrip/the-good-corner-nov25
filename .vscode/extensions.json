@@ -1,10 +1,10 @@
 {
   "recommendations": [
-    "bradlc.vscode-tailwindcss",
-    "biomejs.biome",
+    "fronterior.biome-monorepo",
     "mikestead.dotenv",
     "oderwat.indent-rainbow",
     "YoavBls.pretty-ts-errors",
+    "bradlc.vscode-tailwindcss",
     "csstools.postcss"
   ]
 }

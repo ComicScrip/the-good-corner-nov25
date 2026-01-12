@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { Category, useUpdateCategoryMutation, useDeleteCategoryMutation } from "@/graphql/generated/schema";
+import {
+  Category,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
+} from "@/graphql/generated/schema";
 
 interface CategoryTableProps {
   categories: Category[];
@@ -50,8 +54,8 @@ export default function CategoryTable({ categories, onRefetch }: CategoryTablePr
         await updateCategory({
           variables: {
             updateCategoryId: editingId,
-            data: { name: trimmedValue }
-          }
+            data: { name: trimmedValue },
+          },
         });
         onRefetch();
         setEditingId(null);
@@ -113,9 +117,7 @@ export default function CategoryTable({ categories, onRefetch }: CategoryTablePr
                       }`}
                       autoFocus
                     />
-                    {validationError && (
-                      <div className="text-error text-xs">{validationError}</div>
-                    )}
+                    {validationError && <div className="text-error text-xs">{validationError}</div>}
                   </div>
                 ) : (
                   <span
@@ -137,10 +139,7 @@ export default function CategoryTable({ categories, onRefetch }: CategoryTablePr
                       >
                         Sauver
                       </button>
-                      <button
-                        onClick={handleCancel}
-                        className="btn btn-ghost btn-xs"
-                      >
+                      <button onClick={handleCancel} className="btn btn-ghost btn-xs">
                         Annuler
                       </button>
                     </>
@@ -167,9 +166,7 @@ export default function CategoryTable({ categories, onRefetch }: CategoryTablePr
         </tbody>
       </table>
       {categories.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          Aucune catégorie trouvée
-        </div>
+        <div className="text-center py-8 text-gray-500">Aucune catégorie trouvée</div>
       )}
     </div>
   );

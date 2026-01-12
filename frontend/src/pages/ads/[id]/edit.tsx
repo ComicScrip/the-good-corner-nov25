@@ -18,15 +18,17 @@ export default function EditAd() {
   const ad = data?.ad;
 
   // Transform ad data to match form format
-  const defaultValues = ad ? {
-    title: ad.title,
-    location: ad.location,
-    price: ad.price,
-    pictureUrl: ad.pictureUrl,
-    category: { id: ad.category.id },
-    tags: ad.tags.map(tag => ({ id: tag.id })),
-    description: ad.description || "",
-  } : undefined;
+  const defaultValues = ad
+    ? {
+        title: ad.title,
+        location: ad.location,
+        price: ad.price,
+        pictureUrl: ad.pictureUrl,
+        category: { id: ad.category.id },
+        tags: ad.tags.map((tag) => ({ id: tag.id })),
+        description: ad.description || "",
+      }
+    : undefined;
 
   if (loadingAd || !ad) {
     return (
@@ -48,8 +50,8 @@ export default function EditAd() {
               await updateAd({
                 variables: {
                   updateAdId: parseInt(id as string, 10),
-                  data: formData
-                }
+                  data: formData,
+                },
               });
               router.push(`/ads/${id}`);
             } catch (err) {

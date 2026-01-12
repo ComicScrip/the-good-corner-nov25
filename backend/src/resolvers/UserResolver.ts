@@ -1,12 +1,6 @@
 import { hash, verify } from "argon2";
 import { GraphQLError } from "graphql";
-import {
-  Arg,
-  Ctx,
-  Mutation,
-  Query,
-  Resolver,
-} from "type-graphql";
+import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { endSession, getCurrentUser, startSession } from "../auth";
 import { LoginInput, SignupInput, User } from "../entities/User";
 import type { GraphQLContext } from "../types";
@@ -55,7 +49,6 @@ export default class UserResolver {
     return startSession(context, user);
   }
 
-
   @Mutation(() => Boolean)
   async logout(@Ctx() context: GraphQLContext) {
     endSession(context);
@@ -67,7 +60,7 @@ export default class UserResolver {
     try {
       return await getCurrentUser(context);
     } catch (_e) {
-      return null
+      return null;
     }
   }
 }

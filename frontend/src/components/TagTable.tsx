@@ -50,8 +50,8 @@ export default function TagTable({ tags, onRefetch }: TagTableProps) {
         await updateTag({
           variables: {
             updateTagId: editingId,
-            data: { name: trimmedValue }
-          }
+            data: { name: trimmedValue },
+          },
         });
         onRefetch();
         setEditingId(null);
@@ -113,9 +113,7 @@ export default function TagTable({ tags, onRefetch }: TagTableProps) {
                       }`}
                       autoFocus
                     />
-                    {validationError && (
-                      <div className="text-error text-xs">{validationError}</div>
-                    )}
+                    {validationError && <div className="text-error text-xs">{validationError}</div>}
                   </div>
                 ) : (
                   <span
@@ -137,25 +135,16 @@ export default function TagTable({ tags, onRefetch }: TagTableProps) {
                       >
                         Sauver
                       </button>
-                      <button
-                        onClick={handleCancel}
-                        className="btn btn-ghost btn-xs"
-                      >
+                      <button onClick={handleCancel} className="btn btn-ghost btn-xs">
                         Annuler
                       </button>
                     </>
                   ) : (
                     <>
-                      <button
-                        onClick={() => handleEdit(tag)}
-                        className="btn btn-primary btn-xs"
-                      >
+                      <button onClick={() => handleEdit(tag)} className="btn btn-primary btn-xs">
                         Éditer
                       </button>
-                      <button
-                        onClick={() => handleDelete(tag.id)}
-                        className="btn btn-error btn-xs"
-                      >
+                      <button onClick={() => handleDelete(tag.id)} className="btn btn-error btn-xs">
                         Supprimer
                       </button>
                     </>
@@ -166,11 +155,7 @@ export default function TagTable({ tags, onRefetch }: TagTableProps) {
           ))}
         </tbody>
       </table>
-      {tags.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          Aucun tag trouvé
-        </div>
-      )}
+      {tags.length === 0 && <div className="text-center py-8 text-gray-500">Aucun tag trouvé</div>}
     </div>
   );
 }
