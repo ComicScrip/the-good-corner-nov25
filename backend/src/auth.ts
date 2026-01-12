@@ -44,7 +44,9 @@ export async function endSession(context: GraphQLContext) {
   context.res.clearCookie(cookieName);
 }
 
-export async function getJWT(context: GraphQLContext): Promise<JWTPayload | null> {
+export async function getJWT(
+  context: GraphQLContext,
+): Promise<JWTPayload | null> {
   const token = context.req.cookies?.[cookieName];
 
   if (!token) return null;

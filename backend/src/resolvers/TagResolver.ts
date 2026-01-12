@@ -22,7 +22,8 @@ export default class TagResolver {
   }
 
   @Authorized([UserRole.Admin])
-  @Mutation(() => Tag) async updateTag(
+  @Mutation(() => Tag)
+  async updateTag(
     @Arg("id", () => Int) id: number,
     @Arg("data", () => UpdateTagInput, { validate: true })
     data: UpdateTagInput,

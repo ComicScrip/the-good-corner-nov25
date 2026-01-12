@@ -32,8 +32,18 @@ export default function SearchInput({
 
   return (
     <form className={className} onSubmit={handleSubmit}>
-      <label className={noInputClass ? "flex items-center gap-2 w-full bg-white border border-gray-300 rounded-lg px-3 py-2" : "input w-full"}>
-        <svg className="h-[1em] opacity-50 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <label
+        className={
+          noInputClass
+            ? "flex items-center gap-2 w-full bg-white border border-gray-300 rounded-lg px-3 py-2"
+            : "input w-full"
+        }
+      >
+        <svg
+          className="h-[1em] opacity-50 flex-shrink-0"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+        >
           <title>search</title>
           <g
             strokeLinejoin="round"

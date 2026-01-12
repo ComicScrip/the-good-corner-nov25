@@ -57,7 +57,7 @@ export class Ad extends BaseEntity {
 
   @Field(() => User)
   @ManyToOne(() => User)
-  author: User
+  author: User;
 }
 
 @InputType()
