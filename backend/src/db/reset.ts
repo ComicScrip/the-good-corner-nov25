@@ -46,7 +46,7 @@ async function main() {
     title: "Clavier logitech",
     description:
       "Clavier Bluetooth® fin et minimaliste avec des touches personnalisables.",
-    price: 30,
+    price: 30.55,
     pictureUrl:
       "https://resource.logitech.com/w_800,c_lpad,ar_16:9,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/pebble-keys-2-k380s/gallery/pebble-keys-2-k380s-top-tonal-graphite-gallery-ch.png?v=1",
     location: "Paris",
