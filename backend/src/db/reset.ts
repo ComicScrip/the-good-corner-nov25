@@ -1,5 +1,3 @@
-import { unlink } from "node:fs/promises";
-import { resolve } from "node:path";
 import { hash } from "argon2";
 import { Ad } from "../entities/Ad";
 import { Category } from "../entities/Category";
@@ -8,12 +6,15 @@ import { User, UserRole } from "../entities/User";
 import db from "./index";
 
 export async function clearDB() {
-  await unlink(resolve("src/db/the_good_corner.sqlite"));
+  const runner = db.createQueryRunner()
+  const tableDroppings = db.entityMetadatas.map(entity => runner.query(`DROP TABLE IF EXISTS "${entity.tableName}" CASCADE`))
+  await Promise.all(tableDroppings)
+  await db.synchronize()
 }
 
 async function main() {
-  await clearDB().catch(console.error);
   await db.initialize();
+  await clearDB()
 
   const visitor = await User.create({
     email: "dave.lopper@app.com",

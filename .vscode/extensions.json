@@ -5,6 +5,7 @@
     "oderwat.indent-rainbow",
     "YoavBls.pretty-ts-errors",
     "bradlc.vscode-tailwindcss",
-    "csstools.postcss"
+    "csstools.postcss",
+    "ms-azuretools.vscode-docker"
   ]
 }
