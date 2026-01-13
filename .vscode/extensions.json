@@ -6,7 +6,6 @@
     "YoavBls.pretty-ts-errors",
     "bradlc.vscode-tailwindcss",
     "csstools.postcss",
-    "ms-azuretools.vscode-docker",
-    "ric-v.postgres-explorer"
+    "ms-azuretools.vscode-docker"
   ]
 }

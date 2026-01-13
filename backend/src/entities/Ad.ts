@@ -27,7 +27,7 @@ export class Ad extends BaseEntity {
   title: string;
 
   @Field()
-  @Column({ type: 'float' })
+  @Column()
   price: number;
 
   @Field()
