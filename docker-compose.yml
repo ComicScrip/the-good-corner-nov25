@@ -1,0 +1,15 @@
+services:
+  db:
+    stop_grace_period: 1s
+    image: postgres:18.1-alpine3.23
+    # TODO: change this in production
+    environment:
+      PGUSER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 1s
+      timeout: 2s
+      retries: 10
+    ports:
+      - 5432:5432

@@ -1,8 +1,13 @@
 import { DataSource } from "typeorm";
+import env from "../env";
 
 export default new DataSource({
-  type: "sqlite",
-  database: "src/db/the_good_corner.sqlite",
+  type: "postgres",
+  host: env.DB_HOST,
+  username: env.DB_USER,
+  password: env.DB_PASS,
+  port: env.DB_PORT,
+  database: env.DB_NAME,
   entities: ["src/entities/*.ts"],
   synchronize: true,
   //logging: true
