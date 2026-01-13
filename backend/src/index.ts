@@ -18,7 +18,7 @@ async function start() {
     }),
   );
 
-  await fastify.listen({ port: env.GRAPHQL_SERVER_PORT, host: "0.0.0.0" });
+  await fastify.listen({ port: env.GRAPHQL_SERVER_PORT });
   console.log(`✨ server ready ! http://localhost:${env.GRAPHQL_SERVER_PORT}`);
 }
 
