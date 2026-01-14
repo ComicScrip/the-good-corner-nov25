@@ -14,6 +14,7 @@ services:
     ports:
       - 5432:5432
   backend:
+    stop_grace_period: 1s
     build: backend
     depends_on:
       db:
@@ -24,3 +25,10 @@ services:
       - 4000:4000
     volumes:
       - ./backend/src:/app/src
+  frontend:
+    stop_grace_period: 1s
+    build: frontend
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend/src:/app/src
