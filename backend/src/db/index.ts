@@ -17,6 +17,7 @@ export async function clearDB() {
   const runner = db.createQueryRunner()
   const tableDroppings = db.entityMetadatas.map(entity => runner.query(`DROP TABLE IF EXISTS "${entity.tableName}" CASCADE`))
   await Promise.all(tableDroppings)
+  await runner.release()
   await db.synchronize()
 }
 

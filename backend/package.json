@@ -7,7 +7,8 @@
     "dev": "ts-node-dev src/index.ts",
     "resetDB": "ts-node src/db/reset.ts",
     "format": "biome format --write",
-    "testDB": "docker compose -f docker-compose.integration-tests.yml up testDB --wait"
+    "testDB": "docker compose -f docker-compose.integration-tests.yml up testDB --wait",
+    "test": "jest --runInBand"
   },
   "repository": {
     "type": "git",
