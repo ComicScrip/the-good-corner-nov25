@@ -3,14 +3,9 @@ import { Ad } from "../entities/Ad";
 import { Category } from "../entities/Category";
 import { Tag } from "../entities/Tag";
 import { User, UserRole } from "../entities/User";
-import db from "./index";
+import db, { clearDB } from "./index";
 
-export async function clearDB() {
-  const runner = db.createQueryRunner()
-  const tableDroppings = db.entityMetadatas.map(entity => runner.query(`DROP TABLE IF EXISTS "${entity.tableName}" CASCADE`))
-  await Promise.all(tableDroppings)
-  await db.synchronize()
-}
+
 
 async function main() {
   await db.initialize();

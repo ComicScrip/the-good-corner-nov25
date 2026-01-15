@@ -47,7 +47,8 @@ export async function endSession(context: GraphQLContext) {
 export async function getJWT(
   context: GraphQLContext,
 ): Promise<JWTPayload | null> {
-  const token = context.req.cookies?.[cookieName];
+  const tokenInAuthHeaders = context.req?.headers?.authorization?.split(" ")[1];
+  const token = tokenInAuthHeaders ?? context.req?.cookies?.[cookieName];
 
   if (!token) return null;
   const payload = verifyJWT(token);
