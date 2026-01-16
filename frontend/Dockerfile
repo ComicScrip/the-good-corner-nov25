@@ -13,4 +13,6 @@ COPY next.config.ts ./
 COPY postcss.config.mjs ./
 COPY tsconfig.json ./
 
+RUN npm run codegen
+
 CMD ["npm", "run", "dev"]
