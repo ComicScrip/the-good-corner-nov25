@@ -24,9 +24,15 @@ export default function FavoriteButton({ defaultActive = false, onChange }: Favo
       className="p-2 rounded-full transition-colors duration-300 bg-gray-100 cursor-pointer"
     >
       {isFav ? (
-        <HeartSolid className="w-7 h-7 text-red-500 transition-transform duration-300 transform scale-110" />
+        <HeartSolid
+          data-testid="favorite-on"
+          className="w-7 h-7 text-red-500 transition-transform duration-300 transform scale-110"
+        />
       ) : (
-        <HeartOutline className="w-7 h-7 text-gray-500 transition-transform duration-300 hover:scale-110" />
+        <HeartOutline
+          data-testid="favorite-off"
+          className="w-7 h-7 text-gray-500 transition-transform duration-300 hover:scale-110"
+        />
       )}
     </button>
   );
