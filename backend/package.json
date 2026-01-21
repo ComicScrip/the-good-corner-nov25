@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
     "resetDB": "ts-node src/db/reset.ts",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "lint": "biome check"
   },
   "repository": {
     "type": "git",
