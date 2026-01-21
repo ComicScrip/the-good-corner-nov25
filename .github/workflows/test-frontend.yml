@@ -6,7 +6,7 @@ on:
 
 jobs:
   testing-frontend:
-    name: Linting frontend
+    name: Testing frontend
     runs-on: ubuntu-latest
     defaults:
       run:

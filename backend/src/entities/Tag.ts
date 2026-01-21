@@ -1,4 +1,5 @@
-import { Field, Int, ObjectType, InputType } from "type-graphql";
+import { Length } from "class-validator";
+import { Field, InputType, Int, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -8,7 +9,6 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Ad } from "./Ad";
-import { Length } from "class-validator";
 
 @ObjectType()
 @Entity()
