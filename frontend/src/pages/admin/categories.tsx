@@ -1,7 +1,7 @@
 import { type FormEvent, useState } from "react";
-import Layout from "@/components/Layout";
 import CategoryTable from "@/components/CategoryTable";
-import { useCreateCategoryMutation, useCategoriesQuery } from "@/graphql/generated/schema";
+import Layout from "@/components/Layout";
+import { useCategoriesQuery, useCreateCategoryMutation } from "@/graphql/generated/schema";
 
 export default function CategoriesAdmin() {
   const { data, refetch } = useCategoriesQuery();

@@ -19,7 +19,7 @@ export default function SearchInput({
     const params = new URLSearchParams(window.location.search);
     const titleContains = params.get("titleContains") || "";
     setSearchValue(titleContains);
-  }, [router.asPath]);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,7 +40,7 @@ export default function SearchInput({
         }
       >
         <svg
-          className="h-[1em] opacity-50 flex-shrink-0"
+          className="h-[1em] opacity-50 shrink-0"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
         >

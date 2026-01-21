@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { gql } from "@apollo/client";
-import * as ApolloReactCommon from "@apollo/client/react";
+import type * as ApolloReactCommon from "@apollo/client/react";
 import * as ApolloReactHooks from "@apollo/client/react";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
