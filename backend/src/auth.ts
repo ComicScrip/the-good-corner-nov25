@@ -34,7 +34,7 @@ export async function startSession(context: GraphQLContext, user: User) {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
     sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge: 7 * 24 * 60 * 60, // 7 days
   });
 
   return token;
