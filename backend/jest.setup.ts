@@ -1,30 +1,17 @@
-import { ASTNode, graphql, GraphQLSchema, print } from "graphql";
+import type { ApolloServer } from "@apollo/server";
+import { type ASTNode, print } from "graphql";
+import { initApollo } from "./src/apollo";
+import db, { clearDB } from "./src/db";
+import { initFastify } from "./src/fastify";
+import type { GraphQLContext } from "./src/types";
 
-import db from "./src/db";
-import { getSchema } from "./src/schema";
-import { Maybe } from "type-graphql";
-import { clearDB } from "./src/db";
-
-export let schema: GraphQLSchema;
-
-export async function execute(
-  operation: ASTNode,
-  variableValues?: Maybe<{
-    readonly [variable: string]: unknown;
-  }>,
-  contextValue = {}
-) {
-  return await graphql({
-    schema,
-    source: print(operation),
-    variableValues,
-    contextValue: { ...contextValue },
-  });
-}
+let testServer: ApolloServer<GraphQLContext>;
 
 beforeAll(async () => {
   await db.initialize();
-  schema = await getSchema();
+  const fastify = await initFastify();
+  testServer = await initApollo(fastify);
+  await testServer.start();
 });
 
 beforeEach(async () => {
@@ -34,3 +21,7 @@ beforeEach(async () => {
 afterAll(async () => {
   await db.destroy();
 });
+
+export async function execute(operation: ASTNode, variables?: any, contextValue: any = {}) {
+  return await testServer.executeOperation({ query: print(operation), variables }, { contextValue })
+}
