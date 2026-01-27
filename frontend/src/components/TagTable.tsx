@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Tag, useUpdateTagMutation, useDeleteTagMutation } from "@/graphql/generated/schema";
+import { type Tag, useDeleteTagMutation, useUpdateTagMutation } from "@/graphql/generated/schema";
 
 interface TagTableProps {
   tags: Tag[];
@@ -111,17 +111,17 @@ export default function TagTable({ tags, onRefetch }: TagTableProps) {
                       className={`input input-bordered input-sm w-full ${
                         validationError ? "input-error" : ""
                       }`}
-                      autoFocus
                     />
                     {validationError && <div className="text-error text-xs">{validationError}</div>}
                   </div>
                 ) : (
-                  <span
-                    className="cursor-pointer hover:bg-base-200 px-2 py-1 rounded"
+                  <button
+                    type="button"
+                    className="text-left cursor-pointer hover:bg-base-200 px-2 py-1 rounded bg-transparent border-none"
                     onClick={() => handleEdit(tag)}
                   >
                     {tag.name}
-                  </span>
+                  </button>
                 )}
               </td>
               <td>
@@ -129,22 +129,31 @@ export default function TagTable({ tags, onRefetch }: TagTableProps) {
                   {editingId === tag.id ? (
                     <>
                       <button
+                        type="button"
                         onClick={handleSave}
                         className="btn btn-success btn-xs"
                         disabled={!editValue.trim() || !!validationError}
                       >
                         Sauver
                       </button>
-                      <button onClick={handleCancel} className="btn btn-ghost btn-xs">
+                      <button type="button" onClick={handleCancel} className="btn btn-ghost btn-xs">
                         Annuler
                       </button>
                     </>
                   ) : (
                     <>
-                      <button onClick={() => handleEdit(tag)} className="btn btn-primary btn-xs">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(tag)}
+                        className="btn btn-primary btn-xs"
+                      >
                         Éditer
                       </button>
-                      <button onClick={() => handleDelete(tag.id)} className="btn btn-error btn-xs">
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(tag.id)}
+                        className="btn btn-error btn-xs"
+                      >
                         Supprimer
                       </button>
                     </>

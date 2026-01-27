@@ -1,8 +1,8 @@
 import { useState } from "react";
 import {
-  Category,
-  useUpdateCategoryMutation,
+  type Category,
   useDeleteCategoryMutation,
+  useUpdateCategoryMutation,
 } from "@/graphql/generated/schema";
 
 interface CategoryTableProps {
@@ -115,17 +115,17 @@ export default function CategoryTable({ categories, onRefetch }: CategoryTablePr
                       className={`input input-bordered input-sm w-full ${
                         validationError ? "input-error" : ""
                       }`}
-                      autoFocus
                     />
                     {validationError && <div className="text-error text-xs">{validationError}</div>}
                   </div>
                 ) : (
-                  <span
-                    className="cursor-pointer hover:bg-base-200 px-2 py-1 rounded"
+                  <button
+                    type="button"
+                    className="text-left cursor-pointer hover:bg-base-200 px-2 py-1 rounded bg-transparent border-none"
                     onClick={() => handleEdit(category)}
                   >
                     {category.name}
-                  </span>
+                  </button>
                 )}
               </td>
               <td>
@@ -133,25 +133,28 @@ export default function CategoryTable({ categories, onRefetch }: CategoryTablePr
                   {editingId === category.id ? (
                     <>
                       <button
+                        type="button"
                         onClick={handleSave}
                         className="btn btn-success btn-xs"
                         disabled={!editValue.trim() || !!validationError}
                       >
                         Sauver
                       </button>
-                      <button onClick={handleCancel} className="btn btn-ghost btn-xs">
+                      <button type="button" onClick={handleCancel} className="btn btn-ghost btn-xs">
                         Annuler
                       </button>
                     </>
                   ) : (
                     <>
                       <button
+                        type="button"
                         onClick={() => handleEdit(category)}
                         className="btn btn-primary btn-xs"
                       >
                         Éditer
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleDelete(category.id)}
                         className="btn btn-error btn-xs"
                       >

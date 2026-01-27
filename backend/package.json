@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
     "resetDB": "ts-node src/db/reset.ts",
-    "format": "biome format --write",
     "testDB": "docker compose -f docker-compose.integration-tests.yml up testDB --wait",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "lint": "biome check",
+    "format": "biome format --write && biome check --write"
   },
   "repository": {
     "type": "git",
