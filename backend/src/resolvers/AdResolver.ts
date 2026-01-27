@@ -113,7 +113,7 @@ export default class AdResolver {
     await adToUpdate.save();
     return await Ad.findOne({
       where: { id },
-      relations: { tags: true, category: true },
+      relations: { tags: true, category: true, author: true },
     });
   }
 
