@@ -1,0 +1,21 @@
+name: Linting backend
+
+on: 
+  pull_request:
+    paths: ['backend/**']
+
+jobs:
+  lint-back:
+    name: Lint backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: "2.3.10"
+      - name: Run biome
+        run: biome ci .
