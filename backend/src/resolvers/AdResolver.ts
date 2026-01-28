@@ -51,7 +51,7 @@ export default class AdResolver {
         [`${sortBy}`]: order,
       },
       take: limit,
-      relations: ["category", "tags"],
+      relations: ["category", "tags", "author"],
     });
   }
 

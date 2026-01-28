@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
     "resetDB": "ts-node src/db/reset.ts",
+    "testDB": "docker compose -f docker-compose.integration-tests.yml up testDB --wait",
+    "test": "jest --runInBand",
     "lint": "biome check",
     "format": "biome format --write && biome check --write"
   },
@@ -42,7 +44,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
+    "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
+    "graphql-tag": "^2.12.6",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.6.2"
   }
 }
