@@ -2,7 +2,6 @@ name: Linting frontend
 
 on: 
   pull_request:
-    paths: ['frontend/**']
 
 jobs:
   lint-front:
