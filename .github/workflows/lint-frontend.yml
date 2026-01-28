@@ -2,12 +2,13 @@ name: Linting frontend
 
 on: 
   pull_request:
+    paths: ['frontend/**']
 
 jobs:
   lint-front:
     name: Lint frontend
     runs-on: ubuntu-latest
-    default:
+    defaults:
       run:
         working-directory: ./frontend
     steps:
