@@ -5,9 +5,12 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
+    "build": "tsc",
+    "start": "node build/index.js",
     "resetDB": "ts-node src/db/reset.ts",
     "lint": "biome check",
-    "format": "biome format --write && biome check --write"
+    "format": "biome format --write && biome check --write",
+    "build-and-push-to-dockerhub:staging": "docker build -t scrip/tgc-nov-25-back:staging --file ./Dockerfile.prod . && docker push scrip/tgc-nov-25-back:staging"
   },
   "repository": {
     "type": "git",
