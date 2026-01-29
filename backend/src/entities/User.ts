@@ -13,7 +13,6 @@ export const UserRole = {
   Visitor: "visitor",
 } as const;
 
-// Convert object key in a type
 export type Role = (typeof UserRole)[keyof typeof UserRole];
 
 @ObjectType()

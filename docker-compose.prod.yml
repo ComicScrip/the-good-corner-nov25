@@ -1,6 +1,6 @@
 services:
   db:
-    container_name: prod-db-1
+    container_name: ${DEPLOY_ENV-prod}-db
     image: postgres:15-alpine
     stop_grace_period: 0s
     environment:
@@ -12,9 +12,10 @@ services:
       timeout: 5s
       retries: 10
     volumes:
-      - prodDB:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
 
   backend:
+    container_name: ${DEPLOY_ENV-prod}-backend
     ports:
       - 4000:4000
     environment:
@@ -31,13 +32,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    image: scrip/tgc-nov-25-back:staging
+    image: scrip/tgc-nov-25-back:${DEPLOY_ENV-prod}
 
   frontend:
+    container_name: ${DEPLOY_ENV-prod}-frontend
     stop_grace_period: 0s
-    image: scrip/tgc-nov-25-front:staging
+    image: scrip/tgc-nov-25-front:${DEPLOY_ENV-prod}
 
   gateway:
+    container_name: ${DEPLOY_ENV-prod}-gateway
     restart: always
     stop_grace_period: 0s
     build:
@@ -46,4 +49,5 @@ services:
       - ${GATEWAY_PORT-80}:80
 
 volumes:
-  prodDB:
+  db-data:
+    name: ${DEPLOY_ENV-prod}DB
