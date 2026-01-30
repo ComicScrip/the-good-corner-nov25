@@ -10,8 +10,7 @@
     "format": "biome format --write && biome check --write",
     "codegen": "graphql-codegen --require dotenv/config --config codegen.ts --watch",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "build-and-push-to-dockerhub:staging": "docker build -t scrip/tgc-nov-25-front:staging --file ./Dockerfile.prod . && docker push scrip/tgc-nov-25-front:staging"
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",
