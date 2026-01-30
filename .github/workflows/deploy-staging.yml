@@ -7,7 +7,7 @@ on:
 
 jobs:
   client-tests:
-    uses: ComicScrip/the-good-corner-nov25/.github/workflows/tests-frontend.yml@prepare-deploy
+    uses: ComicScrip/the-good-corner-nov25/.github/workflows/test-frontend.yml@prepare-deploy
 
   build-and-push-server:
     uses: ComicScrip/the-good-corner-nov25/.github/workflows/build-backend.yml@prepare-deploy
