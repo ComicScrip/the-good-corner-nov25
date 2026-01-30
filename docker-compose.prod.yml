@@ -11,7 +11,8 @@ services:
       timeout: 5s
       retries: 10
     volumes:
-      - db-data:/var/lib/postgresql/data
+      # Mount the named volume at the parent postgres directory to override any image VOLUME
+      - db-data:/var/lib/postgresql
 
   backend:
     environment:
