@@ -24,14 +24,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    image: scrip/tgc-nov-25-back:${DEPLOY_ENV-staging}
+    image: scrip/tgc-nov-25-back:${DEPLOY_ENV:-staging}
 
   frontend:
     stop_grace_period: 0s
-    image: scrip/tgc-nov-25-front:${DEPLOY_ENV-staging}
+    image: scrip/tgc-nov-25-front:${DEPLOY_ENV:-staging}
 
   gateway:
-    container_name: ${DEPLOY_ENV-staging}-gateway
+    container_name: ${DEPLOY_ENV:-staging}-gateway
     restart: always
     stop_grace_period: 0s
     build:
@@ -41,4 +41,4 @@ services:
 
 volumes:
   db-data:
-    name: ${DEPLOY_ENV-staging}DB
+    name: "${DEPLOY_ENV:-staging}-db-data"
