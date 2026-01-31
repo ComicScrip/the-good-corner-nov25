@@ -24,7 +24,7 @@ describe("AdCard", () => {
 <div>
   <a
     class="w-[400px] cursor-pointer"
-    href="http://localhost:3000/ads/1"
+    href="/ads/1"
   >
     <div
       class="relative shadow-md border rounded-lg p-4 bg-white mr-3 mb-3"
@@ -70,7 +70,7 @@ describe("AdCard", () => {
 <div>
   <a
     class="w-[400px] cursor-pointer"
-    href="http://localhost:3000/ads/1"
+    href="/ads/1"
   >
     <div
       class="relative shadow-md border rounded-lg p-4 bg-white mr-3 mb-3"

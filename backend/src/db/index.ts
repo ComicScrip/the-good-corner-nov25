@@ -1,4 +1,8 @@
 import { DataSource } from "typeorm";
+import { Ad } from "../entities/Ad";
+import { Category } from "../entities/Category";
+import { Tag } from "../entities/Tag";
+import { User } from "../entities/User";
 import env from "../env";
 
 export default new DataSource({
@@ -8,7 +12,7 @@ export default new DataSource({
   password: env.DB_PASS,
   port: env.DB_PORT,
   database: env.DB_NAME,
-  entities: ["src/entities/*.ts"],
+  entities: [User, Category, Ad, Tag],
   synchronize: true,
   //logging: true
 });
