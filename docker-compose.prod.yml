@@ -1,7 +1,7 @@
 services:
   db:
+    container_name: ${DEPLOY_ENV:-staging}-db
     image: postgres:18.1-alpine3.23
-    stop_grace_period: 0s
     environment:
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_USER: ${DB_USER}
@@ -11,30 +11,28 @@ services:
       timeout: 5s
       retries: 10
     volumes:
-      # Mount the named volume at the parent postgres directory to override any image VOLUME
       - db-data:/var/lib/postgresql
 
   backend:
+    container_name: ${DEPLOY_ENV:-staging}-backend
+    image: scrip/tgc-nov25-back:${DEPLOY_ENV:-staging}
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       DB_HOST: db
       DB_PORT: 5432
       DB_NAME: postgres
     env_file:
       - .env.production
-    stop_grace_period: 0s
-    depends_on:
-      db:
-        condition: service_healthy
-    image: scrip/tgc-nov-25-back:${DEPLOY_ENV:-staging}
 
   frontend:
-    stop_grace_period: 0s
-    image: scrip/tgc-nov-25-front:${DEPLOY_ENV:-staging}
+    container_name: ${DEPLOY_ENV:-staging}-frontend
+    image: scrip/tgc-nov25-front:${DEPLOY_ENV:-staging}
 
   gateway:
     container_name: ${DEPLOY_ENV:-staging}-gateway
     restart: always
-    stop_grace_period: 0s
     build:
       context: gateway
     ports:

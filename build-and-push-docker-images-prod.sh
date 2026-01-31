@@ -2,8 +2,8 @@
 set -euo pipefail
 
 IMAGE_TAG="${IMAGE_TAG:-staging}"
-FRONT_IMAGE="${FRONT_IMAGE:-scrip/tgc-nov-25-front}"
-BACK_IMAGE="${BACK_IMAGE:-scrip/tgc-nov-25-back}"
+FRONT_IMAGE="${FRONT_IMAGE:-scrip/tgc-nov25-front}"
+BACK_IMAGE="${BACK_IMAGE:-scrip/tgc-nov25-back}"
 FRONT_DOCKERFILE="${FRONT_DOCKERFILE:-./frontend/Dockerfile.prod}"
 BACK_DOCKERFILE="${BACK_DOCKERFILE:-./backend/Dockerfile.prod}"
 FRONT_CONTEXT="${FRONT_CONTEXT:-./frontend}"
