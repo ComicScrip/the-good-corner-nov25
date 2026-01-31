@@ -6,7 +6,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_USER: ${DB_USER}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} || exit 1"]
+      # Avoid requiring DB_NAME (may not be set); check server availability by user
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -28,7 +29,7 @@ services:
       - .env.production
     healthcheck:
       # Prefer an HTTP readiness endpoint; adjust path/port if needed
-      test: ["CMD-SHELL", "curl -f http://localhost:4000/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:4000 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 6
