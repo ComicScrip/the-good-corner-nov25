@@ -25,4 +25,4 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      image_name: scrip/tgc-nov25-back:staging
+      image_name: scrip/tgc-nov25-front:staging
