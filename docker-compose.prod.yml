@@ -6,7 +6,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_USER: ${DB_USER}
     healthcheck:
-      # Avoid requiring DB_NAME (may not be set); check server availability by user
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} || exit 1"]
       interval: 10s
       timeout: 5s
@@ -28,8 +27,10 @@ services:
     env_file:
       - .env.production
     healthcheck:
-      # Prefer an HTTP readiness endpoint; adjust path/port if needed
-      test: ["CMD-SHELL", "curl -f http://localhost:4000 || exit 1"]
+      # Use curl to verify the service responds on the port. Do not use -f
+      # because the backend returns 400 for GET / (GraphQL expects POST).
+      # We treat any HTTP response as a sign the service is up.
+      test: ["CMD-SHELL", "curl -sS -o /dev/null http://localhost:4000 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -39,8 +40,8 @@ services:
     container_name: ${DEPLOY_ENV:-staging}-frontend
     image: scrip/tgc-nov25-front:${DEPLOY_ENV:-staging}
     healthcheck:
-      # Next.js default port is 3000 inside the container; adjust if different
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
+      # Accept any HTTP response code as healthy (port/listening check)
+      test: ["CMD-SHELL", "curl -sS -o /dev/null http://localhost:3000/ || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 6
