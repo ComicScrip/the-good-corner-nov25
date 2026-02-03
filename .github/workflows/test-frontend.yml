@@ -3,6 +3,7 @@ name: Test frontend
 on:
   pull_request:
     paths: [ 'frontend/**' ]
+  workflow_call:
 
 jobs:
   testing-frontend:
@@ -11,7 +12,6 @@ jobs:
     defaults:
       run:
         working-directory: ./frontend
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
