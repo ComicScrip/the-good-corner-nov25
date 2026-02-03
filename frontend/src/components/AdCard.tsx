@@ -8,7 +8,7 @@ interface AdCardProps {
 
 export default function AdCard({ ad: { id, title, pictureUrl, price } }: AdCardProps) {
   return (
-    <Link href={`http://localhost:3000/ads/${id}`} className="w-[400px] cursor-pointer">
+    <Link href={`/ads/${id}`} className="w-[400px] cursor-pointer">
       <div className="relative shadow-md border rounded-lg p-4 bg-white mr-3 mb-3">
         {/** biome-ignore lint/performance/noImgElement: images come form unknown domains */}
         <img className="h-[200px] w-full object-cover rounded-md" src={pictureUrl} alt={title} />
