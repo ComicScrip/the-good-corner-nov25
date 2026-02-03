@@ -9,8 +9,7 @@
     "start": "node build/index.js",
     "resetDB": "ts-node src/db/reset.ts",
     "lint": "biome check",
-    "format": "biome format --write && biome check --write",
-    "build-and-push-to-dockerhub": "docker buildx build --platform linux/amd64,linux/arm64 -t scrip/tgc-nov-25-back:${IMAGE_TAG:=staging} --file ./Dockerfile.prod . && docker push scrip/tgc-nov-25-back:${IMAGE_TAG:=staging}"
+    "format": "biome format --write && biome check --write"
   },
   "repository": {
     "type": "git",
