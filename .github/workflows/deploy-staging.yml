@@ -3,6 +3,7 @@ name: Compile and push client and server to staging environment
 on:
   push:
     branches: ["dev"]
+  workflow_dispatch:
 
 jobs:
   client-tests:
