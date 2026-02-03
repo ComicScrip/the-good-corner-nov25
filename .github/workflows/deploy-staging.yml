@@ -25,3 +25,15 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
       image_name: scrip/tgc-nov25-front:staging
+
+  notify-vps:
+    needs:
+      - build-and-push-server
+      - build-and-push-client
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Webhook on VPS
+        run: |
+          curl -X POST \
+            -H "X-Webhook-Secret: ${{ secrets.WEBHOOK_SECRET }}" \
+            https://ops.thegoodcorner.duckdns.org/hooks/redeploy-tgc-staging
