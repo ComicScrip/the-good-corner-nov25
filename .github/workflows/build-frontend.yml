@@ -36,3 +36,4 @@ jobs:
           file: "Dockerfile.prod"
           tags: ${{ inputs.image_name }}
           cache-from: type=gha
+          cache-to: type=gha,mode=max
