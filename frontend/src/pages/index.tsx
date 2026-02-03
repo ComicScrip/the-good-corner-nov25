@@ -3,7 +3,7 @@ import RecentAds from "@/components/RecentAds";
 
 export default function Home() {
   return (
-    <Layout pageTitle="Home">
+    <Layout pageTitle="Accueil">
       <RecentAds />
     </Layout>
   );
