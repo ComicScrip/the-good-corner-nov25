@@ -33,7 +33,7 @@ export async function startSession(context: GraphQLContext, user: User) {
   context.res.cookie(cookieName, token, {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
     maxAge: 7 * 24 * 60 * 60, // 7 days
   });
 
