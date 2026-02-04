@@ -25,7 +25,7 @@ export const verifyJWT = (token: string): JWTPayload | null => {
   }
 };
 
-const cookieName = "authToken";
+export const cookieName = "authToken";
 
 export async function startSession(context: GraphQLContext, user: User) {
   const token = await createJWT(user);
