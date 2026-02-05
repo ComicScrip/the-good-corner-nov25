@@ -196,7 +196,7 @@ Tag {
     expect(tagInDB).toMatchInlineSnapshot(`null`);
   });
 
-  it("should create tag when logged in with admin user", async () => {
+  it("should not create tag with invalid data", async () => {
     const admin = await createAdmin();
     const res = await execute(
       createTag,
