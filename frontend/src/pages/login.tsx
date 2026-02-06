@@ -42,6 +42,7 @@ export default function Login() {
             }}
             id="email"
             error={errors.email?.message}
+            testId="login-email"
           />
 
           <Field
@@ -55,6 +56,7 @@ export default function Login() {
             }}
             id="password"
             error={errors.password?.message}
+            testId="login-password"
           />
 
           <button type="submit" disabled={isSubmitting} className="btn btn-primary w-full">
@@ -72,7 +74,7 @@ export default function Login() {
         </div>
 
         {error && (
-          <p className="text-red-500 mt-4 text-center">
+          <p className="text-red-500 mt-4 text-center" data-testid="login-errors">
             {error.message || "Une erreur est survenue lors de la connexion"}
           </p>
         )}
