@@ -6,38 +6,24 @@
   "scripts": {
     "pretest": "tsc --incremental -p tsconfig.json",
     "test": "npx playwright test -c dist/e2e-tests --trace on",
-    "test:watch": "npm run test && chokidar 'src/**/*.spec.ts' -c 'npm run test'",
     "test:ui": "npm run pretest && npx playwright test -c dist/e2e-tests --trace on --ui",
     "test:headed": "npm run pretest && npx playwright test -c dist/e2e-tests --trace on --headed",
-    "test:watch:headed": "npm run test:headed && chokidar 'src/**/*.spec.ts' -c 'npm run pretest'",
     "app:start": "docker compose -f docker-compose.e2e-tests.yml up --wait",
     "app:stop": "docker compose -f docker-compose.e2e-tests.yml down"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@playwright/test": "^1.43.1",
-    "@types/node": "^25.2.1"
-  },
   "dependencies": {
-    "chokidar-cli": "^3.0.0",
-    "typescript": "^5.4.5",
-    "@apollo/server": "^5.2.0",
-    "@as-integrations/fastify": "^3.1.0",
-    "@fastify/cookie": "^11.0.2",
-    "@fastify/cors": "^11.2.0",
     "argon2": "^0.40.3",
     "class-validator": "^0.14.3",
-    "fastify": "^5.6.2",
-    "graphql": "^16.12.0",
-    "graphql-scalars": "^1.25.0",
-    "jsonwebtoken": "^9.0.3",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "ts-dotenv": "^0.9.1",
-    "ts-node-dev": "^2.0.0",
     "type-graphql": "^2.0.0-rc.2",
-    "typeorm": "^0.3.27"
+    "typeorm": "^0.3.27",
+    "@playwright/test": "^1.58.1",
+    "@types/node": "^25.2.1",
+    "typescript": "^5.4.5"
   }
 }
