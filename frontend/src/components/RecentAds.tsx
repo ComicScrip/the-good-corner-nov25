@@ -9,7 +9,7 @@ export default function RecentAds() {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-6">Annonces récentes</h2>
-      <div className="flex flex-wrap">
+      <div className="flex flex-wrap" data-testid="ads-list">
         {loading && <Loader />}
         {error && (
           <div className="text-red-600">
