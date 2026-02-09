@@ -27,7 +27,7 @@ test("cannot log in with incorrect password", async ({ page }) => {
 
     await page.goto("/login");
     await page.getByTestId("login-email").fill(email);
-    await page.getByTestId("login-password").fill("1T!ESTINg");
+    await page.getByTestId("login-password").fill("1T!ESTINgs");
     await page.getByRole("button", { name: "Se connecter" }).click();
     await expect(page.getByTestId("login-errors")).toContainText("Email ou mot de passe incorrect");
 });
