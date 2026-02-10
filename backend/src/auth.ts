@@ -1,3 +1,4 @@
+import "@fastify/cookie";
 import jwt from "jsonwebtoken";
 import type { AuthChecker } from "type-graphql";
 import { User } from "./entities/User";
@@ -48,6 +49,7 @@ export async function getJWT(
   context: GraphQLContext,
 ): Promise<JWTPayload | null> {
   const token = context.req.cookies?.[cookieName];
+
 
   if (!token) return null;
   const payload = verifyJWT(token);
