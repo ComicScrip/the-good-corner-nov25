@@ -33,11 +33,12 @@ test("can view ads in db", async ({ page }) => {
         author: visitor,
     }).save();
 
-    await page.goto("/");
-    await page.getByRole("heading", { name: "Annonces Récentes" });
+    await page.goto('/')
+    await page.getByRole('link', { name: 'The good corner' })
+    await page.getByRole("heading", { name: "Annonces récentes" })
 
-    await expect(page.getByTestId("ads-list")).toContainText(peugeot.title);
-    await expect(page.getByTestId("ads-list")).toContainText("4 000,00 €");
-    await expect(page.getByTestId("ads-list")).toContainText(keyboard.title);
-    await expect(page.getByTestId("ads-list")).toContainText("30,00 €");
+    await expect(page.getByTestId("ads-list")).toContainText(keyboard.title)
+    await expect(page.getByTestId("ads-list")).toContainText("30,00 €")
+    await expect(page.getByTestId("ads-list")).toContainText(peugeot.title)
+    await expect(page.getByTestId("ads-list")).toContainText("4 000,00 €")
 });
