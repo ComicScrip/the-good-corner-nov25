@@ -50,7 +50,6 @@ export async function getJWT(
 ): Promise<JWTPayload | null> {
   const token = context.req.cookies?.[cookieName];
 
-
   if (!token) return null;
   const payload = verifyJWT(token);
 
