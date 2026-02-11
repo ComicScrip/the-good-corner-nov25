@@ -21,8 +21,15 @@ Components: stable
 Signed-By: /etc/apt/keyrings/docker.asc
 EOF
 
+sudo apt-get update && \
+
 # Install Docker, Caddy, Go, Webhook, Fail2ban
 sudo apt-get install -y webhook debian-keyring debian-archive-keyring apt-transport-https fail2ban caddy docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin && \
+
+sudo service apache2 stop
+sudo apt-get purge apache2 -y
+sudo apt-get autoremove -y
+
 
 # Confirgure docker
 sudo groupadd -f docker && \
