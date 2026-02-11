@@ -12,6 +12,9 @@ jobs:
   server-tests:
     uses: ComicScrip/the-good-corner-nov25/.github/workflows/integration-tests.yml@main
 
+  e2e-tests:
+    uses: ComicScrip/the-good-corner-nov25/.github/workflows/e2e-tests.yml@main
+
   build-and-push-server:
     needs:
         - server-tests
@@ -34,6 +37,7 @@ jobs:
 
   notify-vps:
     needs:
+      - e2e-tests
       - build-and-push-server
       - build-and-push-client
     runs-on: ubuntu-latest
