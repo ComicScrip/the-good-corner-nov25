@@ -12,6 +12,7 @@ interface SelectFieldProps {
   options: { val: string; label: string; key?: string }[];
   noChoiceText?: string;
   error?: string;
+  testId?: string;
 }
 
 export default function SelectField({
@@ -21,6 +22,7 @@ export default function SelectField({
   id,
   noChoiceText,
   options,
+  testId,
 }: SelectFieldProps) {
   return (
     <div className="form-control w-full mb-3">
@@ -31,6 +33,7 @@ export default function SelectField({
         {...inputProps}
         className={`select select-bordered w-full ${error ? "select-error" : ""}`}
         id={id}
+        data-testid={testId}
       >
         {noChoiceText && <option value="">{noChoiceText}</option>}
         {options.map((o) => (

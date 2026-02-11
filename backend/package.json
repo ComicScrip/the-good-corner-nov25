@@ -9,7 +9,9 @@
     "start": "node build/index.js",
     "resetDB": "ts-node src/db/reset.ts",
     "lint": "biome check",
-    "format": "biome format --write && biome check --write"
+    "format": "biome format --write && biome check --write",
+    "testDB": "docker compose -f docker-compose.integration-tests.yml up testDB --wait",
+    "test": "jest --runInBand"
   },
   "repository": {
     "type": "git",
@@ -44,7 +46,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
+    "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
+    "graphql-tag": "^2.12.6",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.6.2"
   }
 }

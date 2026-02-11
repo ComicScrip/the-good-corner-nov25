@@ -38,6 +38,7 @@ export default function AdForm({ onSubmit, isSubmitting, defaultValues }: AdForm
         }}
         id="title"
         error={errors.title?.message}
+        testId="ad-title"
       />
 
       <Field
@@ -48,6 +49,7 @@ export default function AdForm({ onSubmit, isSubmitting, defaultValues }: AdForm
         }}
         id="location"
         error={errors.location?.message}
+        testId="ad-location"
       />
 
       <Field
@@ -62,6 +64,7 @@ export default function AdForm({ onSubmit, isSubmitting, defaultValues }: AdForm
         }}
         id="price"
         error={errors.price?.message}
+        testId="ad-price"
       />
 
       <Field
@@ -78,6 +81,7 @@ export default function AdForm({ onSubmit, isSubmitting, defaultValues }: AdForm
         }}
         id="pictureUrl"
         error={errors.pictureUrl?.message}
+        testId="ad-picture-url"
       />
 
       <SelectField
@@ -90,6 +94,7 @@ export default function AdForm({ onSubmit, isSubmitting, defaultValues }: AdForm
         options={categories.map((c) => ({ label: c.name, val: c.id.toString() }))}
         error={errors.category?.message}
         noChoiceText="Sélectionnez une catégorie"
+        testId="ad-category"
       />
 
       <div className="form-control w-full mb-3">
@@ -100,18 +105,20 @@ export default function AdForm({ onSubmit, isSubmitting, defaultValues }: AdForm
           name="tags"
           control={control}
           render={({ field }) => (
-            <Select
-              {...field}
-              options={tags}
-              value={tags.filter((t) => (field.value || []).map((t) => t.id).includes(t.id))}
-              onChange={(selected) => field.onChange(selected.map((t) => ({ id: t.id })))}
-              getOptionValue={(o) => o.id.toString()}
-              getOptionLabel={(o) => o.name}
-              isMulti
-              id="tags"
-              closeMenuOnSelect={false}
-              placeholder="Sélectionnez des tags..."
-            />
+            <div data-testid="ad-tags">
+              <Select
+                {...field}
+                options={tags}
+                value={tags.filter((t) => (field.value || []).map((t) => t.id).includes(t.id))}
+                onChange={(selected) => field.onChange(selected.map((t) => ({ id: t.id })))}
+                getOptionValue={(o) => o.id.toString()}
+                getOptionLabel={(o) => o.name}
+                isMulti
+                id="tags"
+                closeMenuOnSelect={false}
+                placeholder="Sélectionnez des tags..."
+              />
+            </div>
           )}
         />
       </div>
@@ -125,9 +132,15 @@ export default function AdForm({ onSubmit, isSubmitting, defaultValues }: AdForm
         }}
         id="description"
         error={errors.description?.message}
+        testId="ad-description"
       />
 
-      <button type="submit" className="btn btn-primary mt-12 w-full" disabled={isSubmitting}>
+      <button
+        type="submit"
+        className="btn btn-primary mt-12 w-full"
+        disabled={isSubmitting}
+        data-testid="ad-submit"
+      >
         {isSubmitting ? "Sauvegarde en cours" : "Sauvegarder"}
       </button>
     </form>
