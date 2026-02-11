@@ -1,0 +1,45 @@
+name: Compile and push client and server to production environment
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  client-tests:
+    uses: ComicScrip/the-good-corner-nov25/.github/workflows/test-frontend.yml@main
+
+  server-tests:
+    uses: ComicScrip/the-good-corner-nov25/.github/workflows/integration-tests.yml@main
+
+  build-and-push-server:
+    needs:
+        - server-tests
+    uses: ComicScrip/the-good-corner-nov25/.github/workflows/build-backend.yml@main
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    with:
+      image_name: scrip/tgc-nov25-back:prod
+
+  build-and-push-client:
+    needs:
+      - client-tests
+    uses: ComicScrip/the-good-corner-nov25/.github/workflows/build-frontend.yml@main
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    with:
+      image_name: scrip/tgc-nov25-front:prod
+
+  notify-vps:
+    needs:
+      - build-and-push-server
+      - build-and-push-client
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Webhook on VPS
+        run: |
+          curl -X POST \
+            -H "X-Webhook-Secret: ${{ secrets.WEBHOOK_SECRET }}" \
+            https://ops.thegoodcorner.duckdns.org/hooks/redeploy-tgc-prod
