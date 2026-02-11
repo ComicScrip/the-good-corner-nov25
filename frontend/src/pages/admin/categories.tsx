@@ -58,6 +58,7 @@ export default function CategoriesAdmin() {
               id="name"
               className={`input input-bordered mr-4 ${formError ? "input-error" : ""}`}
               onChange={() => setFormError("")}
+              data-testid="category-name"
             />
             {formError && (
               <div className="label">
@@ -65,7 +66,7 @@ export default function CategoriesAdmin() {
               </div>
             )}
           </div>
-          <button type="submit" className="btn btn-primary mt-4">
+          <button type="submit" className="btn btn-primary mt-4" data-testid="category-submit">
             Ajouter
           </button>
         </form>

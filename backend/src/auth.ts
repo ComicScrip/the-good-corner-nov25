@@ -1,3 +1,4 @@
+import "@fastify/cookie";
 import jwt from "jsonwebtoken";
 import type { AuthChecker } from "type-graphql";
 import { User } from "./entities/User";

@@ -74,7 +74,12 @@ export default function Header() {
                 >
                   Publier
                 </Link>
-                <button type="button" className="btn btn-outline w-full" onClick={handleLogout}>
+                <button
+                  type="button"
+                  className="btn btn-outline w-full"
+                  onClick={handleLogout}
+                  data-testid="logout-btn"
+                >
                   Déconnexion
                 </button>
 
@@ -150,7 +155,12 @@ export default function Header() {
                       {getUserInitial(user.email)}
                     </div>
                   </div>
-                  <button type="button" onClick={handleLogout} className="btn btn-outline btn-sm">
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="btn btn-outline btn-sm"
+                    data-testid="logout-btn"
+                  >
                     Déconnexion
                   </button>
 

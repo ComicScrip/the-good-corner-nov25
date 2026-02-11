@@ -12,9 +12,17 @@ interface LongTextFieldProps {
   };
   error?: string;
   rows?: number;
+  testId?: string;
 }
 
-export default function LongTextField({ label, inputProps, error, id, rows }: LongTextFieldProps) {
+export default function LongTextField({
+  label,
+  inputProps,
+  error,
+  id,
+  rows,
+  testId,
+}: LongTextFieldProps) {
   return (
     <div className="form-control w-full mb-3">
       <label className="label" htmlFor={id}>
@@ -25,6 +33,7 @@ export default function LongTextField({ label, inputProps, error, id, rows }: Lo
         id={id}
         rows={rows || 10}
         className={`textarea textarea-bordered w-full ${error ? "textarea-error" : ""}`}
+        data-testid={testId}
       />
       {error && <span className="text-error text-sm mt-1">{error}</span>}
     </div>

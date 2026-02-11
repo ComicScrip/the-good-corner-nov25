@@ -12,9 +12,10 @@ interface FieldProps {
     required?: boolean;
   };
   error?: string;
+  testId?: string;
 }
 
-export default function Field({ label, inputProps, error, id }: FieldProps) {
+export default function Field({ label, inputProps, error, id, testId }: FieldProps) {
   return (
     <div className="form-control w-full mb-3">
       <label className="label" htmlFor={id}>
@@ -24,6 +25,7 @@ export default function Field({ label, inputProps, error, id }: FieldProps) {
         {...inputProps}
         id={id}
         className={`input input-bordered w-full ${error ? "input-error" : ""}`}
+        data-testid={testId}
       />
       {error && <span className="text-error text-sm mt-1">{error}</span>}
     </div>
