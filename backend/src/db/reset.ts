@@ -5,8 +5,7 @@ import { Tag } from "../entities/Tag";
 import { User, UserRole } from "../entities/User";
 import db, { clearDB } from "./index";
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "SuperP@ssW0rd!"
-
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "SuperP@ssW0rd!";
 
 async function main() {
   await db.initialize();
