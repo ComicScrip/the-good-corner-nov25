@@ -273,7 +273,7 @@ sudo systemctl restart docker && \
 sudo cat <<EOF > /etc/webhook.conf
 [
   {
-    "id": "redeploy-tgc-staging",
+    "id": "redeploy-staging",
     "execute-command": "$HOME/apps/$DNS/staging/start.sh",
     "pass-arguments-to-command": [{"source": "string", "name": "staging"}],
     "command-working-directory": "$HOME/apps/$DNS/staging",
@@ -293,7 +293,7 @@ sudo cat <<EOF > /etc/webhook.conf
     }
   },
   {
-    "id": "redeploy-tgc-prod",
+    "id": "redeploy-prod",
     "execute-command": "$HOME/apps/$DNS/prod/start.sh",
     "pass-arguments-to-command": [{"source": "string", "name": "prod"}],
     "command-working-directory": "$HOME/apps/$DNS/prod",
@@ -370,7 +370,7 @@ echo "Prod: https://$DNS" && \
 echo "WEBHOOK_SECRET: $WEBHOOK_SECRET" && \
 
 ADMIN_PASSWORD=$(openssl rand -base64 20)
-echo "ADMIN_PASSWORD=$ADMIN_PASSWORD"
+echo "ADMIN_PASSWORD: $ADMIN_PASSWORD" && \
 
 docker exec -it staging-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
 docker exec -it prod-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
