@@ -5,6 +5,9 @@ import { Tag } from "../entities/Tag";
 import { User, UserRole } from "../entities/User";
 import db, { clearDB } from "./index";
 
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "SuperP@ssW0rd!"
+
+
 async function main() {
   await db.initialize();
   await clearDB();
@@ -21,7 +24,7 @@ async function main() {
 
   await User.create({
     email: "admin@app.com",
-    hashedPassword: await hash("SuperP@ssW0rd!"),
+    hashedPassword: await hash(ADMIN_PASSWORD),
     role: UserRole.Admin,
   }).save();
 

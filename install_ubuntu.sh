@@ -6,6 +6,16 @@ DNS=${DNS:-$DEFAULT_DNS} && \
 DEFAULT_REPO="https://github.com/ComicScrip/the-good-corner-nov25.git"
 read -p "repo HTTPS URL (default: $DEFAULT_REPO): " REPO_URL
 REPO_URL=${REPO_URL:-$DEFAULT_REPO} && \
+read -p "SSL provider (letsencrypt/zerossl, default: letsencrypt): " SSL_PROVIDER
+SSL_PROVIDER=${SSL_PROVIDER:-letsencrypt} && \
+if [ "$SSL_PROVIDER" = "zerossl" ]; then
+    echo "To get ZeroSSL EAB credentials:"
+    echo "1. Go to https://dashboard.zerossl.com/developer"
+    echo "2. Create a free account if you don't have one"
+    echo "3. Click 'Create EAB Credentials' and copy KID and HMAC Key"
+    read -p "ZeroSSL EAB KID: " EAB_KID
+    read -p "ZeroSSL EAB HMAC Key: " EAB_HMAC_KEY
+fi && \
 WEBHOOK_SECRET=$(openssl rand -base64 24)
 
 sudo apt-get update && \
@@ -67,13 +77,23 @@ sudo cp /tmp/caddy /usr/bin/caddy && \
 sudo chown root:root /usr/bin/caddy && \
 sudo chmod 0755 /usr/bin/caddy && \
 
-# Configure caddy (rate limit 20 r/s, burst 50) and restart
-sudo cat <<EOF > /etc/caddy/Caddyfile
-{
-  #acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
-  acme_issuer https://acme.zerossl.com/v2/DV90
+if [ "$SSL_PROVIDER" = "zerossl" ]; then
+    CADDY_GLOBAL_OPTS="{
+  acme_ca https://acme.zerossl.com/v2/DV90
+  acme_eab {
+    key_id \"$EAB_KID\"
+    mac_key \"$EAB_HMAC_KEY\"
+  }
   order rate_limit before respond
-}
+}"
+else
+    CADDY_GLOBAL_OPTS="{
+  order rate_limit before respond
+}"
+fi
+
+sudo cat <<EOF > /etc/caddy/Caddyfile
+$CADDY_GLOBAL_OPTS
 
 $DNS {
   rate_limit {
@@ -348,6 +368,12 @@ echo "✨ DONE ! ✨" && \
 echo "Staging: https://staging.$DNS" && \
 echo "Prod: https://$DNS" && \
 echo "WEBHOOK_SECRET: $WEBHOOK_SECRET" && \
+
+ADMIN_PASSWORD=$(openssl rand -base64 20)
+echo "ADMIN_PASSWORD=$ADMIN_PASSWORD"
+
+docker exec -it staging-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
+docker exec -it prod-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
 
 # To enable running docker without sudo
 newgrp docker
