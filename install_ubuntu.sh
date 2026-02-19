@@ -151,6 +151,8 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
@@ -160,7 +162,7 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_SERVER_ROOT_URL=https://${MONITORING_DOMAIN}
       - GF_SERVER_DOMAIN=${MONITORING_DOMAIN}
-      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+      - GF_PLUGINS_PREINSTALL=grafana-clock-panel
     networks:
       - monitoring
 
@@ -294,9 +296,9 @@ CADDY_RATE_LIMIT="
 rate_limit {
     zone shared_rate_limit {
       key {remote_host}
-      events 30
+      events 50
       window 1s
-      burst 50
+      burst 70
     }
 }
 "
@@ -321,7 +323,19 @@ ops.$DNS {
 
 $MONITORING_DOMAIN {
   $CADDY_RATE_LIMIT
-  reverse_proxy localhost:3000
+  reverse_proxy localhost:3000 {
+    header_up Host {host}
+    header_up X-Real-IP {remote}
+    header_up X-Forwarded-For {remote}
+    header_up X-Forwarded-Proto {scheme}
+  }
+  
+  # Grafana needs websockets for live features
+  @websocket {
+    header Connection *Upgrade*
+    header Upgrade websocket
+  }
+  reverse_proxy @websocket localhost:3000
 }
 EOF
 
