@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEFAULT_DNS="thegoodcorner.duckdns.org"
+DEFAULT_DNS="thegoodcorner.dedyn.io"
 read -p "domain (default: $DEFAULT_DNS): " DNS
 DNS=${DNS:-$DEFAULT_DNS} && \
 DEFAULT_REPO="https://github.com/ComicScrip/the-good-corner-nov25.git"
@@ -19,6 +19,17 @@ fi && \
 WEBHOOK_SECRET=$(openssl rand -base64 24)
 
 sudo apt-get update && \
+
+# Configure DNS (Quad9 primary, Cloudflare secondary)
+echo "Configuring DNS servers..."
+sudo systemctl stop systemd-resolved 2>/dev/null || true
+sudo systemctl disable systemd-resolved 2>/dev/null || true
+sudo rm -f /etc/resolv.conf
+sudo bash -c 'cat > /etc/resolv.conf <<EOF
+nameserver 9.9.9.9
+nameserver 1.1.1.1
+EOF'
+echo "✓ DNS configured: 9.9.9.9 (primary), 1.1.1.1 (secondary)"
 
 # Docker install : https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
 # Add Docker's official GPG key:
@@ -42,9 +53,9 @@ sudo apt-get install -y webhook debian-keyring debian-archive-keyring apt-transp
 sudo snap install go --classic && \
 export PATH=/snap/bin:$PATH && \
 
-sudo service apache2 stop
-sudo apt-get purge apache2 -y
-sudo apt-get autoremove -y
+sudo service apache2 stop && \
+sudo apt-get purge apache2 -y && \
+sudo apt-get autoremove -y && \
 
 # Configure docker
 sudo groupadd -f docker && \
@@ -59,6 +70,9 @@ sudo cat <<'DOCKERCONFIG' > /etc/docker/daemon.json
 DOCKERCONFIG
 \
 
+# Restart Docker to apply iptables=false configuration
+sudo systemctl restart docker && \
+
 # Configure fail2ban
 sudo touch /etc/fail2ban/jail.local && \
 sudo cat <<EOF > /etc/fail2ban/jail.local
@@ -67,7 +81,190 @@ enabled = true
 EOF
 sudo /etc/init.d/fail2ban restart && \
 
+# ============================================
+# PROMETHEUS + GRAFANA MONITORING SETUP
+# ============================================
+
+echo ""
+echo "=== Setting up Prometheus + Grafana Monitoring ==="
+echo ""
+
+# Configuration
+MONITORING_DIR="$HOME/monitoring"
+MONITORING_DOMAIN="monitoring.$DNS"
+
+# Generate random Grafana admin password
+GRAFANA_ADMIN_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-20)
+
+# Create monitoring directory structure
+mkdir -p $MONITORING_DIR/{prometheus,grafana}
+mkdir -p $MONITORING_DIR/prometheus/data
+mkdir -p $MONITORING_DIR/grafana/data
+
+# Save Grafana admin password to file
+echo "$GRAFANA_ADMIN_PASSWORD" > $MONITORING_DIR/grafana-admin-password.txt
+chmod 600 $MONITORING_DIR/grafana-admin-password.txt
+
+# Create Prometheus configuration
+cat > $MONITORING_DIR/prometheus/prometheus.yml << 'EOF'
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['host.docker.internal:9323']
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+EOF
+
+# Create Docker Compose file for monitoring
+cat > $MONITORING_DIR/docker-compose.yml << EOF
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/etc/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://${MONITORING_DOMAIN}
+      - GF_SERVER_DOMAIN=${MONITORING_DOMAIN}
+      - GF_PLUGINS_PREINSTALL=grafana-clock-panel
+    networks:
+      - monitoring
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - monitoring
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - monitoring
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  monitoring:
+    driver: bridge
+EOF
+
+# Create Grafana provisioning directories
+mkdir -p $MONITORING_DIR/grafana/provisioning/{datasources,dashboards}
+
+# Create Prometheus datasource
+cat > $MONITORING_DIR/grafana/provisioning/datasources/prometheus.yml << 'EOF'
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+EOF
+
+# Create dashboards directory
+mkdir -p $MONITORING_DIR/grafana/dashboards
+
+# Download Node Exporter Full dashboard (ID: 1860)
+echo "Downloading Node Exporter Full dashboard..."
+curl -sL "https://grafana.com/api/dashboards/1860/revisions/latest/download" -o $MONITORING_DIR/grafana/dashboards/node-exporter-full.json
+
+# Download cAdvisor exporter dashboard (ID: 14282)
+echo "Downloading cAdvisor exporter dashboard..."
+curl -sL "https://grafana.com/api/dashboards/14282/revisions/latest/download" -o $MONITORING_DIR/grafana/dashboards/cadvisor-exporter.json
+
+# Fix datasource reference in cAdvisor dashboard (replace ${DS_PROMETHEUS} with Prometheus)
+sed -i 's/\${DS_PROMETHEUS}/Prometheus/g' $MONITORING_DIR/grafana/dashboards/cadvisor-exporter.json
+
+# Create dashboards.yml configuration to provision dashboards automatically
+cat > $MONITORING_DIR/grafana/provisioning/dashboards/dashboards.yml << 'EOF'
+apiVersion: 1
+
+providers:
+  - name: 'Dashboards'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: true
+EOF
+
+# Start monitoring stack
+echo "Starting Prometheus + Grafana stack..."
+cd $MONITORING_DIR
+docker compose up -d
+
 # Build Caddy with rate limiting module
+cd /tmp
 curl -L "https://github.com/caddyserver/xcaddy/releases/download/v0.4.5/xcaddy_0.4.5_linux_amd64.tar.gz" -o /tmp/xcaddy.tar.gz && \
 sudo tar -xzf /tmp/xcaddy.tar.gz -C /tmp && \
 sudo chmod +x /tmp/xcaddy && \
@@ -92,45 +289,53 @@ else
 }"
 fi
 
+CADDY_RATE_LIMIT="
+rate_limit {
+    zone shared_rate_limit {
+      key {remote_host}
+      events 50
+      window 1s
+      burst 70
+    }
+}
+"
+
 sudo cat <<EOF > /etc/caddy/Caddyfile
 $CADDY_GLOBAL_OPTS
 
 $DNS {
-  rate_limit {
-    zone shared_rate_limit {
-      key {remote_host}
-      events 20
-      window 1s
-      burst 50
-    }
-  }
+  $CADDY_RATE_LIMIT
   reverse_proxy localhost:82
 }
 
 staging.$DNS {
-  rate_limit {
-    zone shared_rate_limit {
-      key {remote_host}
-      events 20
-      window 1s
-      burst 50
-    }
-  }
+  $CADDY_RATE_LIMIT
   reverse_proxy localhost:81
 }
 
 ops.$DNS {
-  rate_limit {
-    zone shared_rate_limit {
-      key {remote_host}
-      events 20
-      window 1s
-      burst 50
-    }
-  }
+  $CADDY_RATE_LIMIT
   reverse_proxy localhost:9000
 }
+
+$MONITORING_DOMAIN {
+  $CADDY_RATE_LIMIT
+  reverse_proxy localhost:3000 {
+    header_up Host {host}
+    header_up X-Real-IP {remote}
+    header_up X-Forwarded-For {remote}
+    header_up X-Forwarded-Proto {scheme}
+  }
+  
+  # Grafana needs websockets for live features
+  @websocket {
+    header Connection *Upgrade*
+    header Upgrade websocket
+  }
+  reverse_proxy @websocket localhost:3000
+}
 EOF
+
 sudo systemctl start caddy && \
 
 # Enable IP forwarding for Docker
@@ -138,11 +343,6 @@ sudo sysctl -w net.ipv4.ip_forward=1 && \
 sudo sysctl -w net.ipv6.conf.all.forwarding=1 && \
 echo 'net.ipv4.ip_forward=1' | sudo tee -a /etc/sysctl.conf && \
 echo 'net.ipv6.conf.all.forwarding=1' | sudo tee -a /etc/sysctl.conf && \
-
-# Ensure DNS works (some VPS providers don't configure systemd-resolved properly)
-sudo systemctl stop systemd-resolved 2>/dev/null || true
-echo "nameserver 9.9.9.9" | sudo tee /etc/resolv.conf > /dev/null
-echo "nameserver 1.1.1.1" | sudo tee -a /etc/resolv.conf > /dev/null
 
 # Configure nftables (kernel-level rate limiting + Docker networking)
 sudo cat <<'NFTABLES' > /etc/nftables.conf
@@ -265,9 +465,6 @@ NFTABLES
 sudo systemctl enable nftables && \
 sudo systemctl start nftables && \
 
-# Restart Docker to apply iptables=false configuration
-sudo systemctl restart docker && \
-
 # Configure webhook and restart
 
 sudo cat <<EOF > /etc/webhook.conf
@@ -364,6 +561,9 @@ sed -i "s|DEPLOY_ENV=.*|DEPLOY_ENV=staging|g" .env.production && \
 sed -i "s|GATEWAY_PORT=.*|GATEWAY_PORT=81|g" .env.production && \
 ./start.sh
 
+docker exec -it staging-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
+docker exec -it prod-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
+
 echo "✨ DONE ! ✨" && \
 echo "Staging: https://staging.$DNS" && \
 echo "Prod: https://$DNS" && \
@@ -372,8 +572,25 @@ echo "WEBHOOK_SECRET: $WEBHOOK_SECRET" && \
 ADMIN_PASSWORD=$(openssl rand -base64 20)
 echo "ADMIN_PASSWORD: $ADMIN_PASSWORD" && \
 
-docker exec -it staging-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
-docker exec -it prod-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
+echo ""
+echo "=== Monitoring Setup Complete ==="
+echo ""
+echo "Access Grafana at: https://${MONITORING_DOMAIN}"
+echo ""
+echo "Credentials:"
+echo "  Username: admin"
+echo "  Password: ${GRAFANA_ADMIN_PASSWORD}"
+echo ""
+echo "Password saved to: ${MONITORING_DIR}/grafana-admin-password.txt"
+echo ""
+echo "Metrics collected:"
+echo "  - CPU usage"
+echo "  - RAM usage"
+echo "  - Disk I/O"
+echo "  - Network traffic"
+echo "  - Docker container metrics"
+echo ""
 
 # To enable running docker without sudo
 newgrp docker
+
