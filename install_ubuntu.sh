@@ -156,6 +156,7 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/etc/grafana/dashboards
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
@@ -222,13 +223,29 @@ datasources:
     editable: false
 EOF
 
-# Create dashboards directory for manual imports
+# Create dashboards directory
 mkdir -p $MONITORING_DIR/grafana/dashboards
 
-# Note: Dashboards need to be imported manually via Grafana UI
-# Recommended dashboards to import:
-#   - Node Exporter Full (ID: 1860)
-#   - Docker Container (ID: 179)
+# Download Node Exporter Full dashboard (ID: 1860)
+echo "Downloading Node Exporter Full dashboard..."
+curl -sL "https://grafana.com/api/dashboards/1860/revisions/latest/download" -o $MONITORING_DIR/grafana/dashboards/node-exporter-full.json
+
+# Create dashboards.yml configuration to provision dashboards automatically
+cat > $MONITORING_DIR/grafana/provisioning/dashboards/dashboards.yml << 'EOF'
+apiVersion: 1
+
+providers:
+  - name: 'Dashboards'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: true
+EOF
 
 # Start monitoring stack
 echo "Starting Prometheus + Grafana stack..."
@@ -254,9 +271,9 @@ echo "  - Network traffic"
 echo "  - Docker container metrics"
 echo ""
 echo "Import these dashboards in Grafana:"
-echo "  1. Node Exporter Full (ID: 1860) - Comprehensive server metrics"
-echo "  2. Docker Container (ID: 179) - Container resource usage"
-echo "  3. Node Exporter Dashboard (ID: 11074) - Modern clean UI"
+echo "  - Node Exporter Full (ID: 1860) - Already pre-provisioned!"
+echo "  - Docker Container (ID: 179) - Container resource usage"
+echo "  - Node Exporter Dashboard (ID: 11074) - Modern clean UI"
 echo ""
 echo "To manage monitoring:"
 echo "  cd ${MONITORING_DIR}"
