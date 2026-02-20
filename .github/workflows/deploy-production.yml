@@ -46,4 +46,4 @@ jobs:
         run: |
           curl -X POST \
             -H "X-Webhook-Secret: ${{ secrets.WEBHOOK_SECRET }}" \
-            https://ops.thegoodcorner.duckdns.org/hooks/redeploy-prod
+            https://ops.thegoodcorner.dedyn.io/hooks/redeploy-prod
