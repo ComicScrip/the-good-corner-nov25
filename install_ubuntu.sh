@@ -123,6 +123,10 @@ scrape_configs:
   - job_name: 'docker'
     static_configs:
       - targets: ['host.docker.internal:9323']
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
 EOF
 
 # Create Docker Compose file for monitoring
@@ -230,6 +234,13 @@ mkdir -p $MONITORING_DIR/grafana/dashboards
 echo "Downloading Node Exporter Full dashboard..."
 curl -sL "https://grafana.com/api/dashboards/1860/revisions/latest/download" -o $MONITORING_DIR/grafana/dashboards/node-exporter-full.json
 
+# Download cAdvisor exporter dashboard (ID: 14282)
+echo "Downloading cAdvisor exporter dashboard..."
+curl -sL "https://grafana.com/api/dashboards/14282/revisions/latest/download" -o $MONITORING_DIR/grafana/dashboards/cadvisor-exporter.json
+
+# Fix datasource reference in cAdvisor dashboard (replace ${DS_PROMETHEUS} with Prometheus)
+sed -i 's/\${DS_PROMETHEUS}/Prometheus/g' $MONITORING_DIR/grafana/dashboards/cadvisor-exporter.json
+
 # Create dashboards.yml configuration to provision dashboards automatically
 cat > $MONITORING_DIR/grafana/provisioning/dashboards/dashboards.yml << 'EOF'
 apiVersion: 1
@@ -251,37 +262,6 @@ EOF
 echo "Starting Prometheus + Grafana stack..."
 cd $MONITORING_DIR
 docker compose up -d
-
-echo ""
-echo "=== Monitoring Setup Complete ==="
-echo ""
-echo "Access Grafana at: https://${MONITORING_DOMAIN}"
-echo ""
-echo "Credentials:"
-echo "  Username: admin"
-echo "  Password: ${GRAFANA_ADMIN_PASSWORD}"
-echo ""
-echo "Password saved to: ${MONITORING_DIR}/grafana-admin-password.txt"
-echo ""
-echo "Metrics collected:"
-echo "  - CPU usage"
-echo "  - RAM usage"
-echo "  - Disk I/O"
-echo "  - Network traffic"
-echo "  - Docker container metrics"
-echo ""
-echo "Import these dashboards in Grafana:"
-echo "  - Node Exporter Full (ID: 1860) - Already pre-provisioned!"
-echo "  - Docker Container (ID: 179) - Container resource usage"
-echo "  - Node Exporter Dashboard (ID: 11074) - Modern clean UI"
-echo ""
-echo "To manage monitoring:"
-echo "  cd ${MONITORING_DIR}"
-echo "  docker compose up -d    # Start services"
-echo "  docker compose down     # Stop services"
-echo "  docker compose logs -f  # View logs"
-echo ""
-
 
 # Build Caddy with rate limiting module
 cd /tmp
@@ -581,6 +561,9 @@ sed -i "s|DEPLOY_ENV=.*|DEPLOY_ENV=staging|g" .env.production && \
 sed -i "s|GATEWAY_PORT=.*|GATEWAY_PORT=81|g" .env.production && \
 ./start.sh
 
+docker exec -it staging-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
+docker exec -it prod-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
+
 echo "✨ DONE ! ✨" && \
 echo "Staging: https://staging.$DNS" && \
 echo "Prod: https://$DNS" && \
@@ -589,8 +572,24 @@ echo "WEBHOOK_SECRET: $WEBHOOK_SECRET" && \
 ADMIN_PASSWORD=$(openssl rand -base64 20)
 echo "ADMIN_PASSWORD: $ADMIN_PASSWORD" && \
 
-docker exec -it staging-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
-docker exec -it prod-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
+echo ""
+echo "=== Monitoring Setup Complete ==="
+echo ""
+echo "Access Grafana at: https://${MONITORING_DOMAIN}"
+echo ""
+echo "Credentials:"
+echo "  Username: admin"
+echo "  Password: ${GRAFANA_ADMIN_PASSWORD}"
+echo ""
+echo "Password saved to: ${MONITORING_DIR}/grafana-admin-password.txt"
+echo ""
+echo "Metrics collected:"
+echo "  - CPU usage"
+echo "  - RAM usage"
+echo "  - Disk I/O"
+echo "  - Network traffic"
+echo "  - Docker container metrics"
+echo ""
 
 # To enable running docker without sudo
 newgrp docker
