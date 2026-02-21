@@ -105,6 +105,23 @@ export default function Profile() {
       <div className="p-4 max-w-[600px] mx-auto">
         <h2 className="text-xl font-bold my-6">Mon profil</h2>
 
+        {/* Avatar */}
+        <div className="flex justify-center mb-6">
+          {user.image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={user.image}
+              alt="avatar"
+              referrerPolicy="no-referrer"
+              className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-orange-600 text-white flex items-center justify-center text-3xl font-bold">
+              {user.email.charAt(0).toUpperCase()}
+            </div>
+          )}
+        </div>
+
         <div className="card bg-base-100 shadow-sm border border-gray-200 mb-6">
           <div className="card-body">
             <h3 className="card-title text-base">Informations du compte</h3>
@@ -115,9 +132,6 @@ export default function Profile() {
               ) : (
                 <span className="badge badge-warning badge-sm">Non vérifié</span>
               )}
-            </p>
-            <p className="text-gray-600">
-              <span className="font-medium">Rôle :</span> {user.role}
             </p>
           </div>
         </div>
