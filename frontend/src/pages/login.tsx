@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import Field from "@/components/Field";
 import Layout from "@/components/Layout";
 import { type LoginInput, useLoginMutation } from "@/graphql/generated/schema";
+import { authClient } from "@/lib/authClient";
 
 export default function Login() {
   const router = useRouter();
@@ -20,6 +21,13 @@ export default function Login() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleSocialLogin = async (provider: "google" | "github") => {
+    await authClient.signIn.social({
+      provider,
+      callbackURL: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/api/auth-bridge`,
+    });
   };
 
   return (
@@ -63,6 +71,25 @@ export default function Login() {
             {isSubmitting ? "Connexion..." : "Se connecter"}
           </button>
         </form>
+
+        <div className="divider my-4 text-sm text-gray-400">ou</div>
+
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            onClick={() => handleSocialLogin("github")}
+            className="btn btn-outline w-full flex items-center gap-2"
+          >
+            Continuer avec GitHub
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSocialLogin("google")}
+            className="btn btn-outline w-full flex items-center gap-2"
+          >
+            Continuer avec Google
+          </button>
+        </div>
 
         <div className="text-center mt-4">
           <p className="text-sm text-gray-600">

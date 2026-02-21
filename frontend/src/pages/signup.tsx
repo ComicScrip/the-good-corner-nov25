@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import Field from "@/components/Field";
 import Layout from "@/components/Layout";
 import { type SignupInput, useSignupMutation } from "@/graphql/generated/schema";
+import { authClient } from "@/lib/authClient";
 
 export default function Signup() {
   const router = useRouter();
@@ -21,6 +22,13 @@ export default function Signup() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleSocialLogin = async (provider: "google" | "github") => {
+    await authClient.signIn.social({
+      provider,
+      callbackURL: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/api/auth-bridge`,
+    });
   };
 
   return (
@@ -75,6 +83,25 @@ export default function Signup() {
             {isSubmitting ? "Inscription..." : "S'inscrire"}
           </button>
         </form>
+
+        <div className="divider my-4 text-sm text-gray-400">ou</div>
+
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            onClick={() => handleSocialLogin("github")}
+            className="btn btn-outline w-full"
+          >
+            Continuer avec GitHub
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSocialLogin("google")}
+            className="btn btn-outline w-full"
+          >
+            Continuer avec Google
+          </button>
+        </div>
 
         {error && (
           <p className="text-red-500 mt-4 text-center">

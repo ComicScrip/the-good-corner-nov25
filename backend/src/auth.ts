@@ -35,6 +35,7 @@ export async function startSession(context: GraphQLContext, user: User) {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
     sameSite: "lax",
+    path: "/",
     maxAge: 7 * 24 * 60 * 60, // 7 days
   });
 
@@ -42,7 +43,7 @@ export async function startSession(context: GraphQLContext, user: User) {
 }
 
 export async function endSession(context: GraphQLContext) {
-  context.res.clearCookie(cookieName);
+  context.res.clearCookie(cookieName, { path: "/" });
 }
 
 export async function getJWT(
