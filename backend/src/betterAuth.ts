@@ -2,6 +2,7 @@ import { passkey } from "@better-auth/passkey";
 import { typeormAdapter } from "@hedystia/better-auth-typeorm";
 import { hash as argon2Hash, verify as argon2Verify } from "argon2";
 import { betterAuth } from "better-auth";
+import { magicLink } from "better-auth/plugins";
 import db from "./db";
 import { User } from "./entities/User";
 import env from "./env";
@@ -146,6 +147,30 @@ export const auth = betterAuth({
       rpID: "localhost",
       rpName: "The Good Corner",
       origin: env.FRONTEND_URL,
+    }),
+    magicLink({
+      expiresIn: 600, // 10 minutes
+      disableSignUp: false,
+      sendMagicLink: async ({ email, url }: { email: string; url: string }) => {
+        // better-auth builds url as ${baseURL}/api/auth/magic-link/verify?token=...
+        // Rewrite to the frontend page that will call the bridge after verification.
+        const frontendUrl = url.replace(
+          `${env.BETTER_AUTH_URL}/api/auth`,
+          `${env.FRONTEND_URL}/auth`,
+        );
+        const displayName = email.split("@")[0];
+        await sendMail({
+          to: email,
+          subject: "Votre lien de connexion",
+          html: `
+            <p>Bonjour ${displayName},</p>
+            <p>Voici votre lien de connexion à The Good Corner :</p>
+            <p><a href="${frontendUrl}">${frontendUrl}</a></p>
+            <p>Ce lien est valable pendant 10 minutes.</p>
+            <p>Si vous n'avez pas demandé ce lien, ignorez cet email.</p>
+          `,
+        });
+      },
     }),
   ],
 });

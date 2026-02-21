@@ -13,6 +13,10 @@ export const auth = {
         id: "passkey",
         endpoints: {},
       },
+      {
+        id: "magic-link",
+        endpoints: {},
+      },
     ],
   },
 };

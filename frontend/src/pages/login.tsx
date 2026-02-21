@@ -1,16 +1,29 @@
 import { useRouter } from "next/router";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Field from "@/components/Field";
 import Layout from "@/components/Layout";
 import { type LoginInput, useLoginMutation } from "@/graphql/generated/schema";
 import { authClient } from "@/lib/authClient";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "http://localhost:4000";
+const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "http://localhost:3000";
+
+type Mode = "password" | "magiclink";
+
 export default function Login() {
   const router = useRouter();
+  const [mode, setMode] = useState<Mode>("password");
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [magicLinkEmail, setMagicLinkEmail] = useState("");
+  const [magicLinkLoading, setMagicLinkLoading] = useState(false);
+  const [magicLinkError, setMagicLinkError] = useState<string | null>(null);
+
   const [login, { loading: isSubmitting, error }] = useLoginMutation();
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<LoginInput>();
 
@@ -23,28 +36,77 @@ export default function Login() {
     }
   };
 
+  const handleMagicLink = async () => {
+    const email = getValues("email");
+    if (!email) return;
+    setMagicLinkError(null);
+    setMagicLinkLoading(true);
+    try {
+      const result = await authClient.signIn.magicLink({
+        email,
+        callbackURL: `${FRONTEND_URL}/auth/magic-link/verify`,
+      });
+      if (result.error) {
+        setMagicLinkError(result.error.message ?? "Une erreur est survenue.");
+      } else {
+        setMagicLinkEmail(email);
+        setMagicLinkSent(true);
+      }
+    } catch {
+      setMagicLinkError("Une erreur est survenue lors de l'envoi du lien.");
+    } finally {
+      setMagicLinkLoading(false);
+    }
+  };
+
   const handleSocialLogin = async (provider: "google" | "github") => {
     await authClient.signIn.social({
       provider,
-      callbackURL: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/api/auth-bridge`,
+      callbackURL: `${BACKEND_URL}/api/auth-bridge`,
     });
   };
 
   const handlePasskeyLogin = async () => {
     const result = await authClient.signIn.passkey();
     if (result && !result.error) {
-      // better-auth set its session cookie; call the passkey bridge to mint our JWT cookie
-      await fetch(`${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/api/auth-bridge-passkey`, {
+      await fetch(`${BACKEND_URL}/api/auth-bridge-passkey`, {
         credentials: "include",
       });
       router.push("/");
     }
   };
 
+  if (magicLinkSent) {
+    return (
+      <Layout pageTitle="Connexion">
+        <div className="p-4 max-w-[400px] mx-auto text-center mt-16">
+          <h2 className="text-xl font-bold mb-4">Consultez votre boîte mail</h2>
+          <p className="text-gray-600 mb-2">
+            Un lien de connexion a été envoyé à <strong>{magicLinkEmail}</strong>.
+          </p>
+          <p className="text-gray-500 text-sm mb-6">
+            Cliquez sur le lien dans l'email pour vous connecter. Il expire dans 10 minutes.
+          </p>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={() => {
+              setMagicLinkSent(false);
+              setMagicLinkEmail("");
+            }}
+          >
+            Retour
+          </button>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout pageTitle="Connexion">
       <div className="p-4 max-w-[400px] mx-auto">
         <h2 className="text-xl font-bold my-6 text-center">Se connecter</h2>
+
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <Field
             label="Email"
@@ -64,29 +126,64 @@ export default function Login() {
             testId="login-email"
           />
 
-          <Field
-            label="Mot de passe"
-            inputProps={{
-              ...register("password", {
-                required: "Le mot de passe est requis",
-              }),
-              type: "password",
-              placeholder: "Votre mot de passe",
-            }}
-            id="password"
-            error={errors.password?.message}
-            testId="login-password"
-          />
+          {mode === "password" ? (
+            <>
+              <Field
+                label="Mot de passe"
+                inputProps={{
+                  ...register("password", {
+                    required: "Le mot de passe est requis",
+                  }),
+                  type: "password",
+                  placeholder: "Votre mot de passe",
+                }}
+                id="password"
+                error={errors.password?.message}
+                testId="login-password"
+              />
 
-          <button type="submit" disabled={isSubmitting} className="btn btn-primary w-full">
-            {isSubmitting ? "Connexion..." : "Se connecter"}
-          </button>
+              <button type="submit" disabled={isSubmitting} className="btn btn-primary w-full">
+                {isSubmitting ? "Connexion..." : "Se connecter"}
+              </button>
 
-          <div className="text-right">
-            <a href="/auth/forgot-password" className="text-sm text-blue-600 hover:underline">
-              Mot de passe oublié ?
-            </a>
-          </div>
+              <div className="flex items-center justify-between text-sm">
+                <button
+                  type="button"
+                  onClick={() => setMode("magiclink")}
+                  className="text-blue-600 hover:underline"
+                >
+                  Recevoir un lien magique
+                </button>
+                <a href="/auth/forgot-password" className="text-blue-600 hover:underline">
+                  Mot de passe oublié ?
+                </a>
+              </div>
+            </>
+          ) : (
+            <>
+              {magicLinkError && (
+                <p className="text-red-500 text-sm">{magicLinkError}</p>
+              )}
+              <button
+                type="button"
+                disabled={magicLinkLoading}
+                onClick={handleMagicLink}
+                className="btn btn-primary w-full"
+              >
+                {magicLinkLoading ? "Envoi en cours..." : "Recevoir un lien de connexion"}
+              </button>
+
+              <div className="text-sm text-center">
+                <button
+                  type="button"
+                  onClick={() => { setMode("password"); setMagicLinkError(null); }}
+                  className="text-blue-600 hover:underline"
+                >
+                  Utiliser mon mot de passe
+                </button>
+              </div>
+            </>
+          )}
         </form>
 
         <div className="divider my-4 text-sm text-gray-400">ou</div>
