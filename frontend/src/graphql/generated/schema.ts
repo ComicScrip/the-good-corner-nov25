@@ -273,7 +273,7 @@ export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 export type ProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ProfileQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, email: string, createdAt: any, role: string } | null };
+export type ProfileQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, email: string, emailVerified: boolean, createdAt: any, role: string } | null };
 
 export type RecentAdsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -685,6 +685,7 @@ export const ProfileDocument = gql`
   me {
     id
     email
+    emailVerified
     createdAt
     role
   }

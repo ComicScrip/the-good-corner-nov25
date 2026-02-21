@@ -1,4 +1,4 @@
-import { useRouter } from "next/router";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Field from "@/components/Field";
 import Layout from "@/components/Layout";
@@ -6,7 +6,8 @@ import { type SignupInput, useSignupMutation } from "@/graphql/generated/schema"
 import { authClient } from "@/lib/authClient";
 
 export default function Signup() {
-  const router = useRouter();
+  const [emailSent, setEmailSent] = useState(false);
+  const [signupEmail, setSignupEmail] = useState("");
   const [signup, { loading: isSubmitting, error }] = useSignupMutation();
   const {
     register,
@@ -17,8 +18,8 @@ export default function Signup() {
   const onSubmit = async (data: SignupInput) => {
     try {
       await signup({ variables: { data } });
-      alert("Inscription réussie ! Vous pouvez maintenant vous connecter.");
-      router.push("/");
+      setSignupEmail(data.email);
+      setEmailSent(true);
     } catch (err) {
       console.error(err);
     }
@@ -35,78 +36,98 @@ export default function Signup() {
     <Layout pageTitle="Inscription">
       <div className="p-4 max-w-[400px] mx-auto">
         <h2 className="text-xl font-bold my-6 text-center">Créer un compte</h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <Field
-            label="Email"
-            inputProps={{
-              ...register("email", {
-                required: "L'email est requis",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "L'email n'est pas valide",
-                },
-              }),
-              type: "email",
-              placeholder: "votre.email@example.com",
-            }}
-            id="email"
-            error={errors.email?.message}
-          />
 
-          <Field
-            label="Mot de passe"
-            inputProps={{
-              ...register("password", {
-                required: "Le mot de passe est requis",
-                minLength: {
-                  value: 8,
-                  message: "Le mot de passe doit contenir au moins 8 caractères",
-                },
-                maxLength: {
-                  value: 128,
-                  message: "Le mot de passe ne peut pas dépasser 128 caractères",
-                },
-                pattern: {
-                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                  message:
-                    "Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial",
-                },
-              }),
-              type: "password",
-              placeholder: "Votre mot de passe sécurisé",
-            }}
-            id="password"
-            error={errors.password?.message}
-          />
+        {emailSent ? (
+          <div className="text-center">
+            <p className="text-gray-700 mb-4">
+              Un email de vérification a été envoyé à <strong>{signupEmail}</strong>.
+            </p>
+            <p className="text-gray-600 text-sm">
+              Vérifiez votre boîte mail pour activer votre compte.
+            </p>
+            <div className="mt-6">
+              <a href="/login" className="btn btn-outline">
+                Aller à la connexion
+              </a>
+            </div>
+          </div>
+        ) : (
+          <>
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+              <Field
+                label="Email"
+                inputProps={{
+                  ...register("email", {
+                    required: "L'email est requis",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "L'email n'est pas valide",
+                    },
+                  }),
+                  type: "email",
+                  placeholder: "votre.email@example.com",
+                }}
+                id="email"
+                error={errors.email?.message}
+              />
 
-          <button type="submit" disabled={isSubmitting} className="btn btn-primary w-full">
-            {isSubmitting ? "Inscription..." : "S'inscrire"}
-          </button>
-        </form>
+              <Field
+                label="Mot de passe"
+                inputProps={{
+                  ...register("password", {
+                    required: "Le mot de passe est requis",
+                    minLength: {
+                      value: 8,
+                      message: "Le mot de passe doit contenir au moins 8 caractères",
+                    },
+                    maxLength: {
+                      value: 128,
+                      message: "Le mot de passe ne peut pas dépasser 128 caractères",
+                    },
+                    pattern: {
+                      value:
+                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                      message:
+                        "Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial",
+                    },
+                  }),
+                  type: "password",
+                  placeholder: "Votre mot de passe sécurisé",
+                }}
+                id="password"
+                error={errors.password?.message}
+              />
 
-        <div className="divider my-4 text-sm text-gray-400">ou</div>
+              <button type="submit" disabled={isSubmitting} className="btn btn-primary w-full">
+                {isSubmitting ? "Inscription..." : "S'inscrire"}
+              </button>
+            </form>
 
-        <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={() => handleSocialLogin("github")}
-            className="btn btn-outline w-full"
-          >
-            Continuer avec GitHub
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSocialLogin("google")}
-            className="btn btn-outline w-full"
-          >
-            Continuer avec Google
-          </button>
-        </div>
+            <div className="divider my-4 text-sm text-gray-400">ou</div>
 
-        {error && (
-          <p className="text-red-500 mt-4 text-center">
-            {error.message || "Une erreur est survenue lors de l'inscription"}
-          </p>
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={() => handleSocialLogin("github")}
+                className="btn btn-outline w-full"
+              >
+                Continuer avec GitHub
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSocialLogin("google")}
+                className="btn btn-outline w-full"
+              >
+                Continuer avec Google
+              </button>
+            </div>
+
+            {error && (
+              <p className="text-red-500 mt-4 text-center">
+                {error.message || "Une erreur est survenue lors de l'inscription"}
+              </p>
+            )}
+          </>
         )}
       </div>
     </Layout>

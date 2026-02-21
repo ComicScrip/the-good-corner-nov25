@@ -108,8 +108,13 @@ export default function Profile() {
         <div className="card bg-base-100 shadow-sm border border-gray-200 mb-6">
           <div className="card-body">
             <h3 className="card-title text-base">Informations du compte</h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 flex items-center gap-2 flex-wrap">
               <span className="font-medium">Email :</span> {user.email}
+              {user.emailVerified ? (
+                <span className="badge badge-success badge-sm">Vérifié</span>
+              ) : (
+                <span className="badge badge-warning badge-sm">Non vérifié</span>
+              )}
             </p>
             <p className="text-gray-600">
               <span className="font-medium">Rôle :</span> {user.role}

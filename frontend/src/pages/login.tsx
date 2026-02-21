@@ -81,6 +81,12 @@ export default function Login() {
           <button type="submit" disabled={isSubmitting} className="btn btn-primary w-full">
             {isSubmitting ? "Connexion..." : "Se connecter"}
           </button>
+
+          <div className="text-right">
+            <a href="/auth/forgot-password" className="text-sm text-blue-600 hover:underline">
+              Mot de passe oublié ?
+            </a>
+          </div>
         </form>
 
         <div className="divider my-4 text-sm text-gray-400">ou</div>
