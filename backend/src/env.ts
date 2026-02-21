@@ -33,4 +33,16 @@ export default load({
     type: String,
     optional: true,
   },
+  MAILJET_SMTP_USER: {
+    type: String,
+    optional: true,
+  },
+  MAILJET_SMTP_PASS: {
+    type: String,
+    optional: true,
+  },
+  MAILJET_FROM_EMAIL: {
+    type: String,
+    optional: true,
+  },
 });

@@ -5,6 +5,7 @@ export const auth = {
   handler: async (_req: unknown) => new Response(null, { status: 404 }),
   api: {
     getSession: async (_opts: { headers: unknown }) => null,
+    sendVerificationEmail: async (_opts: unknown) => {},
   },
   options: {
     plugins: [

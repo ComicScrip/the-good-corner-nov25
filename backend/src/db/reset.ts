@@ -1,5 +1,5 @@
+import { randomUUID } from "node:crypto";
 import { hash } from "argon2";
-import { randomUUID } from "crypto";
 import { Ad } from "../entities/Ad";
 import { Category } from "../entities/Category";
 import { Tag } from "../entities/Tag";
@@ -16,12 +16,14 @@ async function main() {
     id: randomUUID(),
     email: "dave.lopper@app.com",
     hashedPassword: await hash("SuperP@ssW0rd!"),
+    emailVerified: true,
   }).save();
 
   const visitor2 = await User.create({
     id: randomUUID(),
     email: "dave.lopper2@app.com",
     hashedPassword: await hash("SuperP@ssW0rd!"),
+    emailVerified: true,
   }).save();
 
   await User.create({
@@ -29,6 +31,7 @@ async function main() {
     email: "admin@app.com",
     hashedPassword: await hash(ADMIN_PASSWORD),
     role: UserRole.Admin,
+    emailVerified: true,
   }).save();
 
   const macbook = Ad.create({

@@ -157,3 +157,70 @@ development — that is normal and expected. Click **"Continue"** to proceed.
 For production, replace `http://localhost:4000` with your actual backend domain and
 register the production callback URLs in each provider's console alongside (not instead
 of) the development ones.
+
+---
+
+## Email (Mailjet SMTP)
+
+The app sends transactional emails (email verification on signup, password reset) via
+**Nodemailer** using Mailjet's SMTP relay. All three variables are **optional** — the
+app starts normally without them and simply skips sending emails (a warning is logged).
+
+### Environment variables
+
+Add to `backend/.env`:
+
+```env
+MAILJET_SMTP_USER=your-mailjet-api-key
+MAILJET_SMTP_PASS=your-mailjet-secret-key
+MAILJET_FROM_EMAIL=noreply@yourdomain.com
+```
+
+| Variable | Description |
+|---|---|
+| `MAILJET_SMTP_USER` | Your Mailjet **API Key** (used as SMTP username) |
+| `MAILJET_SMTP_PASS` | Your Mailjet **Secret Key** (used as SMTP password) |
+| `MAILJET_FROM_EMAIL` | The "From" address shown to recipients |
+
+### How to get Mailjet SMTP credentials
+
+#### 1. Create a Mailjet account
+
+Go to [https://app.mailjet.com/signup](https://app.mailjet.com/signup) and register.
+The free tier allows **200 emails/day** and **6 000/month** — plenty for development.
+
+#### 2. Retrieve your API Key and Secret Key
+
+After signing in, go to:
+
+**Account → Master API Key & Sub API key management**
+
+(Direct URL: `https://app.mailjet.com/account/apikeys`)
+
+You will see your **API Key** and **Secret Key** on this page. Copy both values.
+
+#### 3. Set the environment variables
+
+```env
+MAILJET_SMTP_USER=<your API Key>
+MAILJET_SMTP_PASS=<your Secret Key>
+MAILJET_FROM_EMAIL=noreply@yourdomain.com
+```
+
+> `MAILJET_FROM_EMAIL` can be any address, but Mailjet requires the sender domain to be
+> verified for production use. For local development any address works on the free plan.
+
+#### 4. SMTP connection details (already hardcoded in `mailer.ts`)
+
+| Setting | Value |
+|---|---|
+| Host | `in-v3.mailjet.com` |
+| Port | `587` |
+| Encryption | STARTTLS (`requireTLS: true`) |
+| Username | Your API Key |
+| Password | Your Secret Key |
+
+#### 5. Verify
+
+Restart the backend and sign up with a new account. You should receive a verification
+email within a few seconds.

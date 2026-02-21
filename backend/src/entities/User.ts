@@ -36,6 +36,7 @@ export class User extends BaseEntity {
   name: string | null;
 
   // Set by better-auth when the user verifies their email (OAuth users start as true).
+  @Field()
   @Column({ default: false })
   emailVerified: boolean;
 

@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { GraphQLError } from "graphql";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { endSession, getCurrentUser, startSession } from "../auth";
+import { auth } from "../betterAuth";
 import { LoginInput, SignupInput, User } from "../entities/User";
 import type { GraphQLContext } from "../types";
 
@@ -25,7 +26,20 @@ export default class UserResolver {
     }
     const hashedPassword = await hash(data.password);
     const newUser = User.create({ id: randomUUID(), ...data, hashedPassword });
-    return await newUser.save();
+    const savedUser = await newUser.save();
+
+    // Trigger verification email — must be done manually because signup goes through
+    // a custom GraphQL resolver (not better-auth's built-in endpoint), so sendOnSignUp won't fire.
+    try {
+      await auth.api.sendVerificationEmail({
+        body: { email: savedUser.email },
+        headers: new Headers(),
+      });
+    } catch (e) {
+      console.warn("[signup] Failed to send verification email:", e);
+    }
+
+    return savedUser;
   }
 
   @Mutation(() => String)
@@ -45,6 +59,13 @@ export default class UserResolver {
       throw new GraphQLError("Email ou mot de passe incorrect", {
         extensions: { code: "INVALID_CREDENTIALS", http: { status: 401 } },
       });
+    }
+
+    if (!user.emailVerified) {
+      throw new GraphQLError(
+        "Veuillez vérifier votre adresse email avant de vous connecter. Consultez votre boîte mail.",
+        { extensions: { code: "EMAIL_NOT_VERIFIED", http: { status: 403 } } },
+      );
     }
 
     return startSession(context, user);

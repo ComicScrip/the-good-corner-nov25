@@ -1,9 +1,11 @@
 import { passkey } from "@better-auth/passkey";
 import { typeormAdapter } from "@hedystia/better-auth-typeorm";
+import { hash as argon2Hash, verify as argon2Verify } from "argon2";
 import { betterAuth } from "better-auth";
 import db from "./db";
 import { User } from "./entities/User";
 import env from "./env";
+import { sendMail } from "./mailer";
 
 /**
  * The @hedystia/better-auth-typeorm adapter silently drops the `join` parameter
@@ -60,6 +62,67 @@ export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   trustedOrigins: env.CORS_ALLOWED_ORIGINS.split(","),
   database: patchedTypeormAdapter(db),
+  emailAndPassword: {
+    enabled: true,
+    // Use argon2 so that better-auth's account.password and our user.hashedPassword
+    // always use the same algorithm and can be kept in sync.
+    password: {
+      hash: (password: string) => argon2Hash(password),
+      verify: ({ hash, password }: { hash: string; password: string }) =>
+        argon2Verify(hash, password),
+    },
+    sendResetPassword: async ({ user, url }: { user: { email: string; name: string | null }; url: string }) => {
+      const displayName = user.name ?? user.email.split("@")[0];
+      await sendMail({
+        to: user.email,
+        subject: "Réinitialisation de votre mot de passe",
+        html: `
+          <p>Bonjour ${displayName},</p>
+          <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
+          <p>Cliquez sur le lien ci-dessous pour choisir un nouveau mot de passe :</p>
+          <p><a href="${url}">${url}</a></p>
+          <p>Ce lien expire dans 1 heure.</p>
+          <p>Si vous n'avez pas effectué cette demande, ignorez cet email.</p>
+        `,
+      });
+    },
+    onPasswordReset: async ({ user }: { user: { id: string } }) => {
+      // better-auth stores the new hash in account.password (credential provider).
+      // Our GraphQL login reads user.hashedPassword, so we must keep them in sync.
+      const accountRow = await db
+        .getRepository("account")
+        .findOne({ where: { userId: user.id, providerId: "credential" } });
+      if (accountRow && (accountRow as { password: string }).password) {
+        await User.update(user.id, {
+          hashedPassword: (accountRow as { password: string }).password,
+        });
+      }
+    },
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }: { user: { email: string; name: string | null }; url: string }) => {
+      // better-auth builds url as ${baseURL}/api/auth/verify-email?token=...
+      // but the verification page lives on the frontend at ${FRONTEND_URL}/auth/verify-email?token=...
+      const frontendUrl = url.replace(
+        `${env.BETTER_AUTH_URL}/api/auth`,
+        `${env.FRONTEND_URL}/auth`,
+      );
+      const displayName = user.name ?? user.email.split("@")[0];
+      await sendMail({
+        to: user.email,
+        subject: "Vérifiez votre adresse email",
+        html: `
+          <p>Bonjour ${displayName},</p>
+          <p>Merci de vous être inscrit sur The Good Corner !</p>
+          <p>Cliquez sur le lien ci-dessous pour vérifier votre adresse email :</p>
+          <p><a href="${frontendUrl}">${frontendUrl}</a></p>
+          <p>Ce lien expire dans 24 heures.</p>
+          <p>Si vous n'avez pas créé de compte, ignorez cet email.</p>
+        `,
+      });
+    },
+    autoSignInAfterVerification: true,
+  },
   socialProviders: {
     ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
       ? {
