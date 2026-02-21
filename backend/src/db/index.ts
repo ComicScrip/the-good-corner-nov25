@@ -2,7 +2,7 @@ import { DataSource } from "typeorm";
 import { Ad } from "../entities/Ad";
 import { BaAccount } from "../entities/BaAccount";
 import { BaSession } from "../entities/BaSession";
-import { BaUser } from "../entities/BaUser";
+import { BaPasskey } from "../entities/BaPasskey";
 import { BaVerification } from "../entities/BaVerification";
 import { Category } from "../entities/Category";
 import { Tag } from "../entities/Tag";
@@ -16,7 +16,7 @@ const db = new DataSource({
   password: env.DB_PASS,
   port: env.NODE_ENV === "test" ? env.TEST_DB_PORT : env.DB_PORT,
   database: env.DB_NAME,
-  entities: [Ad, Tag, Category, User, BaUser, BaSession, BaAccount, BaVerification],
+  entities: [Ad, Tag, Category, User, BaSession, BaAccount, BaVerification, BaPasskey],
   synchronize: env.NODE_ENV !== "production",
   //logging: true
 });

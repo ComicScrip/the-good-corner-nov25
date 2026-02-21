@@ -1,4 +1,5 @@
 import { hash, verify } from "argon2";
+import { randomUUID } from "crypto";
 import { GraphQLError } from "graphql";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { endSession, getCurrentUser, startSession } from "../auth";
@@ -23,7 +24,7 @@ export default class UserResolver {
       });
     }
     const hashedPassword = await hash(data.password);
-    const newUser = User.create({ ...data, hashedPassword });
+    const newUser = User.create({ id: randomUUID(), ...data, hashedPassword });
     return await newUser.save();
   }
 

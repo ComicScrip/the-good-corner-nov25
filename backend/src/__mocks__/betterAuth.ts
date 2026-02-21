@@ -6,4 +6,12 @@ export const auth = {
   api: {
     getSession: async (_opts: { headers: unknown }) => null,
   },
+  options: {
+    plugins: [
+      {
+        id: "passkey",
+        endpoints: {},
+      },
+    ],
+  },
 };

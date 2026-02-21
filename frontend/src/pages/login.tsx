@@ -30,6 +30,17 @@ export default function Login() {
     });
   };
 
+  const handlePasskeyLogin = async () => {
+    const result = await authClient.signIn.passkey();
+    if (result && !result.error) {
+      // better-auth set its session cookie; call the passkey bridge to mint our JWT cookie
+      await fetch(`${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/api/auth-bridge-passkey`, {
+        credentials: "include",
+      });
+      router.push("/");
+    }
+  };
+
   return (
     <Layout pageTitle="Connexion">
       <div className="p-4 max-w-[400px] mx-auto">
@@ -88,6 +99,13 @@ export default function Login() {
             className="btn btn-outline w-full flex items-center gap-2"
           >
             Continuer avec Google
+          </button>
+          <button
+            type="button"
+            onClick={handlePasskeyLogin}
+            className="btn btn-outline w-full flex items-center gap-2"
+          >
+            Se connecter avec une clé d'accès
           </button>
         </div>
 

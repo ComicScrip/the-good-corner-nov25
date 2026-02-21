@@ -1,11 +1,12 @@
 import { IsEmail, IsStrongPassword } from "class-validator";
-import { Field, InputType, Int, ObjectType } from "type-graphql";
+import { Field, ID, InputType, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
+  UpdateDateColumn,
 } from "typeorm";
 
 export const UserRole = {
@@ -18,20 +19,42 @@ export type Role = (typeof UserRole)[keyof typeof UserRole];
 @ObjectType()
 @Entity()
 export class User extends BaseEntity {
-  @Field(() => Int)
-  @PrimaryGeneratedColumn()
-  id: number;
+  // Text PK — better-auth supplies its own UUID string; we must not let Postgres
+  // auto-generate one, otherwise better-auth's supplied id would be ignored.
+  @Field(() => ID)
+  @PrimaryColumn("text")
+  id: string;
 
   @Field()
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  // Nullable: email/password users don't have a name from the signup form.
+  // better-auth populates this for OAuth/passkey users.
+  @Field(() => String, { nullable: true })
+  @Column({ type: "text", nullable: true })
+  name: string | null;
+
+  // Set by better-auth when the user verifies their email (OAuth users start as true).
+  @Column({ default: false })
+  emailVerified: boolean;
+
+  // Avatar URL from OAuth provider, if any.
+  @Field(() => String, { nullable: true })
+  @Column({ type: "text", nullable: true })
+  image: string | null;
+
+  // Hidden from GraphQL — only used for email/password login.
+  // Empty string for OAuth/passkey-only users.
+  @Column({ default: "" })
   hashedPassword: string;
 
   @Field()
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @Field()
   @Column({ enum: UserRole, default: UserRole.Visitor })

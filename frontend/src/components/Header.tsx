@@ -151,9 +151,9 @@ export default function Header() {
               {user ? (
                 <>
                   <div className="flex items-center gap-2 mr-2">
-                    <div className="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    <Link href="/profile" className="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold hover:opacity-80" title="Mon profil">
                       {getUserInitial(user.email)}
-                    </div>
+                    </Link>
                   </div>
                   <button
                     type="button"
