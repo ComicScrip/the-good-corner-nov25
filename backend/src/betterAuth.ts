@@ -10,14 +10,20 @@ import { sendMail } from "./mailer";
 
 /**
  * The @hedystia/better-auth-typeorm adapter silently drops the `join` parameter
- * on `findOne` calls, so `findSession` (called by sessionMiddleware on every
- * passkey/list/register request) always returns null → 401 UNAUTHORIZED.
+ * on `findOne` calls.  This causes two separate bugs:
  *
- * We wrap the adapter so that whenever `findOne` is called for the "session"
- * model WITH a join, we do the two-step lookup ourselves (session row + user
- * row) and return the merged object that better-auth's `findSession` expects:
+ * 1. `findSession` (called by sessionMiddleware on every passkey/list/register
+ *    request) always returns null → 401 UNAUTHORIZED.
+ *    Fix: intercept `model === "session"` + join → fetch session row, then user
+ *    row, return `{ ...session, user }`.
  *
- *   { id, token, userId, expiresAt, ..., user: { id, email, name, ... } }
+ * 2. `findOAuthUser` (internal-adapter) calls
+ *    `findOne({ model: "account", join: { user: true } })`.  Without the join
+ *    the account row is returned without `account.user`, so better-auth thinks
+ *    the account is orphaned → falls through to `createOAuthUser` →
+ *    **duplicate user created** on every OAuth re-sign-in after an email change.
+ *    Fix: intercept `model === "account"` + join → fetch account row, then user
+ *    row, return `{ ...account, user }`.
  */
 function patchedTypeormAdapter(dataSource: typeof db) {
   const base = typeormAdapter(dataSource);
@@ -33,7 +39,7 @@ function patchedTypeormAdapter(dataSource: typeof db) {
       select?: string[];
       join?: import("@better-auth/core/db/adapter").JoinOption;
     }): Promise<T | null> => {
-      // Only intercept session + join queries
+      // Intercept session + join queries
       if (args.model === "session" && args.join) {
         // Find the session row normally (without join)
         const session = await originalFindOne<T & { userId?: string }>({ ...args, join: undefined });
@@ -49,6 +55,27 @@ function patchedTypeormAdapter(dataSource: typeof db) {
         // Return the merged object better-auth expects:
         // { ...sessionFields, user: { ...userFields } }
         return { ...session, user } as T;
+      }
+
+      // Intercept account + join queries (e.g. findOAuthUser in internal-adapter)
+      // The base adapter silently drops the `join` parameter, so account.user is
+      // never populated → better-auth thinks the account is orphaned → creates a
+      // duplicate user on OAuth re-sign-in after an email change.
+      if (args.model === "account" && args.join) {
+        // Find the account row normally (without join)
+        const account = await originalFindOne<T & { userId?: string }>({ ...args, join: undefined });
+        if (!account) return null;
+
+        // Manually fetch the linked user row
+        const userId = account.userId;
+        if (!userId) return null;
+
+        const user = await User.findOne({ where: { id: userId } });
+        if (!user) return null;
+
+        // Return the merged object better-auth expects:
+        // { ...accountFields, user: { ...userFields } }
+        return { ...account, user } as T;
       }
 
       return originalFindOne<T>(args);
@@ -123,6 +150,50 @@ export const auth = betterAuth({
       });
     },
     autoSignInAfterVerification: true,
+  },
+  user: {
+    changeEmail: {
+      enabled: true,
+      // Step 1: sent to the OLD email to confirm the request was intentional.
+      // better-auth then sends a second email to the NEW address via sendVerificationEmail (step 2).
+      sendChangeEmailVerification: async ({
+        user,
+        newEmail,
+        url,
+      }: {
+        user: { email: string; name: string | null };
+        newEmail: string;
+        url: string;
+      }) => {
+        // better-auth embeds the callbackURL verbatim into the URL query string
+        // without percent-encoding it, so a callbackURL like
+        // "http://localhost:3000/profile?emailChanged=1" creates a malformed URL
+        // with two "?" characters.  Fix this by re-encoding the callbackURL
+        // parameter before rewriting the host prefix.
+        const fixedUrl = url.replace(
+          /([?&]callbackURL=)(.+)$/,
+          (_, prefix, value) => `${prefix}${encodeURIComponent(value)}`,
+        );
+        // Rewrite backend URL to the frontend verify-email page.
+        const frontendUrl = fixedUrl.replace(
+          `${env.BETTER_AUTH_URL}/api/auth`,
+          `${env.FRONTEND_URL}/auth`,
+        );
+        const displayName = user.name ?? user.email.split("@")[0];
+        await sendMail({
+          to: user.email,
+          subject: "Confirmation de changement d'email",
+          html: `
+            <p>Bonjour ${displayName},</p>
+            <p>Vous avez demandé à changer votre adresse email vers <strong>${newEmail}</strong>.</p>
+            <p>Cliquez sur le lien ci-dessous pour confirmer cette demande depuis votre ancienne adresse :</p>
+            <p><a href="${frontendUrl}">${frontendUrl}</a></p>
+            <p>Ce lien expire dans 24 heures.</p>
+            <p>Si vous n'avez pas effectué cette demande, ignorez cet email.</p>
+          `,
+        });
+      },
+    },
   },
   socialProviders: {
     ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET

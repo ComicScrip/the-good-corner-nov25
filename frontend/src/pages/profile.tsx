@@ -1,10 +1,12 @@
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import Layout from "@/components/Layout";
 import { useProfileQuery } from "@/graphql/generated/schema";
 import { authClient } from "@/lib/authClient";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "http://localhost:4000";
+const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "http://localhost:3000";
 
 async function ensureSession(): Promise<boolean> {
   try {
@@ -19,7 +21,7 @@ async function ensureSession(): Promise<boolean> {
 
 export default function Profile() {
   const router = useRouter();
-  const { data, loading } = useProfileQuery({ fetchPolicy: "cache-and-network" });
+  const { data, loading, refetch } = useProfileQuery({ fetchPolicy: "cache-and-network" });
   const user = data?.me ?? null;
 
   // Redirect to /login if not authenticated
@@ -29,14 +31,23 @@ export default function Profile() {
     }
   }, [loading, user, router]);
 
+  // Refetch profile when landing back from an email-change confirmation redirect.
+  // Also re-mint the JWT so the session reflects the new email address.
+  useEffect(() => {
+    if (!router.query.emailChanged) return;
+    // Re-mint JWT from the current better-auth session (which now has the new email)
+    fetch(`${BACKEND_URL}/api/auth-bridge-passkey`, { credentials: "include" })
+      .finally(() => {
+        refetch();
+        // Remove the query param without a full navigation
+        router.replace("/profile", undefined, { shallow: true });
+      });
+  }, [router.query.emailChanged, refetch, router]);
+
   // useListPasskeys fires immediately on mount (before ensure-session).
-  // For email/password users the first request may get 401 (no session cookie
-  // yet). Once ensure-session succeeds we call refetch() to reload the list.
   const { data: passkeys, isPending: passkeysLoading, refetch: refetchPasskeys } =
     authClient.useListPasskeys();
 
-  // Ensure a better-auth session exists as soon as the user is known, then
-  // refetch the passkey list so it reflects the now-valid session.
   const sessionEnsuredRef = useRef(false);
 
   useEffect(() => {
@@ -47,6 +58,7 @@ export default function Profile() {
     });
   }, [user, refetchPasskeys]);
 
+  // ── Passkey handlers ─────────────────────────────────────────────────────
   const [addError, setAddError] = useState<string | null>(null);
   const [addLoading, setAddLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
@@ -55,13 +67,11 @@ export default function Profile() {
     setAddError(null);
     setAddLoading(true);
     try {
-      // Re-ensure session in case the cookie expired since page load.
       const ok = await ensureSession();
       if (!ok) {
         setAddError("Session expirée, veuillez vous reconnecter.");
         return;
       }
-
       const result = await authClient.passkey.addPasskey({
         name: `Passkey ${new Date().toLocaleDateString("fr-FR")}`,
       });
@@ -82,7 +92,6 @@ export default function Profile() {
     try {
       const ok = await ensureSession();
       if (!ok) return;
-
       await authClient.passkey.deletePasskey({ id: passkeyId });
       (refetchPasskeys as (() => void) | undefined)?.();
     } catch (err) {
@@ -92,6 +101,43 @@ export default function Profile() {
     }
   };
 
+  // ── Change email ──────────────────────────────────────────────────────────
+  const [emailFormOpen, setEmailFormOpen] = useState(false);
+  const [emailPending, setEmailPending] = useState(false);
+  const [emailChangeError, setEmailChangeError] = useState<string | null>(null);
+  const [emailChangeLoading, setEmailChangeLoading] = useState(false);
+
+  const {
+    register: registerEmail,
+    handleSubmit: handleSubmitEmail,
+    reset: resetEmailForm,
+    formState: { errors: emailErrors },
+  } = useForm<{ newEmail: string }>();
+
+  const handleChangeEmail = async ({ newEmail }: { newEmail: string }) => {
+    setEmailChangeError(null);
+    setEmailChangeLoading(true);
+    try {
+      await ensureSession();
+      const result = await authClient.changeEmail({
+        newEmail,
+        callbackURL: `${FRONTEND_URL}/profile?emailChanged=1`,
+      });
+      if (result.error) {
+        setEmailChangeError(result.error.message ?? "Une erreur est survenue.");
+      } else {
+        setEmailFormOpen(false);
+        setEmailPending(true);
+        resetEmailForm();
+      }
+    } catch {
+      setEmailChangeError("Une erreur est survenue lors de la demande.");
+    } finally {
+      setEmailChangeLoading(false);
+    }
+  };
+
+  // ── Render ────────────────────────────────────────────────────────────────
   if (loading || !user) {
     return (
       <Layout pageTitle="Profil">
@@ -122,20 +168,97 @@ export default function Profile() {
           )}
         </div>
 
+        {/* Account info */}
         <div className="card bg-base-100 shadow-sm border border-gray-200 mb-6">
-          <div className="card-body">
+          <div className="card-body gap-3">
             <h3 className="card-title text-base">Informations du compte</h3>
-            <p className="text-gray-600 flex items-center gap-2 flex-wrap">
-              <span className="font-medium">Email :</span> {user.email}
+
+            {/* Current email + verified badge */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium text-gray-600">Email :</span>
+              <span className="text-gray-800">{user.email}</span>
               {user.emailVerified ? (
                 <span className="badge badge-success badge-sm">Vérifié</span>
               ) : (
                 <span className="badge badge-warning badge-sm">Non vérifié</span>
               )}
-            </p>
+              {!emailFormOpen && !emailPending && (
+                <button
+                  type="button"
+                  onClick={() => { setEmailFormOpen(true); setEmailChangeError(null); }}
+                  className="btn btn-ghost btn-xs text-blue-600 ml-auto"
+                >
+                  Modifier
+                </button>
+              )}
+            </div>
+
+            {/* Pending banner */}
+            {emailPending && (
+              <div className="alert alert-info text-sm py-2">
+                <span>
+                  En attente de confirmation — un email a été envoyé à{" "}
+                  <strong>{user.email}</strong>. Cliquez sur le lien pour valider le changement.
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-xs ml-auto"
+                  onClick={() => setEmailPending(false)}
+                >
+                  Fermer
+                </button>
+              </div>
+            )}
+
+            {/* Change email inline form */}
+            {emailFormOpen && (
+              <form
+                onSubmit={handleSubmitEmail(handleChangeEmail)}
+                className="flex flex-col gap-2 mt-1"
+              >
+                <input
+                  type="email"
+                  placeholder="Nouvelle adresse email"
+                  className="input input-bordered input-sm w-full"
+                  {...registerEmail("newEmail", {
+                    required: "L'email est requis",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "L'email n'est pas valide",
+                    },
+                    validate: (v) =>
+                      v.toLowerCase() !== user.email.toLowerCase() ||
+                      "C'est déjà votre adresse email actuelle",
+                  })}
+                />
+                {emailErrors.newEmail && (
+                  <p className="text-red-500 text-xs">{emailErrors.newEmail.message}</p>
+                )}
+                {emailChangeError && (
+                  <p className="text-red-500 text-xs">{emailChangeError}</p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={emailChangeLoading}
+                    className="btn btn-primary btn-sm"
+                  >
+                    {emailChangeLoading ? "Envoi..." : "Envoyer le lien de confirmation"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => { setEmailFormOpen(false); setEmailChangeError(null); resetEmailForm(); }}
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
 
+        {/* Passkeys */}
         <div className="card bg-base-100 shadow-sm border border-gray-200">
           <div className="card-body">
             <h3 className="card-title text-base">Clés d'accès (Passkeys)</h3>
