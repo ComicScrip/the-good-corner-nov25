@@ -27,7 +27,7 @@ const db = new DataSource({
     BaPasskey,
   ],
   migrations: [`${__dirname}/migrations/**/*{.js,.ts}`],
-  migrationsRun: true
+  migrationsRun: true,
 });
 
 export async function clearDB() {

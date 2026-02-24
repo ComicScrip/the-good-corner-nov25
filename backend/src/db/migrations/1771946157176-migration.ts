@@ -5,25 +5,41 @@ export class Migration1771946157176 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Drop hashedPassword (no longer needed — better-auth manages passwords in account.password)
-    await queryRunner.query(`ALTER TABLE "user" DROP COLUMN IF EXISTS "hashedPassword"`);
+    await queryRunner.query(
+      `ALTER TABLE "user" DROP COLUMN IF EXISTS "hashedPassword"`,
+    );
 
     // Rename avatar → image (better-auth convention)
-    await queryRunner.query(`ALTER TABLE "user" RENAME COLUMN "avatar" TO "image"`);
+    await queryRunner.query(
+      `ALTER TABLE "user" RENAME COLUMN "avatar" TO "image"`,
+    );
 
     // Make image nullable (OAuth users have one, email users don't)
-    await queryRunner.query(`ALTER TABLE "user" ALTER COLUMN "image" DROP NOT NULL`);
-    await queryRunner.query(`ALTER TABLE "user" ALTER COLUMN "image" SET DEFAULT NULL`);
+    await queryRunner.query(
+      `ALTER TABLE "user" ALTER COLUMN "image" DROP NOT NULL`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user" ALTER COLUMN "image" SET DEFAULT NULL`,
+    );
     // Clear the old default avatar URL — now null for plain email users
-    await queryRunner.query(`UPDATE "user" SET "image" = NULL WHERE "image" LIKE 'https://media.istockphoto.com%' OR "image" LIKE 'https://c1.alamy.com%'`);
+    await queryRunner.query(
+      `UPDATE "user" SET "image" = NULL WHERE "image" LIKE 'https://media.istockphoto.com%' OR "image" LIKE 'https://c1.alamy.com%'`,
+    );
 
     // Add name column (nullable — better-auth populates for OAuth users)
-    await queryRunner.query(`ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "name" text DEFAULT NULL`);
+    await queryRunner.query(
+      `ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "name" text DEFAULT NULL`,
+    );
 
     // Add emailVerified column (better-auth sets this on email verification)
-    await queryRunner.query(`ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "emailVerified" boolean NOT NULL DEFAULT false`);
+    await queryRunner.query(
+      `ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "emailVerified" boolean NOT NULL DEFAULT false`,
+    );
 
     // Add updatedAt column (better-auth updates this)
-    await queryRunner.query(`ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP NOT NULL DEFAULT now()`);
+    await queryRunner.query(
+      `ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP NOT NULL DEFAULT now()`,
+    );
 
     // Change id column from integer SERIAL to text (better-auth uses UUID strings)
     // Only do this if the id column is still integer type.
@@ -53,11 +69,21 @@ export class Migration1771946157176 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "user" ADD COLUMN "hashedPassword" character varying NOT NULL DEFAULT ''`);
-    await queryRunner.query(`ALTER TABLE "user" RENAME COLUMN "image" TO "avatar"`);
-    await queryRunner.query(`ALTER TABLE "user" ALTER COLUMN "avatar" SET NOT NULL`);
+    await queryRunner.query(
+      `ALTER TABLE "user" ADD COLUMN "hashedPassword" character varying NOT NULL DEFAULT ''`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user" RENAME COLUMN "image" TO "avatar"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user" ALTER COLUMN "avatar" SET NOT NULL`,
+    );
     await queryRunner.query(`ALTER TABLE "user" DROP COLUMN IF EXISTS "name"`);
-    await queryRunner.query(`ALTER TABLE "user" DROP COLUMN IF EXISTS "emailVerified"`);
-    await queryRunner.query(`ALTER TABLE "user" DROP COLUMN IF EXISTS "updatedAt"`);
+    await queryRunner.query(
+      `ALTER TABLE "user" DROP COLUMN IF EXISTS "emailVerified"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user" DROP COLUMN IF EXISTS "updatedAt"`,
+    );
   }
 }

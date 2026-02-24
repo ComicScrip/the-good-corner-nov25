@@ -19,13 +19,15 @@ function parseCookieToken(cookieHeader: string): string | null {
 export const auth = {
   handler: async (_req: unknown) => new Response(null, { status: 404 }),
   api: {
-    getSession: async (opts: { headers: { get?: (key: string) => string | null; [key: string]: unknown } }) => {
+    getSession: async (opts: {
+      headers: { get?: (key: string) => string | null; [key: string]: unknown };
+    }) => {
       try {
         // Extract cookie header from Headers-like object or plain object
         const cookieHeader =
           typeof opts.headers.get === "function"
-            ? opts.headers.get("cookie") ?? ""
-            : (opts.headers["cookie"] as string | undefined) ?? "";
+            ? (opts.headers.get("cookie") ?? "")
+            : ((opts.headers["cookie"] as string | undefined) ?? "");
 
         const token = parseCookieToken(cookieHeader);
         if (!token) return null;
