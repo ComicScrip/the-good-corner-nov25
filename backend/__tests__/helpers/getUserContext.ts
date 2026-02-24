@@ -1,5 +1,4 @@
 import { createHmac, randomUUID } from "crypto";
-import db from "../../src/db";
 import { BaSession } from "../../src/entities/BaSession";
 import type { User } from "../../src/entities/User";
 import env from "../../src/env";
@@ -13,7 +12,7 @@ export async function getUserContext(user: User) {
   const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   const token = randomUUID();
 
-  const session = db.getRepository(BaSession).create({
+  await BaSession.create({
     id: randomUUID(),
     token,
     userId: user.id,
@@ -22,8 +21,7 @@ export async function getUserContext(user: User) {
     userAgent: null,
     createdAt: now,
     updatedAt: now,
-  });
-  await db.getRepository(BaSession).save(session);
+  }).save();
 
   // Sign the token exactly as better-auth does (HMAC-SHA256, standard base64)
   const sig = createHmac("sha256", env.BETTER_AUTH_SECRET)
