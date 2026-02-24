@@ -196,11 +196,10 @@ export type UpdateTagInput = {
 
 export type User = {
   __typename?: 'User';
+  avatar: Scalars['String']['output'];
   createdAt: Scalars['DateTimeISO']['output'];
   email: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  image?: Maybe<Scalars['String']['output']>;
-  name?: Maybe<Scalars['String']['output']>;
+  id: Scalars['Int']['output'];
   role: Scalars['String']['output'];
 };
 
@@ -256,7 +255,7 @@ export type AdQueryVariables = Exact<{
 }>;
 
 
-export type AdQuery = { __typename?: 'Query', ad: { __typename?: 'Ad', id: number, title: string, price: number, description: string, createdAt: any, location: string, pictureUrl: string, category: { __typename?: 'Category', id: number, name: string }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, author: { __typename?: 'User', id: string } } };
+export type AdQuery = { __typename?: 'Query', ad: { __typename?: 'Ad', id: number, title: string, price: number, description: string, createdAt: any, location: string, pictureUrl: string, category: { __typename?: 'Category', id: number, name: string }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, author: { __typename?: 'User', id: number } } };
 
 export type LoginMutationVariables = Exact<{
   data: LoginInput;
@@ -273,7 +272,7 @@ export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 export type ProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ProfileQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, email: string, emailVerified: boolean, image?: string | null, createdAt: any, role: string } | null };
+export type ProfileQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, email: string, createdAt: any, role: string, avatar: string } | null };
 
 export type RecentAdsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -296,7 +295,7 @@ export type SignupMutationVariables = Exact<{
 }>;
 
 
-export type SignupMutation = { __typename?: 'Mutation', signup: { __typename?: 'User', id: string, email: string, createdAt: any } };
+export type SignupMutation = { __typename?: 'Mutation', signup: { __typename?: 'User', id: number, email: string, createdAt: any } };
 
 export type TagsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -685,10 +684,9 @@ export const ProfileDocument = gql`
   me {
     id
     email
-    emailVerified
-    image
     createdAt
     role
+    avatar
   }
 }
     `;

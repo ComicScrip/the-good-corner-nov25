@@ -60,6 +60,13 @@ export class User extends BaseEntity {
   @Field()
   @Column({ enum: UserRole, default: UserRole.Visitor })
   role: Role;
+
+  @Field()
+  @Column({
+    default:
+      "https://media.istockphoto.com/id/1300845620/fr/vectoriel/appartement-dic%C3%B4ne-dutilisateur-isol%C3%A9-sur-le-fond-blanc-symbole-utilisateur.jpg?s=612x612&w=0&k=20&c=BVOfS7mmvy2lnfBPghkN__k8OMsg7Nlykpgjn0YOHj0=",
+  })
+  avatar: string;
 }
 
 @InputType()

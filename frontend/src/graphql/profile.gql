@@ -4,5 +4,6 @@ query profile {
     email
     createdAt
     role
+    avatar
   }
 }
