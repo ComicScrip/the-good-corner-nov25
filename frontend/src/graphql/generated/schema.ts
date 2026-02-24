@@ -187,6 +187,7 @@ export type UpdateTagInput = {
 
 export type User = {
   __typename?: "User";
+  avatar: Scalars["String"]["output"];
   createdAt: Scalars["DateTimeISO"]["output"];
   email: Scalars["String"]["output"];
   id: Scalars["Int"]["output"];
@@ -280,7 +281,14 @@ export type ProfileQueryVariables = Exact<{ [key: string]: never }>;
 
 export type ProfileQuery = {
   __typename?: "Query";
-  me?: { __typename?: "User"; id: number; email: string; createdAt: any; role: string } | null;
+  me?: {
+    __typename?: "User";
+    id: number;
+    email: string;
+    createdAt: any;
+    role: string;
+    avatar: string;
+  } | null;
 };
 
 export type RecentAdsQueryVariables = Exact<{ [key: string]: never }>;
@@ -855,6 +863,7 @@ export const ProfileDocument = gql`
     email
     createdAt
     role
+    avatar
   }
 }
     `;

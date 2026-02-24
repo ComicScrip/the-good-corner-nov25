@@ -13,7 +13,9 @@ const db = new DataSource({
   port: env.NODE_ENV === "test" ? env.TEST_DB_PORT : env.DB_PORT,
   database: env.DB_NAME,
   entities: [Ad, Tag, Category, User],
-  synchronize: env.NODE_ENV !== "production",
+  migrations: [`${__dirname}/migrations/**/*{.js,.ts}`],
+  migrationsRun: true,
+  //synchronize: env.NODE_ENV !== "production",
   //logging: true
 });
 
