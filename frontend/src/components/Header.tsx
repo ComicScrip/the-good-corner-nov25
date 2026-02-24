@@ -26,9 +26,6 @@ export default function Header() {
     }
   };
 
-  const getUserInitial = (email: string) => {
-    return email.charAt(0).toUpperCase();
-  };
   return (
     <header className="p-4 border-b border-gray-400 flex flex-col w-full gap-4">
       {/* Small screen layout: Title + Burger menu */}
