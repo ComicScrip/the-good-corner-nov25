@@ -1,23 +1,11 @@
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Layout from "@/components/Layout";
 import { useProfileQuery } from "@/graphql/generated/schema";
 import { authClient } from "@/lib/authClient";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "http://localhost:4000";
 const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "http://localhost:3000";
-
-async function ensureSession(): Promise<boolean> {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/auth-ensure-session`, {
-      credentials: "include",
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
 
 export default function Profile() {
   const router = useRouter();
@@ -32,31 +20,15 @@ export default function Profile() {
   }, [loading, user, router]);
 
   // Refetch profile when landing back from an email-change confirmation redirect.
-  // Also re-mint the JWT so the session reflects the new email address.
   useEffect(() => {
     if (!router.query.emailChanged) return;
-    // Re-mint JWT from the current better-auth session (which now has the new email)
-    fetch(`${BACKEND_URL}/api/auth-bridge-passkey`, { credentials: "include" })
-      .finally(() => {
-        refetch();
-        // Remove the query param without a full navigation
-        router.replace("/profile", undefined, { shallow: true });
-      });
+    refetch();
+    // Remove the query param without a full navigation
+    router.replace("/profile", undefined, { shallow: true });
   }, [router.query.emailChanged, refetch, router]);
 
-  // useListPasskeys fires immediately on mount (before ensure-session).
   const { data: passkeys, isPending: passkeysLoading, refetch: refetchPasskeys } =
     authClient.useListPasskeys();
-
-  const sessionEnsuredRef = useRef(false);
-
-  useEffect(() => {
-    if (!user || sessionEnsuredRef.current) return;
-    sessionEnsuredRef.current = true;
-    ensureSession().then((ok) => {
-      if (ok) (refetchPasskeys as (() => void) | undefined)?.();
-    });
-  }, [user, refetchPasskeys]);
 
   // ── Passkey handlers ─────────────────────────────────────────────────────
   const [addError, setAddError] = useState<string | null>(null);
@@ -67,11 +39,6 @@ export default function Profile() {
     setAddError(null);
     setAddLoading(true);
     try {
-      const ok = await ensureSession();
-      if (!ok) {
-        setAddError("Session expirée, veuillez vous reconnecter.");
-        return;
-      }
       const result = await authClient.passkey.addPasskey({
         name: `Passkey ${new Date().toLocaleDateString("fr-FR")}`,
       });
@@ -90,8 +57,6 @@ export default function Profile() {
   const handleDeletePasskey = async (passkeyId: string) => {
     setDeleteLoading(passkeyId);
     try {
-      const ok = await ensureSession();
-      if (!ok) return;
       await authClient.passkey.deletePasskey({ id: passkeyId });
       (refetchPasskeys as (() => void) | undefined)?.();
     } catch (err) {
@@ -118,7 +83,6 @@ export default function Profile() {
     setEmailChangeError(null);
     setEmailChangeLoading(true);
     try {
-      await ensureSession();
       const result = await authClient.changeEmail({
         newEmail,
         callbackURL: `${FRONTEND_URL}/profile?emailChanged=1`,

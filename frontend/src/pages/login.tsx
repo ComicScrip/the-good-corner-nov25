@@ -3,12 +3,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Field from "@/components/Field";
 import Layout from "@/components/Layout";
-import { type LoginInput, useLoginMutation } from "@/graphql/generated/schema";
 import { authClient } from "@/lib/authClient";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "http://localhost:4000";
 const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "http://localhost:3000";
 
+type FormValues = { email: string; password: string };
 type Mode = "password" | "magiclink";
 
 export default function Login() {
@@ -18,21 +17,60 @@ export default function Login() {
   const [magicLinkEmail, setMagicLinkEmail] = useState("");
   const [magicLinkLoading, setMagicLinkLoading] = useState(false);
   const [magicLinkError, setMagicLinkError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [login, { loading: isSubmitting, error }] = useLoginMutation();
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
+
   const {
     register,
     handleSubmit,
     getValues,
     formState: { errors },
-  } = useForm<LoginInput>();
+  } = useForm<FormValues>();
 
-  const onSubmit = async (data: LoginInput) => {
+  const onSubmit = async (data: FormValues) => {
+    setSubmitError(null);
+    setUnverifiedEmail(null);
+    setResendSent(false);
+    setIsSubmitting(true);
     try {
-      await login({ variables: { data } });
-      router.push("/");
+      const result = await authClient.signIn.email({
+        email: data.email,
+        password: data.password,
+      });
+      if (result.error) {
+        if (result.error.code === "EMAIL_NOT_VERIFIED") {
+          setUnverifiedEmail(data.email);
+        } else {
+          setSubmitError(result.error.message ?? "Email ou mot de passe incorrect.");
+        }
+      } else {
+        router.push("/");
+      }
     } catch (err) {
       console.error(err);
+      setSubmitError("Une erreur est survenue lors de la connexion.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!unverifiedEmail) return;
+    setResendLoading(true);
+    try {
+      await authClient.sendVerificationEmail({
+        email: unverifiedEmail,
+        callbackURL: `${FRONTEND_URL}/auth/verify-email`,
+      });
+      setResendSent(true);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -62,16 +100,13 @@ export default function Login() {
   const handleSocialLogin = async (provider: "google" | "github") => {
     await authClient.signIn.social({
       provider,
-      callbackURL: `${BACKEND_URL}/api/auth-bridge`,
+      callbackURL: `${FRONTEND_URL}/`,
     });
   };
 
   const handlePasskeyLogin = async () => {
     const result = await authClient.signIn.passkey();
     if (result && !result.error) {
-      await fetch(`${BACKEND_URL}/api/auth-bridge-passkey`, {
-        credentials: "include",
-      });
       router.push("/");
     }
   };
@@ -221,10 +256,30 @@ export default function Login() {
           </p>
         </div>
 
-        {error && (
+        {submitError && (
           <p className="text-red-500 mt-4 text-center" data-testid="login-errors">
-            {error.message || "Une erreur est survenue lors de la connexion"}
+            {submitError}
           </p>
+        )}
+
+        {unverifiedEmail && (
+          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-300 rounded text-sm text-center">
+            <p className="text-yellow-800 mb-2">
+              Votre adresse email n'a pas encore été vérifiée.
+            </p>
+            {resendSent ? (
+              <p className="text-green-700">Email de vérification envoyé !</p>
+            ) : (
+              <button
+                type="button"
+                className="text-blue-600 hover:underline"
+                disabled={resendLoading}
+                onClick={handleResendVerification}
+              >
+                {resendLoading ? "Envoi..." : "Renvoyer l'email de vérification"}
+              </button>
+            )}
+          </div>
         )}
       </div>
     </Layout>

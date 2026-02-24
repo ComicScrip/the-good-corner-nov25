@@ -2,8 +2,9 @@ query profile {
   me {
     id
     email
+    emailVerified
     createdAt
     role
-    avatar
+    image
   }
 }

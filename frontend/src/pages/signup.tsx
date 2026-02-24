@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Field from "@/components/Field";
 import Layout from "@/components/Layout";
-import { type SignupInput, useSignupMutation } from "@/graphql/generated/schema";
 import { authClient } from "@/lib/authClient";
 
 const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "http://localhost:3000";
 
+type FormValues = { email: string; password: string };
 type Mode = "password" | "magiclink";
 
 export default function Signup() {
@@ -15,7 +15,8 @@ export default function Signup() {
   // password mode state
   const [emailSent, setEmailSent] = useState(false);
   const [signupEmail, setSignupEmail] = useState("");
-  const [signup, { loading: isSubmitting, error }] = useSignupMutation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // magic link mode state
   const [magicLinkSent, setMagicLinkSent] = useState(false);
@@ -28,15 +29,28 @@ export default function Signup() {
     handleSubmit,
     getValues,
     formState: { errors },
-  } = useForm<SignupInput>();
+  } = useForm<FormValues>();
 
-  const onSubmit = async (data: SignupInput) => {
+  const onSubmit = async (data: FormValues) => {
+    setSubmitError(null);
+    setIsSubmitting(true);
     try {
-      await signup({ variables: { data } });
-      setSignupEmail(data.email);
-      setEmailSent(true);
+      const result = await authClient.signUp.email({
+        email: data.email,
+        password: data.password,
+        name: data.email,
+      });
+      if (result.error) {
+        setSubmitError(result.error.message ?? "Une erreur est survenue lors de l'inscription.");
+      } else {
+        setSignupEmail(data.email);
+        setEmailSent(true);
+      }
     } catch (err) {
       console.error(err);
+      setSubmitError("Une erreur est survenue lors de l'inscription.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -66,7 +80,7 @@ export default function Signup() {
   const handleSocialLogin = async (provider: "google" | "github") => {
     await authClient.signIn.social({
       provider,
-      callbackURL: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/api/auth-bridge`,
+      callbackURL: `${FRONTEND_URL}/`,
     });
   };
 
@@ -229,9 +243,9 @@ export default function Signup() {
           </button>
         </div>
 
-        {error && (
+        {submitError && (
           <p className="text-red-500 mt-4 text-center">
-            {error.message || "Une erreur est survenue lors de l'inscription"}
+            {submitError}
           </p>
         )}
 

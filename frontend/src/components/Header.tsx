@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { useLogoutMutation, useProfileQuery } from "@/graphql/generated/schema";
+import { useProfileQuery } from "@/graphql/generated/schema";
+import { authClient } from "@/lib/authClient";
 import CategoriesNav from "./CategoriesNav";
 import SearchInput from "./SearchInput";
 
@@ -12,12 +13,11 @@ export default function Header() {
   const user = data?.me || null;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const [logout] = useLogoutMutation();
   const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await authClient.signOut();
       await refetch();
       router.push("/");
     } catch (err) {
@@ -65,7 +65,7 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-2">
-          {!loading && user && <AvatarCircle />}
+          {!loading && user && <AvatarCircle linkTo="/profile" title="Mon profil" />}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="btn btn-ghost btn-sm"

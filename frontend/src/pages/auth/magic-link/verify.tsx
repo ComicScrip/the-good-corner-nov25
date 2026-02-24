@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { authClient } from "@/lib/authClient";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "http://localhost:4000";
-
 type Status = "loading" | "success" | "error";
 
 export default function MagicLinkVerify() {
@@ -25,21 +23,13 @@ export default function MagicLinkVerify() {
 
     authClient.magicLink
       .verify({ query: { token } })
-      .then(async (result) => {
+      .then((result) => {
         if (result.error) {
           setStatus("error");
           setErrorMessage(
             result.error.message ?? "Le lien de connexion est invalide ou a expiré.",
           );
         } else {
-          // better-auth created a session — call the bridge to mint our JWT cookie
-          try {
-            await fetch(`${BACKEND_URL}/api/auth-bridge`, {
-              credentials: "include",
-            });
-          } catch {
-            // bridge failure is non-fatal; user can still log in manually
-          }
           setStatus("success");
           router.replace("/profile");
         }

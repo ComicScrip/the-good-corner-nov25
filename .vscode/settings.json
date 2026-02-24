@@ -7,7 +7,7 @@
     "source.fixAll.biome": "always"
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "fronterior.biome-monorepo"
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "[typescript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
