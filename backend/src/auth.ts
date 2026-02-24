@@ -1,69 +1,25 @@
-import "@fastify/cookie";
-import jwt from "jsonwebtoken";
 import type { AuthChecker } from "type-graphql";
+import { auth } from "./betterAuth";
 import { User } from "./entities/User";
-import env from "./env";
 import { ForbiddenError, UnauthenticatedError } from "./errors";
 import type { GraphQLContext } from "./types";
 
-export interface JWTPayload {
-  userId: string;
-}
-
-export async function createJWT(user: User): Promise<string> {
-  const payload: JWTPayload = {
-    userId: user.id,
-  };
-
-  return jwt.sign(payload, env.JWT_SECRET, { expiresIn: "7d" });
-}
-
-export const verifyJWT = (token: string): JWTPayload | null => {
-  try {
-    return jwt.verify(token, env.JWT_SECRET) as JWTPayload;
-  } catch (_error) {
-    return null;
-  }
-};
-
-export const cookieName = "authToken";
-
-export async function startSession(context: GraphQLContext, user: User) {
-  const token = await createJWT(user);
-
-  context.res.cookie(cookieName, token, {
-    httpOnly: true,
-    secure: env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
-  });
-
-  return token;
-}
-
-export async function endSession(context: GraphQLContext) {
-  context.res.clearCookie(cookieName, { path: "/" });
-}
-
-export async function getJWT(
-  context: GraphQLContext,
-): Promise<JWTPayload | null> {
-  const token = context.req.cookies?.[cookieName];
-
-  if (!token) return null;
-  const payload = verifyJWT(token);
-
-  if (!payload) return null;
-  return payload;
-}
-
+/**
+ * Resolve the current user from the better-auth session cookie.
+ * better-auth reads its own `better-auth.session_token` cookie from the
+ * request headers, so we forward the raw cookie string as a Header object.
+ */
 export async function getCurrentUser(context: GraphQLContext): Promise<User> {
-  const jwt = await getJWT(context);
-  if (jwt === null) throw new UnauthenticatedError();
-  const currentUser = await User.findOne({ where: { id: jwt.userId } });
-  if (currentUser === null) throw new UnauthenticatedError();
-  return currentUser;
+  const cookieHeader = context.req?.headers?.["cookie"] ?? "";
+  const session = await auth.api.getSession({
+    headers: new Headers({ cookie: cookieHeader }),
+  });
+  if (!session?.user?.id) throw new UnauthenticatedError();
+
+  const user = await User.findOne({ where: { id: session.user.id } });
+  if (!user) throw new UnauthenticatedError();
+
+  return user;
 }
 
 export const authChecker: AuthChecker<GraphQLContext> = async (

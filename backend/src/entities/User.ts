@@ -1,5 +1,4 @@
-import { IsEmail, IsStrongPassword } from "class-validator";
-import { Field, ID, InputType, ObjectType } from "type-graphql";
+import { Field, ID, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -19,8 +18,7 @@ export type Role = (typeof UserRole)[keyof typeof UserRole];
 @ObjectType()
 @Entity()
 export class User extends BaseEntity {
-  // Text PK — better-auth supplies its own UUID string; we must not let Postgres
-  // auto-generate one, otherwise better-auth's supplied id would be ignored.
+  // Text PK — better-auth supplies its own UUID string.
   @Field(() => ID)
   @PrimaryColumn("text")
   id: string;
@@ -40,16 +38,6 @@ export class User extends BaseEntity {
   @Column({ default: false })
   emailVerified: boolean;
 
-  // Avatar URL from OAuth provider, if any.
-  @Field(() => String, { nullable: true })
-  @Column({ type: "text", nullable: true })
-  image: string | null;
-
-  // Hidden from GraphQL — only used for email/password login.
-  // Empty string for OAuth/passkey-only users.
-  @Column({ default: "" })
-  hashedPassword: string;
-
   @Field()
   @CreateDateColumn()
   createdAt: Date;
@@ -61,44 +49,12 @@ export class User extends BaseEntity {
   @Column({ enum: UserRole, default: UserRole.Visitor })
   role: Role;
 
-  @Field()
+  // better-auth uses "image" as the field name for OAuth profile pictures.
+  @Field(() => String, { nullable: true })
   @Column({
-    default:
-      "https://media.istockphoto.com/id/1300845620/fr/vectoriel/appartement-dic%C3%B4ne-dutilisateur-isol%C3%A9-sur-le-fond-blanc-symbole-utilisateur.jpg?s=612x612&w=0&k=20&c=BVOfS7mmvy2lnfBPghkN__k8OMsg7Nlykpgjn0YOHj0=",
+    type: "text",
+    nullable: true,
+    default: null,
   })
-  avatar: string;
-}
-
-@InputType()
-export class SignupInput {
-  @Field()
-  @IsEmail({}, { message: "L'email doit être valide" })
-  email: string;
-
-  @Field()
-  @IsStrongPassword(
-    {},
-    {
-      message:
-        "Le mot de passe doit contenir au moins 8 caractères, dont une minuscule, une majuscule, un chiffre et un caractère spécial",
-    },
-  )
-  password: string;
-}
-
-@InputType()
-export class LoginInput {
-  @Field()
-  @IsEmail({}, { message: "L'email doit être valide" })
-  email: string;
-
-  @Field()
-  @IsStrongPassword(
-    {},
-    {
-      message:
-        "Le mot de passe doit contenir au moins 8 caractères, dont une minuscule, une majuscule, un chiffre et un caractère spécial",
-    },
-  )
-  password: string;
+  image: string | null;
 }

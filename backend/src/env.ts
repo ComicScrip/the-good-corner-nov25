@@ -2,7 +2,6 @@ import { load } from "ts-dotenv";
 
 export default load({
   GRAPHQL_SERVER_PORT: Number,
-  JWT_SECRET: String,
   BETTER_AUTH_SECRET: String,
   BETTER_AUTH_URL: String,
   FRONTEND_URL: String,

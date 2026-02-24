@@ -3,6 +3,7 @@ import { typeormAdapter } from "@hedystia/better-auth-typeorm";
 import { hash as argon2Hash, verify as argon2Verify } from "argon2";
 import { betterAuth } from "better-auth";
 import { magicLink } from "better-auth/plugins";
+import type { FastifyInstance } from "fastify";
 import db from "./db";
 import { User } from "./entities/User";
 import env from "./env";
@@ -41,40 +42,57 @@ function patchedTypeormAdapter(dataSource: typeof db) {
     }): Promise<T | null> => {
       // Intercept session + join queries
       if (args.model === "session" && args.join) {
-        // Find the session row normally (without join)
-        const session = await originalFindOne<T & { userId?: string }>({ ...args, join: undefined });
+        const session = await originalFindOne<T & { userId?: string }>({
+          ...args,
+          join: undefined,
+        });
         if (!session) return null;
 
-        // Manually fetch the user row
         const userId = session.userId;
         if (!userId) return null;
 
         const user = await User.findOne({ where: { id: userId } });
         if (!user) return null;
 
-        // Return the merged object better-auth expects:
-        // { ...sessionFields, user: { ...userFields } }
         return { ...session, user } as T;
       }
 
+      // Intercept user + join queries (e.g. findUserByEmail with includeAccounts:true)
+      // internal-adapter calls findOne({ model:"user", join:{ account:true } }) and
+      // expects the result shape { ...user, account: Account[] }.
+      // The TypeORM adapter silently drops the `join`, so we handle it here.
+      if (args.model === "user" && args.join) {
+        const user = await originalFindOne<T & { id?: string }>({
+          ...args,
+          join: undefined,
+        });
+        if (!user) return null;
+
+        const userId = user.id;
+        if (!userId) return { ...user, account: [] } as T;
+
+        const accounts = await adapter.findMany({
+          model: "account",
+          where: [{ field: "userId", value: userId }],
+        });
+
+        return { ...user, account: accounts ?? [] } as T;
+      }
+
       // Intercept account + join queries (e.g. findOAuthUser in internal-adapter)
-      // The base adapter silently drops the `join` parameter, so account.user is
-      // never populated → better-auth thinks the account is orphaned → creates a
-      // duplicate user on OAuth re-sign-in after an email change.
       if (args.model === "account" && args.join) {
-        // Find the account row normally (without join)
-        const account = await originalFindOne<T & { userId?: string }>({ ...args, join: undefined });
+        const account = await originalFindOne<T & { userId?: string }>({
+          ...args,
+          join: undefined,
+        });
         if (!account) return null;
 
-        // Manually fetch the linked user row
         const userId = account.userId;
         if (!userId) return null;
 
         const user = await User.findOne({ where: { id: userId } });
         if (!user) return null;
 
-        // Return the merged object better-auth expects:
-        // { ...accountFields, user: { ...userFields } }
         return { ...account, user } as T;
       }
 
@@ -85,6 +103,39 @@ function patchedTypeormAdapter(dataSource: typeof db) {
   };
 }
 
+export function injectBetterAuthRoutes(fastify: FastifyInstance) {
+  // Mount all better-auth REST routes at /api/auth/*
+  fastify.route({
+    method: ["GET", "POST"],
+    url: "/api/auth/*",
+    handler: async (request, reply) => {
+      const url = `${env.BETTER_AUTH_URL}${request.url}`;
+      const webRequest = new Request(url, {
+        method: request.method,
+        headers: request.headers as Record<string, string>,
+        body:
+          request.method !== "GET" && request.method !== "HEAD"
+            ? JSON.stringify(request.body)
+            : undefined,
+      });
+
+      const webResponse = await auth.handler(webRequest);
+
+      reply.status(webResponse.status);
+      webResponse.headers.forEach((value, key) => {
+        if (key.toLowerCase() === "set-cookie") return;
+        reply.header(key, value);
+      });
+      const cookies = webResponse.headers.getSetCookie?.() ?? [];
+      for (const cookie of cookies) {
+        reply.header("set-cookie", cookie);
+      }
+      const body = await webResponse.text();
+      return reply.send(body);
+    },
+  });
+}
+
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
@@ -92,14 +143,19 @@ export const auth = betterAuth({
   database: patchedTypeormAdapter(db),
   emailAndPassword: {
     enabled: true,
-    // Use argon2 so that better-auth's account.password and our user.hashedPassword
-    // always use the same algorithm and can be kept in sync.
+    requireEmailVerification: true,
     password: {
       hash: (password: string) => argon2Hash(password),
       verify: ({ hash, password }: { hash: string; password: string }) =>
         argon2Verify(hash, password),
     },
-    sendResetPassword: async ({ user, url }: { user: { email: string; name: string | null }; url: string }) => {
+    sendResetPassword: async ({
+      user,
+      url,
+    }: {
+      user: { email: string; name: string | null };
+      url: string;
+    }) => {
       const displayName = user.name ?? user.email.split("@")[0];
       await sendMail({
         to: user.email,
@@ -114,21 +170,16 @@ export const auth = betterAuth({
         `,
       });
     },
-    onPasswordReset: async ({ user }: { user: { id: string } }) => {
-      // better-auth stores the new hash in account.password (credential provider).
-      // Our GraphQL login reads user.hashedPassword, so we must keep them in sync.
-      const accountRow = await db
-        .getRepository("account")
-        .findOne({ where: { userId: user.id, providerId: "credential" } });
-      if (accountRow && (accountRow as { password: string }).password) {
-        await User.update(user.id, {
-          hashedPassword: (accountRow as { password: string }).password,
-        });
-      }
-    },
   },
   emailVerification: {
-    sendVerificationEmail: async ({ user, url }: { user: { email: string; name: string | null }; url: string }) => {
+    sendOnSignUp: true,
+    sendVerificationEmail: async ({
+      user,
+      url,
+    }: {
+      user: { email: string; name: string | null };
+      url: string;
+    }) => {
       // better-auth builds url as ${baseURL}/api/auth/verify-email?token=...
       // but the verification page lives on the frontend at ${FRONTEND_URL}/auth/verify-email?token=...
       const frontendUrl = url.replace(
@@ -154,8 +205,6 @@ export const auth = betterAuth({
   user: {
     changeEmail: {
       enabled: true,
-      // Step 1: sent to the OLD email to confirm the request was intentional.
-      // better-auth then sends a second email to the NEW address via sendVerificationEmail (step 2).
       sendChangeEmailVerification: async ({
         user,
         newEmail,
@@ -165,16 +214,10 @@ export const auth = betterAuth({
         newEmail: string;
         url: string;
       }) => {
-        // better-auth embeds the callbackURL verbatim into the URL query string
-        // without percent-encoding it, so a callbackURL like
-        // "http://localhost:3000/profile?emailChanged=1" creates a malformed URL
-        // with two "?" characters.  Fix this by re-encoding the callbackURL
-        // parameter before rewriting the host prefix.
         const fixedUrl = url.replace(
           /([?&]callbackURL=)(.+)$/,
           (_, prefix, value) => `${prefix}${encodeURIComponent(value)}`,
         );
-        // Rewrite backend URL to the frontend verify-email page.
         const frontendUrl = fixedUrl.replace(
           `${env.BETTER_AUTH_URL}/api/auth`,
           `${env.FRONTEND_URL}/auth`,
@@ -198,19 +241,19 @@ export const auth = betterAuth({
   socialProviders: {
     ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
       ? {
-          google: {
-            clientId: env.GOOGLE_CLIENT_ID,
-            clientSecret: env.GOOGLE_CLIENT_SECRET,
-          },
-        }
+        google: {
+          clientId: env.GOOGLE_CLIENT_ID,
+          clientSecret: env.GOOGLE_CLIENT_SECRET,
+        },
+      }
       : {}),
     ...(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET
       ? {
-          github: {
-            clientId: env.GITHUB_CLIENT_ID,
-            clientSecret: env.GITHUB_CLIENT_SECRET,
-          },
-        }
+        github: {
+          clientId: env.GITHUB_CLIENT_ID,
+          clientSecret: env.GITHUB_CLIENT_SECRET,
+        },
+      }
       : {}),
   },
   plugins: [
@@ -224,7 +267,7 @@ export const auth = betterAuth({
       disableSignUp: false,
       sendMagicLink: async ({ email, url }: { email: string; url: string }) => {
         // better-auth builds url as ${baseURL}/api/auth/magic-link/verify?token=...
-        // Rewrite to the frontend page that will call the bridge after verification.
+        // Rewrite to the frontend page that will call the verify endpoint.
         const frontendUrl = url.replace(
           `${env.BETTER_AUTH_URL}/api/auth`,
           `${env.FRONTEND_URL}/auth`,

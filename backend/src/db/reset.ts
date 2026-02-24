@@ -1,38 +1,54 @@
 import { randomUUID } from "node:crypto";
-import { hash } from "argon2";
+import { hash as argon2Hash } from "argon2";
 import { Ad } from "../entities/Ad";
 import { Category } from "../entities/Category";
 import { Tag } from "../entities/Tag";
-import { User, UserRole } from "../entities/User";
+import { type Role, User, UserRole } from "../entities/User";
 import db, { clearDB } from "./index";
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "SuperP@ssW0rd!";
+
+async function createUserWithPassword(
+  email: string,
+  password: string,
+  role?: Role,
+): Promise<User> {
+  const id = randomUUID();
+  const user = await User.create({
+    id,
+    email,
+    emailVerified: true,
+    ...(role ? { role } : {}),
+  }).save();
+
+  const hashedPassword = await argon2Hash(password);
+  const accountRepo = db.getRepository("account");
+  await accountRepo.save({
+    id: randomUUID(),
+    userId: id,
+    accountId: email,
+    providerId: "credential",
+    password: hashedPassword,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+
+  return user;
+}
 
 async function main() {
   await db.initialize();
   await clearDB();
 
-  const visitor = await User.create({
-    id: randomUUID(),
-    email: "dave.lopper@app.com",
-    hashedPassword: await hash("SuperP@ssW0rd!"),
-    emailVerified: true,
-  }).save();
-
-  const visitor2 = await User.create({
-    id: randomUUID(),
-    email: "dave.lopper2@app.com",
-    hashedPassword: await hash("SuperP@ssW0rd!"),
-    emailVerified: true,
-  }).save();
-
-  await User.create({
-    id: randomUUID(),
-    email: "admin@app.com",
-    hashedPassword: await hash(ADMIN_PASSWORD),
-    role: UserRole.Admin,
-    emailVerified: true,
-  }).save();
+  const visitor = await createUserWithPassword(
+    "dave.lopper@app.com",
+    "SuperP@ssW0rd!",
+  );
+  const visitor2 = await createUserWithPassword(
+    "dave.lopper2@app.com",
+    "SuperP@ssW0rd!",
+  );
+  await createUserWithPassword("admin@app.com", ADMIN_PASSWORD, UserRole.Admin);
 
   const macbook = Ad.create({
     title: "Macbook pro",
