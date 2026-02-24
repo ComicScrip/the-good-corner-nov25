@@ -10,7 +10,7 @@ import type { GraphQLContext } from "./types";
  * request headers, so we forward the raw cookie string as a Header object.
  */
 export async function getCurrentUser(context: GraphQLContext): Promise<User> {
-  const cookieHeader = context.req?.headers?.["cookie"] ?? "";
+  const cookieHeader = context.req?.headers?.cookie ?? "";
   const session = await auth.api.getSession({
     headers: new Headers({ cookie: cookieHeader }),
   });

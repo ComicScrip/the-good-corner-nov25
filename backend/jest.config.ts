@@ -5,10 +5,9 @@ module.exports = {
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   testMatch: ["**/__tests__/**/*.test.ts"],
   moduleNameMapper: {
-    // Swap out the real betterAuth module (which uses ESM-only better-auth)
-    // for a lightweight CJS-compatible mock during tests.
-    "^../betterAuth$": "<rootDir>/src/__mocks__/betterAuth.ts",
-    "^\\.\\./betterAuth$": "<rootDir>/src/__mocks__/betterAuth.ts",
-    "^./betterAuth$": "<rootDir>/src/__mocks__/betterAuth.ts",
+    // better-auth and its plugins are ESM-only (.mjs). ts-jest runs in CJS mode
+    // and cannot load them. Map the one module that pulls them all in to a
+    // lightweight CJS stub.
+    "^(\\.\\.?/)*betterAuth$": "<rootDir>/__tests__/__mocks__/betterAuth.ts",
   },
 };

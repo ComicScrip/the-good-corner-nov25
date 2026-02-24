@@ -1,4 +1,4 @@
-import { createHmac, randomUUID } from "crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { BaSession } from "../../src/entities/BaSession";
 import type { User } from "../../src/entities/User";
 import env from "../../src/env";
