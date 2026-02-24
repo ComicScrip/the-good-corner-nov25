@@ -29,12 +29,18 @@ export default function Header() {
     return email.charAt(0).toUpperCase();
   };
 
-  const avatarBase = "w-8 h-8 rounded-full object-cover flex items-center justify-center text-sm font-bold";
+  const avatarBase =
+    "w-8 h-8 rounded-full object-cover flex items-center justify-center text-sm font-bold";
 
   const AvatarCircle = ({ linkTo, title }: { linkTo?: string; title?: string }) => {
     const inner = user?.image ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={user.image} alt="avatar" className={`${avatarBase} bg-orange-600`} referrerPolicy="no-referrer" />
+      // biome-ignore lint/performance/noImgElement: images may come from unknown hosts
+      <img
+        src={user.image}
+        alt="avatar"
+        className={`${avatarBase} bg-orange-600`}
+        referrerPolicy="no-referrer"
+      />
     ) : (
       <span className={`${avatarBase} bg-orange-600 text-white`}>
         {getUserInitial(user?.email ?? "?")}
@@ -59,9 +65,7 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-2">
-          {!loading && user && (
-            <AvatarCircle />
-          )}
+          {!loading && user && <AvatarCircle />}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="btn btn-ghost btn-sm"
