@@ -17,8 +17,6 @@ export async function getUserContext(user: User) {
     token,
     userId: user.id,
     expiresAt,
-    ipAddress: null,
-    userAgent: null,
     createdAt: now,
     updatedAt: now,
   }).save();
