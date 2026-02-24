@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { hash as argon2Hash } from "argon2";
 import { Ad } from "../entities/Ad";
+import { BaAccount } from "../entities/BaAccount";
 import { Category } from "../entities/Category";
 import { Tag } from "../entities/Tag";
 import { type Role, User, UserRole } from "../entities/User";
@@ -22,8 +23,7 @@ async function createUserWithPassword(
   }).save();
 
   const hashedPassword = await argon2Hash(password);
-  const accountRepo = db.getRepository("account");
-  await accountRepo.save({
+  await BaAccount.create({
     id: randomUUID(),
     userId: id,
     accountId: email,
@@ -31,7 +31,7 @@ async function createUserWithPassword(
     password: hashedPassword,
     createdAt: new Date(),
     updatedAt: new Date(),
-  });
+  }).save();
 
   return user;
 }

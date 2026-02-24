@@ -1,7 +1,7 @@
-import { Column, Entity, Index, PrimaryColumn } from "typeorm";
+import { BaseEntity, Column, Entity, Index, PrimaryColumn } from "typeorm";
 
 @Entity("passkey")
-export class BaPasskey {
+export class BaPasskey extends BaseEntity {
   @PrimaryColumn("text")
   id!: string;
 

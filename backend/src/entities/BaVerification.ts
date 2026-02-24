@@ -1,7 +1,7 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
 
 @Entity("verification")
-export class BaVerification {
+export class BaVerification extends BaseEntity {
   @PrimaryColumn("text")
   id!: string;
 

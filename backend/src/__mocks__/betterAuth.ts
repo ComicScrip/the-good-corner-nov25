@@ -2,7 +2,6 @@
 // better-auth's ESM bundles, which Jest cannot parse without extra config.
 
 import { createHmac } from "crypto";
-import db from "../db";
 import { BaSession } from "../entities/BaSession";
 import { User } from "../entities/User";
 
@@ -33,8 +32,7 @@ export const auth = {
         if (!token) return null;
 
         // Look up the session in the DB
-        const repo = db.getRepository(BaSession);
-        const session = await repo.findOne({ where: { token } });
+        const session = await BaSession.findOne({ where: { token } });
         if (!session || session.expiresAt < new Date()) return null;
 
         const user = await User.findOne({ where: { id: session.userId } });
