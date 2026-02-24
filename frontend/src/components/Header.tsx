@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/performance/noImgElement: images may come from unknown hosts */
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -38,9 +39,11 @@ export default function Header() {
 
         <div className="flex items-center gap-2">
           {!loading && user && (
-            <div className="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-              {getUserInitial(user.email)}
-            </div>
+            <img
+              className="w-8 h-8 text-white rounded-full flex "
+              src={user.avatar}
+              alt={`profil de ${user.email}`}
+            />
           )}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -151,9 +154,11 @@ export default function Header() {
               {user ? (
                 <>
                   <div className="flex items-center gap-2 mr-2">
-                    <div className="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                      {getUserInitial(user.email)}
-                    </div>
+                    <img
+                      className="w-8 h-8 text-white rounded-full flex "
+                      src={user.avatar}
+                      alt={`profil de ${user.email}`}
+                    />
                   </div>
                   <button
                     type="button"
