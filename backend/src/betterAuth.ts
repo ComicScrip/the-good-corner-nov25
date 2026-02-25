@@ -1,107 +1,22 @@
 import { passkey } from "@better-auth/passkey";
-import { typeormAdapter } from "@hedystia/better-auth-typeorm";
 import { hash as argon2Hash, verify as argon2Verify } from "argon2";
 import { betterAuth } from "better-auth";
 import { magicLink } from "better-auth/plugins";
 import type { FastifyInstance } from "fastify";
-import db from "./db";
-import { User } from "./entities/User";
+import { Pool } from "pg";
 import env from "./env";
 import { sendMail } from "./mailer";
 
-/**
- * The @hedystia/better-auth-typeorm adapter silently drops the `join` parameter
- * on `findOne` calls.  This causes two separate bugs:
- *
- * 1. `findSession` (called by sessionMiddleware on every passkey/list/register
- *    request) always returns null → 401 UNAUTHORIZED.
- *    Fix: intercept `model === "session"` + join → fetch session row, then user
- *    row, return `{ ...session, user }`.
- *
- * 2. `findOAuthUser` (internal-adapter) calls
- *    `findOne({ model: "account", join: { user: true } })`.  Without the join
- *    the account row is returned without `account.user`, so better-auth thinks
- *    the account is orphaned → falls through to `createOAuthUser` →
- *    **duplicate user created** on every OAuth re-sign-in after an email change.
- *    Fix: intercept `model === "account"` + join → fetch account row, then user
- *    row, return `{ ...account, user }`.
- */
-function patchedTypeormAdapter(dataSource: typeof db) {
-  const base = typeormAdapter(dataSource);
-
-  return (options: Parameters<ReturnType<typeof typeormAdapter>>[0]) => {
-    const adapter = base(options);
-
-    const originalFindOne = adapter.findOne.bind(adapter);
-
-    adapter.findOne = async <T>(args: {
-      model: string;
-      where: import("@better-auth/core/db/adapter").Where[];
-      select?: string[];
-      join?: import("@better-auth/core/db/adapter").JoinOption;
-    }): Promise<T | null> => {
-      // Intercept session + join queries
-      if (args.model === "session" && args.join) {
-        const session = await originalFindOne<T & { userId?: string }>({
-          ...args,
-          join: undefined,
-        });
-        if (!session) return null;
-
-        const userId = session.userId;
-        if (!userId) return null;
-
-        const user = await User.findOne({ where: { id: userId } });
-        if (!user) return null;
-
-        return { ...session, user } as T;
-      }
-
-      // Intercept user + join queries (e.g. findUserByEmail with includeAccounts:true)
-      // internal-adapter calls findOne({ model:"user", join:{ account:true } }) and
-      // expects the result shape { ...user, account: Account[] }.
-      // The TypeORM adapter silently drops the `join`, so we handle it here.
-      if (args.model === "user" && args.join) {
-        const user = await originalFindOne<T & { id?: string }>({
-          ...args,
-          join: undefined,
-        });
-        if (!user) return null;
-
-        const userId = user.id;
-        if (!userId) return { ...user, account: [] } as T;
-
-        const accounts = await adapter.findMany({
-          model: "account",
-          where: [{ field: "userId", value: userId }],
-        });
-
-        return { ...user, account: accounts ?? [] } as T;
-      }
-
-      // Intercept account + join queries (e.g. findOAuthUser in internal-adapter)
-      if (args.model === "account" && args.join) {
-        const account = await originalFindOne<T & { userId?: string }>({
-          ...args,
-          join: undefined,
-        });
-        if (!account) return null;
-
-        const userId = account.userId;
-        if (!userId) return null;
-
-        const user = await User.findOne({ where: { id: userId } });
-        if (!user) return null;
-
-        return { ...account, user } as T;
-      }
-
-      return originalFindOne<T>(args);
-    };
-
-    return adapter;
-  };
-}
+// Standard pg Pool — better-auth uses this directly via its built-in Kysely
+// PostgreSQL adapter. No custom adapter wrapper needed.
+const pool = new Pool({
+  host: env.DB_HOST,
+  port:
+    env.NODE_ENV === "test" ? (env.TEST_DB_PORT ?? env.DB_PORT) : env.DB_PORT,
+  user: env.DB_USER,
+  password: env.DB_PASS,
+  database: env.DB_NAME,
+});
 
 export function injectBetterAuthRoutes(fastify: FastifyInstance) {
   // Mount all better-auth REST routes at /api/auth/*
@@ -110,6 +25,7 @@ export function injectBetterAuthRoutes(fastify: FastifyInstance) {
     url: "/api/auth/*",
     handler: async (request, reply) => {
       const url = `${env.BETTER_AUTH_URL}${request.url}`;
+
       const webRequest = new Request(url, {
         method: request.method,
         headers: request.headers as Record<string, string>,
@@ -140,7 +56,22 @@ export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
   trustedOrigins: env.CORS_ALLOWED_ORIGINS.split(","),
-  database: patchedTypeormAdapter(db),
+  database: pool,
+  session: {
+    // Cookie cache: session data is encoded in a signed JWT cookie so the DB
+    // is not queried on every request. Refreshed automatically when the 5-min
+    // cache expires. The session record still lives in the `session` table and
+    // is written by better-auth on sign-in.
+    //
+    // To add Redis-backed revocability in the future, add a `secondaryStorage`
+    // config block (better-auth will then store sessions in Redis instead of
+    // the DB, and the cookie cache will validate against Redis).
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60, // 5-minute cache: avoids a DB read on every request
+      strategy: "jwt",
+    },
+  },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,

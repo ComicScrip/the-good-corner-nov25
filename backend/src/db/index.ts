@@ -16,16 +16,7 @@ const db = new DataSource({
   password: env.DB_PASS,
   port: env.NODE_ENV === "test" ? env.TEST_DB_PORT : env.DB_PORT,
   database: env.DB_NAME,
-  entities: [
-    Ad,
-    Tag,
-    Category,
-    User,
-    BaSession,
-    BaAccount,
-    BaVerification,
-    BaPasskey,
-  ],
+  entities: [Ad, Tag, Category, User, BaAccount, BaVerification, BaPasskey, BaSession],
   migrations: [`${__dirname}/migrations/**/*{.js,.ts}`],
   migrationsRun: true,
 });

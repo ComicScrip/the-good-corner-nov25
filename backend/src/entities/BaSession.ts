@@ -1,5 +1,8 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
 
+// Schema sentinel: TypeORM needs this entity in its metadata so it does NOT
+// generate DROP TABLE "session" migrations. The session table is owned and
+// written by better-auth's Kysely adapter — TypeORM never queries it directly.
 @Entity("session")
 export class BaSession extends BaseEntity {
   @PrimaryColumn("text")

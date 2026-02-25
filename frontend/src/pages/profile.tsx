@@ -43,7 +43,10 @@ export default function Profile() {
         name: `Passkey ${new Date().toLocaleDateString("fr-FR")}`,
       });
       if (result?.error) {
-        setAddError(result.error.message ?? "Erreur lors de l'enregistrement de la clé d'accès");
+        const msg = result.error.message
+          ? `${result.error.message} (${result.error.code ?? result.error.status})`
+          : `Erreur lors de l'enregistrement de la clé d'accès (${result.error.code ?? result.error.status})`;
+        setAddError(msg);
       } else {
         (refetchPasskeys as (() => void) | undefined)?.();
       }
