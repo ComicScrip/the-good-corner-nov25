@@ -84,10 +84,7 @@ export const auth = betterAuth({
       verify: ({ hash, password }: { hash: string; password: string }) =>
         argon2Verify(hash, password),
     },
-    sendResetPassword: async ({
-      user,
-      url,
-    }) => {
+    sendResetPassword: async ({ user, url }) => {
       const displayName = user.name ?? (user.email ?? "").split("@")[0];
       await sendMail({
         to: user.email,
@@ -98,10 +95,7 @@ export const auth = betterAuth({
   },
   emailVerification: {
     sendOnSignUp: true,
-    sendVerificationEmail: async ({
-      user,
-      url,
-    }) => {
+    sendVerificationEmail: async ({ user, url }) => {
       // better-auth builds url as ${baseURL}/api/auth/verify-email?token=...
       // but the verification page lives on the frontend at ${FRONTEND_URL}/auth/verify-email?token=...
       const frontendUrl = url.replace(
@@ -120,11 +114,7 @@ export const auth = betterAuth({
   user: {
     changeEmail: {
       enabled: true,
-      sendChangeEmailVerification: async ({
-        user,
-        newEmail,
-        url,
-      }) => {
+      sendChangeEmailVerification: async ({ user, newEmail, url }) => {
         const fixedUrl = url.replace(
           /([?&]callbackURL=)(.+)$/,
           (_, prefix, value) => `${prefix}${encodeURIComponent(value)}`,
