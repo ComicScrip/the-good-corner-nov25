@@ -21,8 +21,6 @@ function buildSessionDataJWT(user: User): string {
         userId: user.id,
         token: randomUUID(),
         expiresAt: new Date((now + maxAge) * 1000).toISOString(),
-        ipAddress: null,
-        userAgent: null,
         createdAt: new Date(now * 1000).toISOString(),
         updatedAt: new Date(now * 1000).toISOString(),
       },
