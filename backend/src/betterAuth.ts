@@ -4,6 +4,10 @@ import { betterAuth } from "better-auth";
 import { magicLink } from "better-auth/plugins";
 import type { FastifyInstance } from "fastify";
 import { Pool } from "pg";
+import { changeEmailEmail } from "./emails/changeEmail";
+import { magicLinkEmail } from "./emails/magicLink";
+import { resetPasswordEmail } from "./emails/resetPassword";
+import { verifyEmailEmail } from "./emails/verifyEmail";
 import env from "./env";
 import { sendMail } from "./mailer";
 
@@ -91,14 +95,7 @@ export const auth = betterAuth({
       await sendMail({
         to: user.email,
         subject: "Réinitialisation de votre mot de passe",
-        html: `
-          <p>Bonjour ${displayName},</p>
-          <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
-          <p>Cliquez sur le lien ci-dessous pour choisir un nouveau mot de passe :</p>
-          <p><a href="${url}">${url}</a></p>
-          <p>Ce lien expire dans 1 heure.</p>
-          <p>Si vous n'avez pas effectué cette demande, ignorez cet email.</p>
-        `,
+        html: resetPasswordEmail(displayName, url),
       });
     },
   },
@@ -121,14 +118,7 @@ export const auth = betterAuth({
       await sendMail({
         to: user.email,
         subject: "Vérifiez votre adresse email",
-        html: `
-          <p>Bonjour ${displayName},</p>
-          <p>Merci de vous être inscrit sur The Good Corner !</p>
-          <p>Cliquez sur le lien ci-dessous pour vérifier votre adresse email :</p>
-          <p><a href="${frontendUrl}">${frontendUrl}</a></p>
-          <p>Ce lien expire dans 24 heures.</p>
-          <p>Si vous n'avez pas créé de compte, ignorez cet email.</p>
-        `,
+        html: verifyEmailEmail(displayName, frontendUrl),
       });
     },
     autoSignInAfterVerification: true,
@@ -157,14 +147,7 @@ export const auth = betterAuth({
         await sendMail({
           to: user.email,
           subject: "Confirmation de changement d'email",
-          html: `
-            <p>Bonjour ${displayName},</p>
-            <p>Vous avez demandé à changer votre adresse email vers <strong>${newEmail}</strong>.</p>
-            <p>Cliquez sur le lien ci-dessous pour confirmer cette demande depuis votre ancienne adresse :</p>
-            <p><a href="${frontendUrl}">${frontendUrl}</a></p>
-            <p>Ce lien expire dans 24 heures.</p>
-            <p>Si vous n'avez pas effectué cette demande, ignorez cet email.</p>
-          `,
+          html: changeEmailEmail(displayName, newEmail, frontendUrl),
         });
       },
     },
@@ -207,13 +190,7 @@ export const auth = betterAuth({
         await sendMail({
           to: email,
           subject: "Votre lien de connexion",
-          html: `
-            <p>Bonjour ${displayName},</p>
-            <p>Voici votre lien de connexion à The Good Corner :</p>
-            <p><a href="${frontendUrl}">${frontendUrl}</a></p>
-            <p>Ce lien est valable pendant 10 minutes.</p>
-            <p>Si vous n'avez pas demandé ce lien, ignorez cet email.</p>
-          `,
+          html: magicLinkEmail(displayName, frontendUrl),
         });
       },
     }),
