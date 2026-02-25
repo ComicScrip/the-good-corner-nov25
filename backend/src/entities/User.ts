@@ -1,11 +1,11 @@
-import { IsEmail, IsStrongPassword } from "class-validator";
-import { Field, InputType, Int, ObjectType } from "type-graphql";
+import { Field, ID, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
+  UpdateDateColumn,
 } from "typeorm";
 
 export const UserRole = {
@@ -18,63 +18,43 @@ export type Role = (typeof UserRole)[keyof typeof UserRole];
 @ObjectType()
 @Entity()
 export class User extends BaseEntity {
-  @Field(() => Int)
-  @PrimaryGeneratedColumn()
-  id: number;
+  // Text PK — better-auth supplies its own UUID string.
+  @Field(() => ID)
+  @PrimaryColumn("text")
+  id: string;
 
   @Field()
   @Column({ unique: true })
   email: string;
 
-  @Column()
-  hashedPassword: string;
+  // Nullable: email/password users don't have a name from the signup form.
+  // better-auth populates this for OAuth/passkey users.
+  @Field(() => String, { nullable: true })
+  @Column({ type: "text", nullable: true })
+  name: string | null;
+
+  // Set by better-auth when the user verifies their email (OAuth users start as true).
+  @Field()
+  @Column({ default: false })
+  emailVerified: boolean;
 
   @Field()
   @CreateDateColumn()
   createdAt: Date;
 
+  @UpdateDateColumn()
+  updatedAt: Date;
+
   @Field()
   @Column({ enum: UserRole, default: UserRole.Visitor })
   role: Role;
 
-  @Field()
+  // better-auth uses "image" as the field name for OAuth profile pictures.
+  @Field(() => String, { nullable: true })
   @Column({
-    default:
-      "https://media.istockphoto.com/id/1300845620/fr/vectoriel/appartement-dic%C3%B4ne-dutilisateur-isol%C3%A9-sur-le-fond-blanc-symbole-utilisateur.jpg?s=612x612&w=0&k=20&c=BVOfS7mmvy2lnfBPghkN__k8OMsg7Nlykpgjn0YOHj0=",
+    type: "text",
+    nullable: true,
+    default: null,
   })
-  avatar: string;
-}
-
-@InputType()
-export class SignupInput {
-  @Field()
-  @IsEmail({}, { message: "L'email doit être valide" })
-  email: string;
-
-  @Field()
-  @IsStrongPassword(
-    {},
-    {
-      message:
-        "Le mot de passe doit contenir au moins 8 caractères, dont une minuscule, une majuscule, un chiffre et un caractère spécial",
-    },
-  )
-  password: string;
-}
-
-@InputType()
-export class LoginInput {
-  @Field()
-  @IsEmail({}, { message: "L'email doit être valide" })
-  email: string;
-
-  @Field()
-  @IsStrongPassword(
-    {},
-    {
-      message:
-        "Le mot de passe doit contenir au moins 8 caractères, dont une minuscule, une majuscule, un chiffre et un caractère spécial",
-    },
-  )
-  password: string;
+  image: string | null;
 }

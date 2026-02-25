@@ -533,35 +533,40 @@ mkdir -p "$HOME/apps/$DNS/prod" && cd "$HOME/apps/$DNS/prod" && \
 git clone $REPO_URL .
 
 # Generate secure credentials
-JWT_SECRET=$(openssl rand -base64 32)
+BETTER_AUTH_SECRET=$(openssl rand -base64 32)
 DB_USER="tgc_$(openssl rand -hex 4)"
 DB_PASS=$(openssl rand -base64 24)
 # Setup prod env
 cp .env.production.example .env.production && \
-sed -i "s|JWT_SECRET=.*|JWT_SECRET=$JWT_SECRET|g" .env.production && \
+sed -i "s|BETTER_AUTH_SECRET=.*|BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET|g" .env.production && \
 sed -i "s|DB_USER=.*|DB_USER=$DB_USER|g" .env.production && \
 sed -i "s|DB_PASS=.*|DB_PASS=$DB_PASS|g" .env.production && \
 sed -i "s|DEPLOY_ENV=.*|DEPLOY_ENV=prod|g" .env.production && \
 sed -i "s|GATEWAY_PORT=.*|GATEWAY_PORT=82|g" .env.production && \
+sed -i "s|BETTER_AUTH_URL=.*|BETTER_AUTH_URL=https://$DNS|g" .env.production && \
+sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=https://$DNS|g" .env.production && \
 ./start.sh prod
 
 # Setup staging env
 mkdir -p "$HOME/apps/$DNS/staging" && cd "$HOME/apps/$DNS/staging" && \
 git clone $REPO_URL . && git checkout dev && \
 
-JWT_SECRET=$(openssl rand -base64 32)
+BETTER_AUTH_SECRET=$(openssl rand -base64 32)
 DB_USER="tgc_$(openssl rand -hex 4)"
 DB_PASS=$(openssl rand -base64 24)
 
 cp .env.production.example .env.production && \
-sed -i "s|JWT_SECRET=.*|JWT_SECRET=$JWT_SECRET|g" .env.production && \
+sed -i "s|BETTER_AUTH_SECRET=.*|BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET|g" .env.production && \
 sed -i "s|DB_USER=.*|DB_USER=$DB_USER|g" .env.production && \
 sed -i "s|DB_PASS=.*|DB_PASS=$DB_PASS|g" .env.production && \
 sed -i "s|DEPLOY_ENV=.*|DEPLOY_ENV=staging|g" .env.production && \
 sed -i "s|GATEWAY_PORT=.*|GATEWAY_PORT=81|g" .env.production && \
+sed -i "s|BETTER_AUTH_URL=.*|BETTER_AUTH_URL=https://staging.$DNS|g" .env.production && \
+sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=https://staging.$DNS|g" .env.production && \
 ./start.sh
 
 ADMIN_PASSWORD=$(openssl rand -base64 20)
+
 docker exec -it staging-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
 docker exec -it prod-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
 

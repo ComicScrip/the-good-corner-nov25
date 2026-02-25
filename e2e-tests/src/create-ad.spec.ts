@@ -2,8 +2,8 @@ import { expect, test } from "@playwright/test";
 import { clearDB } from "../../backend/src/db";
 import { Category } from "../../backend/src/entities/Category";
 import { Tag } from "../../backend/src/entities/Tag";
-import { connectDB, disconnectDB } from "./dbHelpers";
-import { loginAs } from "./authHelpers";
+import { connectDB, disconnectDB } from "./helpers/dbHelpers";
+import { loginAs } from "./helpers/authHelpers";
 
 test.beforeAll(connectDB);
 test.beforeEach(clearDB);
@@ -11,9 +11,8 @@ test.afterAll(disconnectDB);
 
 test("can create a new ad", async ({ page }) => {
   const email = "zoe.smith@app.com";
-  const password = "SuperP@ssW0rd!";
 
-  await loginAs(page, { email, password });
+  await loginAs(page, { email });
 
   const category = await Category.create({ name: "Jeux video" }).save();
   const tagRetro = await Tag.create({ name: "Retro" }).save();

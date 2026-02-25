@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { randomUUID } from "node:crypto";
 import { Ad } from "../../backend/src/entities/Ad";
 import { clearDB } from "../../backend/src/db";
 import { Category } from "../../backend/src/entities/Category";
 import { User } from "../../backend/src/entities/User";
-import { connectDB, disconnectDB } from "./dbHelpers";
-import { hash } from "argon2";
+import { connectDB, disconnectDB } from "./helpers/dbHelpers";
 
 test.beforeAll(connectDB);
 test.beforeEach(clearDB);
@@ -13,7 +13,7 @@ test.afterAll(disconnectDB);
 test("can view ads in db", async ({ page }) => {
     const computerCat = await Category.create({ name: "informatique" }).save();
     const carCat = await Category.create({ name: "automobile" }).save();
-    const visitor = await User.create({ email: "visitor@app.com", hashedPassword: await hash("SuperP@ssW0rd!") }).save();
+    const visitor = await User.create({ id: randomUUID(), email: "visitor@app.com", emailVerified: true }).save();
     const keyboard = await Ad.create({
         title: "Clavier logitech",
         description: "Clavier Bluetooth® fin et minimaliste avec des touches personnalisables.",
