@@ -561,6 +561,8 @@ sed -i "s|DEPLOY_ENV=.*|DEPLOY_ENV=staging|g" .env.production && \
 sed -i "s|GATEWAY_PORT=.*|GATEWAY_PORT=81|g" .env.production && \
 ./start.sh
 
+ADMIN_PASSWORD=$(openssl rand -base64 20)
+
 docker exec -it staging-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
 docker exec -it prod-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
 
@@ -569,7 +571,6 @@ echo "Staging: https://staging.$DNS" && \
 echo "Prod: https://$DNS" && \
 echo "WEBHOOK_SECRET: $WEBHOOK_SECRET" && \
 
-ADMIN_PASSWORD=$(openssl rand -base64 20)
 echo "ADMIN_PASSWORD: $ADMIN_PASSWORD" && \
 
 echo ""
