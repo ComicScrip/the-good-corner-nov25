@@ -40,8 +40,8 @@ export default function ForgotPassword() {
         {submitted ? (
           <div className="text-center">
             <p className="text-gray-700 mb-6">
-              Si cet email existe, un lien de réinitialisation vous a été envoyé. Vérifiez
-              votre boîte mail.
+              Si cet email existe, un lien de réinitialisation vous a été envoyé. Vérifiez votre
+              boîte mail.
             </p>
             <a href="/login" className="btn btn-outline">
               Retour à la connexion
@@ -50,8 +50,8 @@ export default function ForgotPassword() {
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <p className="text-sm text-gray-600">
-              Saisissez votre adresse email et nous vous enverrons un lien pour réinitialiser
-              votre mot de passe.
+              Saisissez votre adresse email et nous vous enverrons un lien pour réinitialiser votre
+              mot de passe.
             </p>
 
             <Field

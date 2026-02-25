@@ -44,4 +44,12 @@ export default load({
     type: String,
     optional: true,
   },
+  MAILJET_SMTP_HOST: {
+    type: String,
+    optional: true,
+  },
+  MAILJET_SMTP_PORT: {
+    type: Number,
+    optional: true,
+  },
 });

@@ -44,6 +44,8 @@ export default function Login() {
       if (result.error) {
         if (result.error.code === "EMAIL_NOT_VERIFIED") {
           setUnverifiedEmail(data.email);
+        } else if (result.error.code === "INVALID_EMAIL_OR_PASSWORD") {
+          setSubmitError("Email ou mot de passe incorrect");
         } else {
           setSubmitError(result.error.message ?? "Email ou mot de passe incorrect.");
         }
@@ -196,9 +198,7 @@ export default function Login() {
             </>
           ) : (
             <>
-              {magicLinkError && (
-                <p className="text-red-500 text-sm">{magicLinkError}</p>
-              )}
+              {magicLinkError && <p className="text-red-500 text-sm">{magicLinkError}</p>}
               <button
                 type="button"
                 disabled={magicLinkLoading}
@@ -211,7 +211,10 @@ export default function Login() {
               <div className="text-sm text-center">
                 <button
                   type="button"
-                  onClick={() => { setMode("password"); setMagicLinkError(null); }}
+                  onClick={() => {
+                    setMode("password");
+                    setMagicLinkError(null);
+                  }}
                   className="text-blue-600 hover:underline"
                 >
                   Utiliser mon mot de passe
@@ -264,9 +267,7 @@ export default function Login() {
 
         {unverifiedEmail && (
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-300 rounded text-sm text-center">
-            <p className="text-yellow-800 mb-2">
-              Votre adresse email n'a pas encore été vérifiée.
-            </p>
+            <p className="text-yellow-800 mb-2">Votre adresse email n'a pas encore été vérifiée.</p>
             {resendSent ? (
               <p className="text-green-700">Email de vérification envoyé !</p>
             ) : (

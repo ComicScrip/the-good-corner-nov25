@@ -26,9 +26,7 @@ export default function MagicLinkVerify() {
       .then((result) => {
         if (result.error) {
           setStatus("error");
-          setErrorMessage(
-            result.error.message ?? "Le lien de connexion est invalide ou a expiré.",
-          );
+          setErrorMessage(result.error.message ?? "Le lien de connexion est invalide ou a expiré.");
         } else {
           setStatus("success");
           router.replace("/profile");

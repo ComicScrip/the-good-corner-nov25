@@ -87,11 +87,8 @@ export const auth = betterAuth({
     sendResetPassword: async ({
       user,
       url,
-    }: {
-      user: { email: string; name: string | null };
-      url: string;
     }) => {
-      const displayName = user.name ?? user.email.split("@")[0];
+      const displayName = user.name ?? (user.email ?? "").split("@")[0];
       await sendMail({
         to: user.email,
         subject: "Réinitialisation de votre mot de passe",
@@ -104,9 +101,6 @@ export const auth = betterAuth({
     sendVerificationEmail: async ({
       user,
       url,
-    }: {
-      user: { email: string; name: string | null };
-      url: string;
     }) => {
       // better-auth builds url as ${baseURL}/api/auth/verify-email?token=...
       // but the verification page lives on the frontend at ${FRONTEND_URL}/auth/verify-email?token=...
@@ -114,7 +108,7 @@ export const auth = betterAuth({
         `${env.BETTER_AUTH_URL}/api/auth`,
         `${env.FRONTEND_URL}/auth`,
       );
-      const displayName = user.name ?? user.email.split("@")[0];
+      const displayName = user.name ?? (user.email ?? "").split("@")[0];
       await sendMail({
         to: user.email,
         subject: "Vérifiez votre adresse email",
@@ -130,10 +124,6 @@ export const auth = betterAuth({
         user,
         newEmail,
         url,
-      }: {
-        user: { email: string; name: string | null };
-        newEmail: string;
-        url: string;
       }) => {
         const fixedUrl = url.replace(
           /([?&]callbackURL=)(.+)$/,
@@ -143,9 +133,9 @@ export const auth = betterAuth({
           `${env.BETTER_AUTH_URL}/api/auth`,
           `${env.FRONTEND_URL}/auth`,
         );
-        const displayName = user.name ?? user.email.split("@")[0];
+        const displayName = user.name ?? (user.email ?? "").split("@")[0];
         await sendMail({
-          to: user.email,
+          to: user.email ?? newEmail,
           subject: "Confirmation de changement d'email",
           html: changeEmailEmail(displayName, newEmail, frontendUrl),
         });

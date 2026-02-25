@@ -3,8 +3,8 @@ import { clearDB } from "../../backend/src/db";
 import { Ad } from "../../backend/src/entities/Ad";
 import { Category } from "../../backend/src/entities/Category";
 import { Tag } from "../../backend/src/entities/Tag";
-import { connectDB, disconnectDB } from "./dbHelpers";
-import { loginAs } from "./authHelpers";
+import { connectDB, disconnectDB } from "./helpers/dbHelpers";
+import { loginAs } from "./helpers/authHelpers";
 
 test.beforeAll(connectDB);
 test.beforeEach(clearDB);
@@ -12,8 +12,7 @@ test.afterAll(disconnectDB);
 
 test("can update an existing ad", async ({ page }) => {
   const email = "martin.dupont@app.com";
-  const password = "SuperP@ssW0rd!";
-  const user = await loginAs(page, { email, password });
+  const user = await loginAs(page, { email });
 
   const category = await Category.create({ name: "Informatique" }).save();
   const updatedCategory = await Category.create({ name: "Telephonie" }).save();

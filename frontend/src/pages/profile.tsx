@@ -27,8 +27,11 @@ export default function Profile() {
     router.replace("/profile", undefined, { shallow: true });
   }, [router.query.emailChanged, refetch, router]);
 
-  const { data: passkeys, isPending: passkeysLoading, refetch: refetchPasskeys } =
-    authClient.useListPasskeys();
+  const {
+    data: passkeys,
+    isPending: passkeysLoading,
+    refetch: refetchPasskeys,
+  } = authClient.useListPasskeys();
 
   // ── Passkey handlers ─────────────────────────────────────────────────────
   const [addError, setAddError] = useState<string | null>(null);
@@ -43,9 +46,10 @@ export default function Profile() {
         name: `Passkey ${new Date().toLocaleDateString("fr-FR")}`,
       });
       if (result?.error) {
+        const code = "code" in result.error ? result.error.code : undefined;
         const msg = result.error.message
-          ? `${result.error.message} (${result.error.code ?? result.error.status})`
-          : `Erreur lors de l'enregistrement de la clé d'accès (${result.error.code ?? result.error.status})`;
+          ? `${result.error.message} (${code ?? result.error.status})`
+          : `Erreur lors de l'enregistrement de la clé d'accès (${code ?? result.error.status})`;
         setAddError(msg);
       } else {
         (refetchPasskeys as (() => void) | undefined)?.();
@@ -121,7 +125,7 @@ export default function Profile() {
         {/* Avatar */}
         <div className="flex justify-center mb-6">
           {user.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
+            // biome-ignore lint/performance/noImgElement: images may come from unknown domains for now
             <img
               src={user.image}
               alt="avatar"
@@ -152,7 +156,10 @@ export default function Profile() {
               {!emailFormOpen && !emailPending && (
                 <button
                   type="button"
-                  onClick={() => { setEmailFormOpen(true); setEmailChangeError(null); }}
+                  onClick={() => {
+                    setEmailFormOpen(true);
+                    setEmailChangeError(null);
+                  }}
                   className="btn btn-ghost btn-xs text-blue-600 ml-auto"
                 >
                   Modifier
@@ -164,8 +171,8 @@ export default function Profile() {
             {emailPending && (
               <div className="alert alert-info text-sm py-2">
                 <span>
-                  En attente de confirmation — un email a été envoyé à{" "}
-                  <strong>{user.email}</strong>. Cliquez sur le lien pour valider le changement.
+                  En attente de confirmation — un email a été envoyé à <strong>{user.email}</strong>
+                  . Cliquez sur le lien pour valider le changement.
                 </span>
                 <button
                   type="button"
@@ -201,9 +208,7 @@ export default function Profile() {
                 {emailErrors.newEmail && (
                   <p className="text-red-500 text-xs">{emailErrors.newEmail.message}</p>
                 )}
-                {emailChangeError && (
-                  <p className="text-red-500 text-xs">{emailChangeError}</p>
-                )}
+                {emailChangeError && <p className="text-red-500 text-xs">{emailChangeError}</p>}
                 <div className="flex gap-2">
                   <button
                     type="submit"
@@ -215,7 +220,11 @@ export default function Profile() {
                   <button
                     type="button"
                     className="btn btn-ghost btn-sm"
-                    onClick={() => { setEmailFormOpen(false); setEmailChangeError(null); resetEmailForm(); }}
+                    onClick={() => {
+                      setEmailFormOpen(false);
+                      setEmailChangeError(null);
+                      resetEmailForm();
+                    }}
                   >
                     Annuler
                   </button>

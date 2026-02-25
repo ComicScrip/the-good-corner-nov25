@@ -114,7 +114,8 @@ export default function Signup() {
             Un lien de connexion a été envoyé à <strong>{magicLinkEmail}</strong>.
           </p>
           <p className="text-gray-500 text-sm mb-6">
-            Cliquez sur le lien dans l'email pour créer et activer votre compte. Il expire dans 10 minutes.
+            Cliquez sur le lien dans l'email pour créer et activer votre compte. Il expire dans 10
+            minutes.
           </p>
           <button
             type="button"
@@ -170,8 +171,7 @@ export default function Signup() {
                       message: "Le mot de passe ne peut pas dépasser 128 caractères",
                     },
                     pattern: {
-                      value:
-                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                      value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
                       message:
                         "Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial",
                     },
@@ -199,9 +199,7 @@ export default function Signup() {
             </>
           ) : (
             <>
-              {magicLinkError && (
-                <p className="text-red-500 text-sm">{magicLinkError}</p>
-              )}
+              {magicLinkError && <p className="text-red-500 text-sm">{magicLinkError}</p>}
               <button
                 type="button"
                 disabled={magicLinkLoading}
@@ -214,7 +212,10 @@ export default function Signup() {
               <div className="text-sm text-center">
                 <button
                   type="button"
-                  onClick={() => { setMode("password"); setMagicLinkError(null); }}
+                  onClick={() => {
+                    setMode("password");
+                    setMagicLinkError(null);
+                  }}
                   className="text-blue-600 hover:underline"
                 >
                   Créer un compte avec un mot de passe
@@ -243,11 +244,7 @@ export default function Signup() {
           </button>
         </div>
 
-        {submitError && (
-          <p className="text-red-500 mt-4 text-center">
-            {submitError}
-          </p>
-        )}
+        {submitError && <p className="text-red-500 mt-4 text-center">{submitError}</p>}
 
         <div className="text-center mt-4">
           <p className="text-sm text-gray-600">

@@ -45,9 +45,7 @@ export default function ResetPassword() {
       });
 
       if (result.error) {
-        setServerError(
-          result.error.message ?? "Une erreur est survenue. Veuillez réessayer.",
-        );
+        setServerError(result.error.message ?? "Une erreur est survenue. Veuillez réessayer.");
       } else {
         router.push("/login");
       }
@@ -131,9 +129,7 @@ export default function ResetPassword() {
             error={errors.confirmPassword?.message}
           />
 
-          {serverError && (
-            <p className="text-red-500 text-sm text-center">{serverError}</p>
-          )}
+          {serverError && <p className="text-red-500 text-sm text-center">{serverError}</p>}
 
           <button type="submit" disabled={isSubmitting} className="btn btn-primary w-full">
             {isSubmitting ? "Enregistrement..." : "Enregistrer le nouveau mot de passe"}

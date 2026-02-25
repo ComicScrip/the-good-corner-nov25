@@ -15,6 +15,13 @@ services:
     ports:
       - 5433:5432
 
+  mailpit:
+    image: axllent/mailpit:latest
+    stop_grace_period: 1s
+    ports:
+      - 8025:8025   # web UI + REST API (optional — handy for debugging)
+      - 1025:1025   # SMTP catch-all (no auth required)
+
   backend:
     stop_grace_period: 0s
     env_file:
@@ -27,6 +34,11 @@ services:
     environment:
       - DB_HOST=testDB
       - TEST_DB_PORT=5432
+      - MAILJET_SMTP_HOST=mailpit
+      - MAILJET_SMTP_PORT=1025
+      - MAILJET_SMTP_USER=
+      - MAILJET_SMTP_PASS=
+      - MAILJET_FROM_EMAIL=noreply@test.local
     healthcheck:
       test: 'curl --fail --request GET -H ''content-type:application/json'' --url ''http://localhost:4000/?query=%7B__typename%7D'''
       interval: 1s
@@ -35,6 +47,8 @@ services:
     depends_on:
       testDB:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   frontend:
     stop_grace_period: 0s

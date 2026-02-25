@@ -43,9 +43,8 @@ export default function VerifyEmail() {
           // Redirect to profile. The ?emailChanged=1 param causes profile.tsx
           // to refetch so the new email appears immediately.
           // This is harmless for other flows (signup verify, etc.).
-          const destination = callbackURL && callbackURL !== "/"
-            ? callbackURL
-            : "/profile?emailChanged=1";
+          const destination =
+            callbackURL && callbackURL !== "/" ? callbackURL : "/profile?emailChanged=1";
           router.replace(destination);
         }
       })
