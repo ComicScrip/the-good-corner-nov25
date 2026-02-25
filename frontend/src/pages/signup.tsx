@@ -190,7 +190,7 @@ export default function Signup() {
                 <button
                   type="button"
                   onClick={() => setMode("magiclink")}
-                  className="text-blue-600 hover:underline"
+                  className="text-blue-600 hover:underline cursor-pointer"
                 >
                   S'inscrire sans mot de passe avec un lien magique
                 </button>

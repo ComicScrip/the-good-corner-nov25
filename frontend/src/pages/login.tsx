@@ -187,7 +187,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setMode("magiclink")}
-                  className="text-blue-600 hover:underline"
+                  className="text-blue-600 hover:underline cursor-pointer"
                 >
                   Recevoir un lien magique
                 </button>
