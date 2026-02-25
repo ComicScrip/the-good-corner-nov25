@@ -152,7 +152,7 @@ export const auth = betterAuth({
   },
   plugins: [
     passkey({
-      rpID: "localhost",
+      rpID: new URL(env.FRONTEND_URL).hostname,
       rpName: "The Good Corner",
       origin: env.FRONTEND_URL,
     }),

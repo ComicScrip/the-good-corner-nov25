@@ -543,8 +543,8 @@ sed -i "s|DB_USER=.*|DB_USER=$DB_USER|g" .env.production && \
 sed -i "s|DB_PASS=.*|DB_PASS=$DB_PASS|g" .env.production && \
 sed -i "s|DEPLOY_ENV=.*|DEPLOY_ENV=prod|g" .env.production && \
 sed -i "s|GATEWAY_PORT=.*|GATEWAY_PORT=82|g" .env.production && \
-sed -i "s|BETTER_AUTH_URL=.*|BETTER_AUTH_URL=$DNS|g" .env.production && \
-sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=$DNS|g" .env.production && \
+sed -i "s|BETTER_AUTH_URL=.*|BETTER_AUTH_URL=https://$DNS|g" .env.production && \
+sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=https://$DNS|g" .env.production && \
 ./start.sh prod
 
 # Setup staging env
@@ -561,8 +561,8 @@ sed -i "s|DB_USER=.*|DB_USER=$DB_USER|g" .env.production && \
 sed -i "s|DB_PASS=.*|DB_PASS=$DB_PASS|g" .env.production && \
 sed -i "s|DEPLOY_ENV=.*|DEPLOY_ENV=staging|g" .env.production && \
 sed -i "s|GATEWAY_PORT=.*|GATEWAY_PORT=81|g" .env.production && \
-sed -i "s|BETTER_AUTH_URL=.*|BETTER_AUTH_URL=staging.$DNS|g" .env.production && \
-sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=staging.$DNS|g" .env.production && \
+sed -i "s|BETTER_AUTH_URL=.*|BETTER_AUTH_URL=https://staging.$DNS|g" .env.production && \
+sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=https://staging.$DNS|g" .env.production && \
 ./start.sh
 
 ADMIN_PASSWORD=$(openssl rand -base64 20)

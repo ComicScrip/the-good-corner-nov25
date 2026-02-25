@@ -36,14 +36,15 @@ export default function Profile() {
   const [addError, setAddError] = useState<string | null>(null);
   const [addLoading, setAddLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [passkeyName, setPasskeyName] = useState("");
 
   const handleAddPasskey = async () => {
     setAddError(null);
     setAddLoading(true);
     try {
-      const result = await authClient.passkey.addPasskey({
-        name: `Passkey ${new Date().toLocaleDateString("fr-FR")}`,
-      });
+      const name =
+        passkeyName.trim() || `Passkey generated at ${new Date().toLocaleString("fr-FR")}`;
+      const result = await authClient.passkey.addPasskey({ name });
       if (result?.error) {
         const code = "code" in result.error ? result.error.code : undefined;
         const msg = result.error.message
@@ -51,6 +52,7 @@ export default function Profile() {
           : `Erreur lors de l'enregistrement de la clé d'accès (${code ?? result.error.status})`;
         setAddError(msg);
       } else {
+        setPasskeyName("");
         (refetchPasskeys as (() => void) | undefined)?.();
       }
     } catch (err: unknown) {
@@ -248,14 +250,24 @@ export default function Profile() {
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={handleAddPasskey}
-              disabled={addLoading}
-              className="btn btn-primary btn-sm w-fit mb-4"
-            >
-              {addLoading ? "Enregistrement..." : "Ajouter une clé d'accès"}
-            </button>
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="text"
+                value={passkeyName}
+                onChange={(e) => setPasskeyName(e.target.value)}
+                placeholder="Nom de la clé (optionnel)"
+                className="input input-bordered input-sm flex-1 max-w-xs"
+                disabled={addLoading}
+              />
+              <button
+                type="button"
+                onClick={handleAddPasskey}
+                disabled={addLoading}
+                className="btn btn-primary btn-sm"
+              >
+                {addLoading ? "Enregistrement..." : "Ajouter une clé d'accès"}
+              </button>
+            </div>
 
             {passkeysLoading ? (
               <p className="text-sm text-gray-400">Chargement des clés d'accès...</p>
