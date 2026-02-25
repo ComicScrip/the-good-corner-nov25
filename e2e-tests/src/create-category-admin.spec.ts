@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { clearDB } from "../../backend/src/db";
 import { UserRole } from "../../backend/src/entities/User";
-import { connectDB, disconnectDB } from "./dbHelpers";
-import { loginAs } from "./authHelpers";
+import { connectDB, disconnectDB } from "./helpers/dbHelpers";
+import { loginAs } from "./helpers/authHelpers";
 
 test.beforeAll(connectDB);
 test.beforeEach(clearDB);
@@ -11,7 +11,6 @@ test.afterAll(disconnectDB);
 test("admin can create a category", async ({ page }) => {
   await loginAs(page, {
     email: "admin@app.com",
-    password: "SuperP@ssW0rd!",
     role: UserRole.Admin,
   });
 

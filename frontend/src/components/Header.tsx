@@ -1,8 +1,8 @@
-/** biome-ignore-all lint/performance/noImgElement: images may come from unknown hosts */
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { useLogoutMutation, useProfileQuery } from "@/graphql/generated/schema";
+import { useProfileQuery } from "@/graphql/generated/schema";
+import { authClient } from "@/lib/authClient";
 import CategoriesNav from "./CategoriesNav";
 import SearchInput from "./SearchInput";
 
@@ -13,12 +13,11 @@ export default function Header() {
   const user = data?.me || null;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const [logout] = useLogoutMutation();
   const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await authClient.signOut();
       await refetch();
       router.push("/");
     } catch (err) {
@@ -26,6 +25,37 @@ export default function Header() {
     }
   };
 
+  const getUserInitial = (email: string) => {
+    return email.charAt(0).toUpperCase();
+  };
+
+  const avatarBase =
+    "w-8 h-8 rounded-full object-cover flex items-center justify-center text-sm font-bold";
+
+  const AvatarCircle = ({ linkTo, title }: { linkTo?: string; title?: string }) => {
+    const inner = user?.image ? (
+      // biome-ignore lint/performance/noImgElement: images may come from unknown hosts
+      <img
+        src={user.image}
+        alt="avatar"
+        className={`${avatarBase} bg-orange-600`}
+        referrerPolicy="no-referrer"
+      />
+    ) : (
+      <span className={`${avatarBase} bg-orange-600 text-white`}>
+        {getUserInitial(user?.email ?? "?")}
+      </span>
+    );
+
+    if (linkTo) {
+      return (
+        <Link href={linkTo} className={`${avatarBase} hover:opacity-80`} title={title}>
+          {inner}
+        </Link>
+      );
+    }
+    return <div className={avatarBase}>{inner}</div>;
+  };
   return (
     <header className="p-4 border-b border-gray-400 flex flex-col w-full gap-4">
       {/* Small screen layout: Title + Burger menu */}
@@ -35,13 +65,7 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-2">
-          {!loading && user && (
-            <img
-              className="w-8 h-8 text-white rounded-full flex "
-              src={user.avatar}
-              alt={`profil de ${user.email}`}
-            />
-          )}
+          {!loading && user && <AvatarCircle linkTo="/profile" title="Mon profil" />}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="btn btn-ghost btn-sm"
@@ -151,11 +175,7 @@ export default function Header() {
               {user ? (
                 <>
                   <div className="flex items-center gap-2 mr-2">
-                    <img
-                      className="w-8 h-8 text-white rounded-full flex "
-                      src={user.avatar}
-                      alt={`profil de ${user.email}`}
-                    />
+                    <AvatarCircle linkTo="/profile" title="Mon profil" />
                   </div>
                   <button
                     type="button"
