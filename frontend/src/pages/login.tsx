@@ -5,12 +5,12 @@ import Field from "@/components/Field";
 import Layout from "@/components/Layout";
 import { authClient } from "@/lib/authClient";
 
-const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "http://localhost:3000";
-
 type FormValues = { email: string; password: string };
 type Mode = "password" | "magiclink";
 
 export default function Login() {
+  const FRONTEND_URL = window?.location?.origin ?? "http://localhost:3000";
+
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("password");
   const [magicLinkSent, setMagicLinkSent] = useState(false);

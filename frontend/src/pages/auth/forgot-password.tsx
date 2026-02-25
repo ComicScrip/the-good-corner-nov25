@@ -9,6 +9,8 @@ interface ForgotPasswordForm {
 }
 
 export default function ForgotPassword() {
+  const FRONTEND_URL = window?.location?.origin ?? "http://localhost:3000";
+
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
@@ -22,7 +24,7 @@ export default function ForgotPassword() {
     try {
       await authClient.requestPasswordReset({
         email: data.email,
-        redirectTo: `${process.env.NEXT_PUBLIC_FRONTEND_URL ?? "http://localhost:3000"}/auth/reset-password`,
+        redirectTo: `${FRONTEND_URL}/auth/reset-password`,
       });
     } catch (_e) {
       // Intentionally silent — we never reveal whether the email exists

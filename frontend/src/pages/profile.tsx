@@ -5,9 +5,8 @@ import Layout from "@/components/Layout";
 import { useProfileQuery } from "@/graphql/generated/schema";
 import { authClient } from "@/lib/authClient";
 
-const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "http://localhost:3000";
-
 export default function Profile() {
+  const FRONTEND_URL = window?.location?.origin ?? "http://localhost:3000";
   const router = useRouter();
   const { data, loading, refetch } = useProfileQuery({ fetchPolicy: "cache-and-network" });
   const user = data?.me ?? null;
