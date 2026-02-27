@@ -13,10 +13,13 @@ import {
 } from "type-graphql";
 import { Like } from "typeorm";
 import { getCurrentUser } from "../auth";
+import { invalidateAdsCache, invalidateCache } from "../db";
 import { Ad, NewAdInput, UpdateAdInput } from "../entities/Ad";
 import { UserRole } from "../entities/User";
 import { ForbiddenError } from "../errors";
 import type { GraphQLContext } from "../types";
+
+const CACHE_TTL = 60_000; // 1 minute
 
 @ArgsType()
 class GetAdsArgs {
@@ -42,16 +45,18 @@ export default class AdResolver {
   async ads(
     @Args() { titleContains, limit, categoryId, order, sortBy }: GetAdsArgs,
   ) {
+    // Cache key encodes all query parameters so different filter/sort
+    // combinations are stored independently.
+    const cacheId = `ads:${categoryId ?? ""}:${titleContains ?? ""}:${limit}:${sortBy}:${order}`;
     return Ad.find({
       where: {
         category: { id: categoryId },
         title: titleContains ? Like(`%${titleContains}%`) : undefined,
       },
-      order: {
-        [`${sortBy}`]: order,
-      },
+      order: { [`${sortBy}`]: order },
       take: limit,
       relations: ["category", "tags"],
+      cache: { id: cacheId, milliseconds: CACHE_TTL },
     });
   }
 
@@ -60,6 +65,7 @@ export default class AdResolver {
     const ad = await Ad.findOne({
       where: { id },
       relations: { tags: true, category: true, author: true },
+      cache: { id: `ad:${id}`, milliseconds: CACHE_TTL },
     });
     if (!ad)
       throw new GraphQLError("ad not found", {
@@ -79,6 +85,7 @@ export default class AdResolver {
     newAd.author = currentUser;
     Object.assign(newAd, data);
     const { id } = await newAd.save();
+    await invalidateAdsCache();
     return Ad.findOne({
       where: { id },
       relations: { tags: true, category: true, author: true },
@@ -111,6 +118,8 @@ export default class AdResolver {
 
     Object.assign(adToUpdate, data);
     await adToUpdate.save();
+    await invalidateCache([`ad:${id}`]);
+    await invalidateAdsCache();
     return await Ad.findOne({
       where: { id },
       relations: { tags: true, category: true },
@@ -137,6 +146,8 @@ export default class AdResolver {
       throw new ForbiddenError();
 
     await ad.remove();
+    await invalidateCache([`ad:${id}`]);
+    await invalidateAdsCache();
     return "ad deleted !";
   }
 }

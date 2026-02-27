@@ -4,13 +4,13 @@ import { betterAuth } from "better-auth";
 import { magicLink } from "better-auth/plugins";
 import type { FastifyInstance } from "fastify";
 import { Pool } from "pg";
-import { createClient } from "redis";
 import { changeEmailEmail } from "./emails/changeEmail";
 import { magicLinkEmail } from "./emails/magicLink";
 import { resetPasswordEmail } from "./emails/resetPassword";
 import { verifyEmailEmail } from "./emails/verifyEmail";
 import env from "./env";
 import { sendMail } from "./mailer";
+import redis from "./redis";
 
 // ---------------------------------------------------------------------------
 // Dragonfly / Redis secondary storage
@@ -18,24 +18,24 @@ import { sendMail } from "./mailer";
 // (Redis-compatible) instead of Postgres, enabling fast O(1) session lookups
 // and instant revocability. The cookie cache still applies on top, so a
 // Redis round-trip is only needed when the 5-minute JWT cache expires.
+//
+// The same Dragonfly instance is also used by TypeORM for query result
+// caching (see src/db/index.ts). Both share the same ioredis singleton
+// (see src/redis.ts) so only one TCP connection is opened.
 // ---------------------------------------------------------------------------
-const redis = env.REDIS_URL ? createClient({ url: env.REDIS_URL }) : null;
-
-if (redis) {
-  redis.connect().catch((err) => {
-    console.error("[redis] failed to connect:", err);
-  });
-}
 
 const secondaryStorage = redis
-  ? {
-      get: (key: string) => redis.get(key),
-      set: (key: string, value: string, ttl?: number) =>
-        ttl
-          ? redis.set(key, value, { EX: ttl }).then(() => {})
-          : redis.set(key, value).then(() => {}),
-      delete: (key: string) => redis.del(key).then(() => {}),
-    }
+  ? (() => {
+      const r = redis; // non-null alias so TypeScript narrows correctly in closures
+      return {
+        get: (key: string) => r.get(key),
+        set: (key: string, value: string, ttl?: number) =>
+          ttl
+            ? r.set(key, value, "EX", ttl).then(() => {})
+            : r.set(key, value).then(() => {}),
+        delete: (key: string) => r.del(key).then(() => {}),
+      };
+    })()
   : undefined;
 
 // Standard pg Pool — better-auth uses this directly via its built-in Kysely
