@@ -13,7 +13,7 @@
     "migration:revert": "npx typeorm-ts-node-commonjs migration:revert -d src/db/index.ts",
     "lint": "biome check",
     "format": "biome format --write && biome check --write",
-    "testDB": "docker compose -f docker-compose.integration-tests.yml up testDB --wait",
+    "testDB": "docker compose -f docker-compose.integration-tests.yml up --wait",
     "test": "jest --runInBand"
   },
   "repository": {

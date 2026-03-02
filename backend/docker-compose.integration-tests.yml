@@ -15,3 +15,15 @@ services:
     tmpfs: /var/lib/postgresql
     ports:
       - 5433:5432
+  kvStore:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    stop_grace_period: 1s
+    ulimits:
+      memlock: -1
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 1s
+      timeout: 2s
+      retries: 10
+    ports:
+      - 6379:6379
