@@ -29,7 +29,9 @@ const db = new DataSource({
   ],
   migrations: [`${__dirname}/migrations/**/*{.js,.ts}`],
   migrationsRun: true,
-  ...(env.REDIS_URL
+  // Disable query-result caching in test mode so that e2e tests always see
+  // the current DB state after clearDB() runs between test cases.
+  ...(env.REDIS_URL && env.NODE_ENV !== "test"
     ? {
         cache: {
           type: "ioredis" as const,
@@ -90,6 +92,12 @@ export async function invalidateAdsCache(): Promise<void> {
 }
 
 export async function clearDB() {
+  // Flush Redis so stale cached query results don't bleed across tests.
+  if (redis) {
+    await redis.flushdb();
+  }
+  await db.queryResultCache?.clear();
+
   const runner = db.createQueryRunner();
   const tableDroppings = db.entityMetadatas.map((entity) =>
     runner.query(`DROP TABLE IF EXISTS "${entity.tableName}" CASCADE`),
