@@ -13,14 +13,29 @@ services:
       retries: 10
     ports:
       - 5432:5432
+  kvStore:
+    stop_grace_period: 1s
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    ulimits:
+      memlock: -1
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 1s
+      timeout: 2s
+      retries: 10
+    ports:
+      - 6379:6379
   backend:
     stop_grace_period: 1s
     build: backend
     depends_on:
       db:
         condition: service_healthy
+      kvStore:
+        condition: service_healthy
     environment:
       DB_HOST: db
+      REDIS_URL: redis://kvStore:6379
     env_file:
       - ./backend/.env
     ports:
