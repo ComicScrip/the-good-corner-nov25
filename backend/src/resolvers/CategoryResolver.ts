@@ -1,5 +1,6 @@
 import { GraphQLError } from "graphql";
 import { Arg, Authorized, Int, Mutation, Query, Resolver } from "type-graphql";
+import { invalidateAdsCache, invalidateCache } from "../db";
 import {
   Category,
   NewCategoryInput,
@@ -7,11 +8,15 @@ import {
 } from "../entities/Category";
 import { UserRole } from "../entities/User";
 
+const CACHE_TTL = 60_000; // 1 minute
+
 @Resolver()
 export default class CategoryResolver {
   @Query(() => [Category])
   async categories() {
-    return Category.find();
+    return Category.find({
+      cache: { id: "categories", milliseconds: CACHE_TTL },
+    });
   }
 
   @Authorized([UserRole.Admin])
@@ -23,6 +28,8 @@ export default class CategoryResolver {
     const newCategory = new Category();
     Object.assign(newCategory, data);
     const { id } = await newCategory.save();
+    // Invalidate the categories list
+    await invalidateCache(["categories"]);
     return Category.findOne({
       where: { id },
       relations: { ads: true },
@@ -47,6 +54,8 @@ export default class CategoryResolver {
 
     Object.assign(categoryToUpdate, data);
     await categoryToUpdate.save();
+    await invalidateCache(["categories"]);
+    await invalidateAdsCache();
     return categoryToUpdate;
   }
 
@@ -62,6 +71,8 @@ export default class CategoryResolver {
         extensions: { code: "NOT_FOUND", http: { status: 404 } },
       });
     await category.remove();
+    await invalidateCache(["categories"]);
+    await invalidateAdsCache();
     return "category deleted !";
   }
 }

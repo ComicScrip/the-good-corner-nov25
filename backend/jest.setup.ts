@@ -3,6 +3,7 @@ import { type ASTNode, print } from "graphql";
 import { initApollo } from "./src/apollo";
 import db, { clearDB } from "./src/db";
 import { initFastify } from "./src/fastify";
+import redis from "./src/redis";
 import type { GraphQLContext } from "./src/types";
 
 let testServer: ApolloServer<GraphQLContext>;
@@ -20,6 +21,7 @@ beforeEach(async () => {
 
 afterAll(async () => {
   await db.destroy();
+  if (redis) await redis?.disconnect();
 });
 
 export async function execute(

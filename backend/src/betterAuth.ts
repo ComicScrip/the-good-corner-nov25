@@ -10,6 +10,33 @@ import { resetPasswordEmail } from "./emails/resetPassword";
 import { verifyEmailEmail } from "./emails/verifyEmail";
 import env from "./env";
 import { sendMail } from "./mailer";
+import redis from "./redis";
+
+// ---------------------------------------------------------------------------
+// Dragonfly / Redis secondary storage
+// When REDIS_URL is set, better-auth stores sessions in Dragonfly
+// (Redis-compatible) instead of Postgres, enabling fast O(1) session lookups
+// and instant revocability. The cookie cache still applies on top, so a
+// Redis round-trip is only needed when the 5-minute JWT cache expires.
+//
+// The same Dragonfly instance is also used by TypeORM for query result
+// caching (see src/db/index.ts). Both share the same ioredis singleton
+// (see src/redis.ts) so only one TCP connection is opened.
+// ---------------------------------------------------------------------------
+
+const secondaryStorage = redis
+  ? (() => {
+      const r = redis; // non-null alias so TypeScript narrows correctly in closures
+      return {
+        get: (key: string) => r.get(key),
+        set: (key: string, value: string, ttl?: number) =>
+          ttl
+            ? r.set(key, value, "EX", ttl).then(() => {})
+            : r.set(key, value).then(() => {}),
+        delete: (key: string) => r.del(key).then(() => {}),
+      };
+    })()
+  : undefined;
 
 // Standard pg Pool — better-auth uses this directly via its built-in Kysely
 // PostgreSQL adapter. No custom adapter wrapper needed.
@@ -61,18 +88,16 @@ export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   trustedOrigins: env.CORS_ALLOWED_ORIGINS.split(","),
   database: pool,
+  secondaryStorage,
   session: {
     // Cookie cache: session data is encoded in a signed JWT cookie so the DB
-    // is not queried on every request. Refreshed automatically when the 5-min
-    // cache expires. The session record still lives in the `session` table and
-    // is written by better-auth on sign-in.
-    //
-    // To add Redis-backed revocability in the future, add a `secondaryStorage`
-    // config block (better-auth will then store sessions in Redis instead of
-    // the DB, and the cookie cache will validate against Redis).
+    // (or Redis) is not queried on every request. Refreshed automatically
+    // when the 5-min cache expires. When REDIS_URL is set, better-auth
+    // reads/writes sessions from Redis/Dragonfly for O(1) lookups and instant
+    // revocability; otherwise it falls back to the Postgres `session` table.
     cookieCache: {
       enabled: true,
-      maxAge: 5 * 60, // 5-minute cache: avoids a DB read on every request
+      maxAge: 5 * 60, // 5-minute cache: avoids a storage round-trip per request
       strategy: "jwt",
     },
   },

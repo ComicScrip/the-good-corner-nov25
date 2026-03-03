@@ -52,4 +52,8 @@ export default load({
     type: Number,
     optional: true,
   },
+  REDIS_URL: {
+    type: String,
+    optional: true,
+  },
 });
