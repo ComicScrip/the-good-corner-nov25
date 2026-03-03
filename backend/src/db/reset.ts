@@ -5,6 +5,7 @@ import { BaAccount } from "../entities/BaAccount";
 import { Category } from "../entities/Category";
 import { Tag } from "../entities/Tag";
 import { type Role, User, UserRole } from "../entities/User";
+import redis from "../redis";
 import db, { clearDB } from "./index";
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "SuperP@ssW0rd!";
@@ -147,6 +148,7 @@ async function main() {
   await skis.save();
 
   await db.destroy();
+  if (redis) await redis?.disconnect();
   console.log("done !");
 }
 
