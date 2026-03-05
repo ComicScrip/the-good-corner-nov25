@@ -56,4 +56,16 @@ export default load({
     type: String,
     optional: true,
   },
+  STRIPE_SECRET_KEY: {
+    type: String,
+    optional: true,
+  },
+  STRIPE_WEBHOOK_SECRET: {
+    type: String,
+    optional: true,
+  },
+  STRIPE_CURRENCY: {
+    type: String,
+    optional: true,
+  },
 });
