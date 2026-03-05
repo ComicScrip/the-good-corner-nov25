@@ -5,6 +5,7 @@ import { BaPasskey } from "../entities/BaPasskey";
 import { BaSession } from "../entities/BaSession";
 import { BaVerification } from "../entities/BaVerification";
 import { Category } from "../entities/Category";
+import { Purchase } from "../entities/Purchase";
 import { Tag } from "../entities/Tag";
 import { User } from "../entities/User";
 import env from "../env";
@@ -22,6 +23,7 @@ const db = new DataSource({
     Tag,
     Category,
     User,
+    Purchase,
     BaAccount,
     BaVerification,
     BaPasskey,

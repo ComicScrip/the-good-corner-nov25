@@ -15,8 +15,11 @@ import { Like } from "typeorm";
 import { getCurrentUser } from "../auth";
 import { invalidateAdsCache, invalidateCache } from "../db";
 import { Ad, NewAdInput, UpdateAdInput } from "../entities/Ad";
+import { Purchase } from "../entities/Purchase";
 import { UserRole } from "../entities/User";
+import env from "../env";
 import { ForbiddenError } from "../errors";
+import { stripe } from "../stripe";
 import type { GraphQLContext } from "../types";
 
 const CACHE_TTL = 60_000; // 1 minute
@@ -149,5 +152,74 @@ export default class AdResolver {
     await invalidateCache([`ad:${id}`]);
     await invalidateAdsCache();
     return "ad deleted !";
+  }
+
+  @Authorized()
+  @Mutation(() => String)
+  async createCheckoutSession(
+    @Arg("adId", () => Int) adId: number,
+    @Ctx() context: GraphQLContext,
+  ) {
+    if (!stripe) {
+      throw new GraphQLError("Stripe is not configured on this server.", {
+        extensions: { code: "STRIPE_NOT_CONFIGURED", http: { status: 503 } },
+      });
+    }
+
+    const currentUser = await getCurrentUser(context);
+
+    const ad = await Ad.findOne({
+      where: { id: adId },
+      relations: { author: true },
+    });
+    if (!ad)
+      throw new GraphQLError("ad not found", {
+        extensions: { code: "NOT_FOUND", http: { status: 404 } },
+      });
+
+    if (ad.sold)
+      throw new GraphQLError("This ad has already been sold.", {
+        extensions: { code: "AD_ALREADY_SOLD", http: { status: 400 } },
+      });
+
+    if (ad.author.id === currentUser.id)
+      throw new GraphQLError("You cannot buy your own ad.", {
+        extensions: { code: "FORBIDDEN", http: { status: 403 } },
+      });
+
+    const frontendUrl = env.FRONTEND_URL;
+    const currency = env.STRIPE_CURRENCY || "eur";
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency,
+            unit_amount: Math.round(ad.price * 100),
+            product_data: {
+              name: ad.title,
+              description: ad.description ?? undefined,
+              images: ad.pictureUrl ? [ad.pictureUrl] : [],
+            },
+          },
+        },
+      ],
+      success_url: `${frontendUrl}/ads/${adId}?purchase=success`,
+      cancel_url: `${frontendUrl}/ads/${adId}?purchase=cancelled`,
+      metadata: { adId: String(adId), buyerId: currentUser.id },
+    });
+
+    // Persist the pending purchase
+    const purchase = Purchase.create({
+      ad,
+      buyer: currentUser,
+      stripeSessionId: session.id,
+    });
+    await purchase.save();
+
+    return session.url as string;
   }
 }
