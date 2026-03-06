@@ -1,9 +1,11 @@
 import { MapPinIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import Layout from "@/components/Layout";
 import Loader from "@/components/Loader";
 import {
   useAdQuery,
+  useCreateCheckoutSessionMutation,
   useDeleteAdMutation,
   useProfileQuery,
   useRecentAdsQuery,
@@ -25,15 +27,49 @@ export default function AdDetails() {
   });
 
   const [deleteAd] = useDeleteAdMutation();
+  const [createCheckoutSession] = useCreateCheckoutSessionMutation();
+  const [buying, setBuying] = useState(false);
 
   const ad = data?.ad;
+  const purchase = router.query.purchase as string | undefined;
 
   const currentUserHasWriteAccess =
     currentUser?.role === "admin" || ad?.author.id === currentUser?.id;
 
+  const canBuy = currentUser !== null && ad?.author.id !== currentUser?.id && !ad?.sold;
+
+  async function handleBuy() {
+    if (!id) return;
+    setBuying(true);
+    try {
+      const result = await createCheckoutSession({
+        variables: { adId: parseInt(id as string, 10) },
+      });
+      const url = result.data?.createCheckoutSession;
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Une erreur est survenue lors de la création de la session de paiement.");
+    } finally {
+      setBuying(false);
+    }
+  }
+
   return (
     <Layout pageTitle={ad?.title ? `${ad.title} - TGC` : "The Good Corner"}>
       <div className="pb-12 mt-12 max-w-[800px] mx-auto">
+        {purchase === "success" && (
+          <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-800 rounded-lg">
+            🎉 Paiement réussi ! Votre achat a bien été pris en compte.
+          </div>
+        )}
+        {purchase === "cancelled" && (
+          <div className="mb-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded-lg">
+            Le paiement a été annulé. Vous pouvez réessayer à tout moment.
+          </div>
+        )}
         <div className="p-6 bg-white shadow-lg rounded-2xl">
           {typeof ad === "undefined" ? (
             <Loader />
@@ -52,6 +88,11 @@ export default function AdDetails() {
                         {t.name}
                       </span>
                     ))}
+                    {ad.sold && (
+                      <span className="bg-red-100 text-red-700 rounded-full px-3 py-1 text-sm font-semibold border border-red-300">
+                        Vendu
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -67,7 +108,18 @@ export default function AdDetails() {
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 items-center flex-wrap">
+                {canBuy && (
+                  <button
+                    type="button"
+                    onClick={handleBuy}
+                    disabled={buying}
+                    className="bg-green-600 hover:bg-green-700 disabled:opacity-60 cursor-pointer text-white font-semibold px-6 py-2 rounded-lg transition-colors"
+                  >
+                    {buying ? "Redirection…" : `Acheter · ${ad.price} €`}
+                  </button>
+                )}
+
                 {currentUserHasWriteAccess && (
                   <PencilIcon
                     className="cursor-pointer text-blue-600 hover:text-blue-800"

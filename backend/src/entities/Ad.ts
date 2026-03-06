@@ -58,6 +58,10 @@ export class Ad extends BaseEntity {
   @Field(() => User)
   @ManyToOne(() => User)
   author: User;
+
+  @Field()
+  @Column({ default: false })
+  sold: boolean;
 }
 
 @InputType()

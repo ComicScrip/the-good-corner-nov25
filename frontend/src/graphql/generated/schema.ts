@@ -34,6 +34,7 @@ export type Ad = {
   location: Scalars["String"]["output"];
   pictureUrl: Scalars["String"]["output"];
   price: Scalars["Float"]["output"];
+  sold: Scalars["Boolean"]["output"];
   tags: Array<Tag>;
   title: Scalars["String"]["output"];
 };
@@ -48,6 +49,7 @@ export type Mutation = {
   __typename?: "Mutation";
   createAd: Ad;
   createCategory: Category;
+  createCheckoutSession: Scalars["String"]["output"];
   createTag: Tag;
   deleteAd: Scalars["String"]["output"];
   deleteCategory: Scalars["String"]["output"];
@@ -59,6 +61,10 @@ export type Mutation = {
 
 export type MutationCreateAdArgs = {
   data: NewAdInput;
+};
+
+export type MutationCreateCheckoutSessionArgs = {
+  adId: Scalars["Int"]["input"];
 };
 
 export type MutationCreateCategoryArgs = {
@@ -241,9 +247,10 @@ export type AdQuery = {
     createdAt: any;
     location: string;
     pictureUrl: string;
+    sold: boolean;
     category: { __typename?: "Category"; id: number; name: string };
     tags: Array<{ __typename?: "Tag"; id: number; name: string }>;
-    author: { __typename?: "User"; id: number };
+    author: { __typename?: "User"; id: string };
   };
 };
 
@@ -684,6 +691,7 @@ export const AdDocument = gql`
       name
     }
     pictureUrl
+    sold
     author {
       id
     }
@@ -1142,4 +1150,62 @@ export type UpdateTagMutationResult = ApolloReactCommon.MutationResult<UpdateTag
 export type UpdateTagMutationOptions = ApolloReactCommon.BaseMutationOptions<
   UpdateTagMutation,
   UpdateTagMutationVariables
+>;
+
+export type CreateCheckoutSessionMutationVariables = Exact<{
+  adId: Scalars["Int"]["input"];
+}>;
+
+export type CreateCheckoutSessionMutation = {
+  __typename?: "Mutation";
+  createCheckoutSession: string;
+};
+
+export const CreateCheckoutSessionDocument = gql`
+    mutation CreateCheckoutSession($adId: Int!) {
+  createCheckoutSession(adId: $adId)
+}
+    `;
+export type CreateCheckoutSessionMutationFn = ApolloReactCommon.MutationFunction<
+  CreateCheckoutSessionMutation,
+  CreateCheckoutSessionMutationVariables
+>;
+
+/**
+ * __useCreateCheckoutSessionMutation__
+ *
+ * To run a mutation, you first call `useCreateCheckoutSessionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCheckoutSessionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCheckoutSessionMutation, { data, loading, error }] = useCreateCheckoutSessionMutation({
+ *   variables: {
+ *      adId: // value for 'adId'
+ *   },
+ * });
+ */
+export function useCreateCheckoutSessionMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    CreateCheckoutSessionMutation,
+    CreateCheckoutSessionMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useMutation<
+    CreateCheckoutSessionMutation,
+    CreateCheckoutSessionMutationVariables
+  >(CreateCheckoutSessionDocument, options);
+}
+export type CreateCheckoutSessionMutationHookResult = ReturnType<
+  typeof useCreateCheckoutSessionMutation
+>;
+export type CreateCheckoutSessionMutationResult =
+  ApolloReactCommon.MutationResult<CreateCheckoutSessionMutation>;
+export type CreateCheckoutSessionMutationOptions = ApolloReactCommon.BaseMutationOptions<
+  CreateCheckoutSessionMutation,
+  CreateCheckoutSessionMutationVariables
 >;
