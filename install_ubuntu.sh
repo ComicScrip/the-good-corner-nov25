@@ -595,6 +595,14 @@ ADMIN_PASSWORD=$(openssl rand -base64 20)
 docker exec -it staging-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
 docker exec -it prod-backend /bin/sh -c "ADMIN_PASSWORD=$ADMIN_PASSWORD npm run resetDB"
 
+# Setup daily backup cron job if S3 was configured
+if [ "$SETUP_S3" = "y" ]; then
+    BACKUP_SCRIPT="$HOME/apps/$DNS/prod/create_backup.sh"
+    CRON_JOB="0 3 * * * $BACKUP_SCRIPT >> $HOME/apps/$DNS/prod/backup.log 2>&1"
+    ( crontab -l 2>/dev/null | grep -v "$BACKUP_SCRIPT"; echo "$CRON_JOB" ) | crontab -
+    echo "✓ Daily backup cron job set: create_backup.sh runs every day at 3am"
+fi
+
 echo "✨ DONE ! ✨" && \
 echo "Staging: https://staging.$DNS" && \
 echo "Prod: https://$DNS" && \
