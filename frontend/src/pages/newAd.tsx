@@ -1,7 +1,11 @@
 import { useRouter } from "next/router";
 import AdForm from "@/components/AdForm";
 import Layout from "@/components/Layout";
-import { useCreateAdMutation } from "@/graphql/generated/schema";
+import {
+  RecentAdsDocument,
+  SearchAdsDocument,
+  useCreateAdMutation,
+} from "@/graphql/generated/schema";
 
 export default function NewAd() {
   const router = useRouter();
@@ -14,8 +18,12 @@ export default function NewAd() {
         <AdForm
           onSubmit={async (data) => {
             try {
-              const response = await createAd({ variables: { data } });
-              router.push(`/ads/${response.data?.createAd.id}`);
+              await createAd({
+                variables: { data },
+                refetchQueries: [RecentAdsDocument, SearchAdsDocument],
+                awaitRefetchQueries: true,
+              });
+              router.push("/");
             } catch (err) {
               console.error(err);
             }
