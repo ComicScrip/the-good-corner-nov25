@@ -18,12 +18,12 @@ export default function NewAd() {
         <AdForm
           onSubmit={async (data) => {
             try {
-              await createAd({
+              const res = await createAd({
                 variables: { data },
                 refetchQueries: [RecentAdsDocument, SearchAdsDocument],
                 awaitRefetchQueries: true,
               });
-              router.push("/");
+              router.push(`/ads/${res.data?.createAd.id}`);
             } catch (err) {
               console.error(err);
             }
