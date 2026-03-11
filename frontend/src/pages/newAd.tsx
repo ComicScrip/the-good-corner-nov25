@@ -1,14 +1,12 @@
+import { useApolloClient } from "@apollo/client/react";
 import { useRouter } from "next/router";
 import AdForm from "@/components/AdForm";
 import Layout from "@/components/Layout";
-import {
-  RecentAdsDocument,
-  SearchAdsDocument,
-  useCreateAdMutation,
-} from "@/graphql/generated/schema";
+import { useCreateAdMutation } from "@/graphql/generated/schema";
 
 export default function NewAd() {
   const router = useRouter();
+  const apolloClient = useApolloClient();
   const [createAd, { loading: isSubmitting, error }] = useCreateAdMutation();
 
   return (
@@ -18,11 +16,9 @@ export default function NewAd() {
         <AdForm
           onSubmit={async (data) => {
             try {
-              const res = await createAd({
-                variables: { data },
-                refetchQueries: [RecentAdsDocument, SearchAdsDocument],
-                awaitRefetchQueries: true,
-              });
+              const res = await createAd({ variables: { data } });
+              apolloClient.cache.evict({ fieldName: "ads" });
+              apolloClient.cache.gc();
               router.push(`/ads/${res.data?.createAd.id}`);
             } catch (err) {
               console.error(err);
