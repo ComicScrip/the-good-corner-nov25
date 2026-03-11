@@ -16,6 +16,14 @@ if [ "$SSL_PROVIDER" = "zerossl" ]; then
     read -p "ZeroSSL EAB KID: " EAB_KID
     read -p "ZeroSSL EAB HMAC Key: " EAB_HMAC_KEY
 fi && \
+read -p "Configure S3 backup with rclone? (y/n, default: n): " SETUP_S3
+SETUP_S3=${SETUP_S3:-n}
+if [ "$SETUP_S3" = "y" ]; then
+    read -p "S3 Key ID (S3_KEYID): " S3_KEYID
+    read -p "S3 Secret Access Key (S3_SECRET): " S3_SECRET
+    read -p "S3 Region (S3_REGION, e.g. us-east-005): " S3_REGION
+    read -p "S3 Endpoint (S3_ENDPOINT, e.g. s3.us-east-005.backblazeb2.com): " S3_ENDPOINT
+fi && \
 WEBHOOK_SECRET=$(openssl rand -base64 24)
 
 sudo apt-get update && \
@@ -48,8 +56,25 @@ EOF
 
 sudo apt-get update && \
 
-# Install Docker, Caddy, Go (snap), Webhook, Fail2ban, nftables
-sudo apt-get install -y webhook debian-keyring debian-archive-keyring apt-transport-https fail2ban nftables caddy docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin snapd && \
+# Install Rclone, Docker, Caddy, Go (snap), Webhook, Fail2ban, nftables
+sudo apt-get install -y rclone webhook debian-keyring debian-archive-keyring apt-transport-https fail2ban nftables caddy docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin snapd && \
+
+# Configure rclone S3 if credentials were provided
+if [ "$SETUP_S3" = "y" ]; then
+    mkdir -p ~/.config/rclone
+    cat > ~/.config/rclone/rclone.conf <<EOF
+[s3]
+type = s3
+provider = Other
+access_key_id = $S3_KEYID
+secret_access_key = $S3_SECRET
+region = $S3_REGION
+endpoint = $S3_ENDPOINT
+acl = private
+EOF
+    chmod 600 ~/.config/rclone/rclone.conf
+    echo "✓ rclone S3 config written to ~/.config/rclone/rclone.conf"
+fi && \
 sudo snap install go --classic && \
 export PATH=/snap/bin:$PATH && \
 
