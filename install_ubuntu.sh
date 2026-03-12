@@ -1,4 +1,6 @@
 #!/bin/bash
+# logs all script's output
+exec > >(tee -a $HOME/install.log) 2>&1
 
 DEFAULT_DNS="thegoodcorner.dedyn.io"
 read -p "domain (default: $DEFAULT_DNS): " DNS
@@ -343,6 +345,16 @@ ops.$DNS {
   reverse_proxy localhost:9000
 }
 
+pgadmin.$DNS {
+  $CADDY_RATE_LIMIT
+  reverse_proxy localhost:5051
+}
+
+staging.pgadmin.$DNS {
+  $CADDY_RATE_LIMIT
+  reverse_proxy localhost:5050
+}
+
 $MONITORING_DOMAIN {
   $CADDY_RATE_LIMIT
   reverse_proxy localhost:3000 {
@@ -561,6 +573,7 @@ git clone $REPO_URL .
 BETTER_AUTH_SECRET=$(openssl rand -base64 32)
 DB_USER="tgc_$(openssl rand -hex 4)"
 DB_PASS=$(openssl rand -base64 24)
+PGADMIN_PASSWORD_PROD=$(openssl rand -base64 20)
 # Setup prod env
 cp .env.production.example .env.production && \
 sed -i "s|BETTER_AUTH_SECRET=.*|BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET|g" .env.production && \
@@ -570,6 +583,9 @@ sed -i "s|DEPLOY_ENV=.*|DEPLOY_ENV=prod|g" .env.production && \
 sed -i "s|GATEWAY_PORT=.*|GATEWAY_PORT=82|g" .env.production && \
 sed -i "s|BETTER_AUTH_URL=.*|BETTER_AUTH_URL=https://$DNS|g" .env.production && \
 sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=https://$DNS|g" .env.production && \
+sed -i "s|PGADMIN_DEFAULT_EMAIL=.*|PGADMIN_DEFAULT_EMAIL=admin@$DNS|g" .env.production && \
+sed -i "s|PGADMIN_DEFAULT_PASSWORD=.*|PGADMIN_DEFAULT_PASSWORD=$PGADMIN_PASSWORD_PROD|g" .env.production && \
+sed -i "s|PGADMIN_PORT=.*|PGADMIN_PORT=5051|g" .env.production && \
 ./start.sh prod
 
 # Setup staging env
@@ -579,6 +595,7 @@ git clone $REPO_URL . && git checkout dev && \
 BETTER_AUTH_SECRET=$(openssl rand -base64 32)
 DB_USER="tgc_$(openssl rand -hex 4)"
 DB_PASS=$(openssl rand -base64 24)
+PGADMIN_PASSWORD_STAGING=$(openssl rand -base64 20)
 
 cp .env.production.example .env.production && \
 sed -i "s|BETTER_AUTH_SECRET=.*|BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET|g" .env.production && \
@@ -588,6 +605,9 @@ sed -i "s|DEPLOY_ENV=.*|DEPLOY_ENV=staging|g" .env.production && \
 sed -i "s|GATEWAY_PORT=.*|GATEWAY_PORT=81|g" .env.production && \
 sed -i "s|BETTER_AUTH_URL=.*|BETTER_AUTH_URL=https://staging.$DNS|g" .env.production && \
 sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=https://staging.$DNS|g" .env.production && \
+sed -i "s|PGADMIN_DEFAULT_EMAIL=.*|PGADMIN_DEFAULT_EMAIL=admin@$DNS|g" .env.production && \
+sed -i "s|PGADMIN_DEFAULT_PASSWORD=.*|PGADMIN_DEFAULT_PASSWORD=$PGADMIN_PASSWORD_STAGING|g" .env.production && \
+sed -i "s|PGADMIN_PORT=.*|PGADMIN_PORT=5050|g" .env.production && \
 ./start.sh
 
 ADMIN_PASSWORD=$(openssl rand -base64 20)
@@ -609,6 +629,8 @@ echo "Prod: https://$DNS" && \
 echo "WEBHOOK_SECRET: $WEBHOOK_SECRET" && \
 
 echo "ADMIN_PASSWORD: $ADMIN_PASSWORD" && \
+echo "PGADMIN prod - https://pgadmin.$DNS (admin@$DNS / $PGADMIN_PASSWORD_PROD)" && \
+echo "PGADMIN staging - https://staging.pgadmin.$DNS (admin@$DNS / $PGADMIN_PASSWORD_STAGING)" && \
 
 echo ""
 echo "=== Monitoring Setup Complete ==="
