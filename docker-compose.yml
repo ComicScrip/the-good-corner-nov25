@@ -51,3 +51,23 @@ services:
       - 3000:3000
     volumes:
       - ./frontend/src:/app/src
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_SERVER_JSON_FILE: /tmp/servers.json
+    ports:
+      - 5050:80
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        echo '{"Servers":{"1":{"Name":"The Good Corner DB","Group":"Servers","Host":"db","Port":5432,"MaintenanceDB":"postgres","Username":"postgres","SSLMode":"prefer","PassFile":"/tmp/pgpass"}}}' > /tmp/servers.json &&
+        echo 'db:5432:*:postgres:postgres' > /tmp/pgpass &&
+        chmod 600 /tmp/pgpass &&
+        /entrypoint.sh
