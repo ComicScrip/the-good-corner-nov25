@@ -86,10 +86,19 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_SERVER_JSON_FILE: /tmp/servers.json
     ports:
       - "127.0.0.1:${PGADMIN_PORT:-5050}:80"
     volumes:
       - pgadmin-data:/var/lib/pgadmin
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        echo '{"Servers":{"1":{"Name":"The Good Corner DB","Group":"Servers","Host":"db","Port":5432,"MaintenanceDB":"postgres","Username":"${DB_USER}","SSLMode":"prefer","PassFile":"/tmp/pgpass"}}}' > /tmp/servers.json &&
+        echo 'db:5432:*:${DB_USER}:${DB_PASS}' > /tmp/pgpass &&
+        chmod 600 /tmp/pgpass &&
+        /entrypoint.sh
 
 volumes:
   db-data:
